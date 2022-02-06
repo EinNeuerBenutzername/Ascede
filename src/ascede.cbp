@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ascede" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ascede" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ascede" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="config.h" />
+		<Unit filename="raudio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="raudio.h" />
+		<Unit filename="raylib.h" />
+		<Unit filename="raymath.h" />
+		<Unit filename="rcore.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rglfw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rlgl.h" />
+		<Unit filename="rshapes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rtext.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rtextures.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utils.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
