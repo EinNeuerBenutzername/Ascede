@@ -8,17 +8,22 @@
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/ascede" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
 				<Option object_output="obj/Debug/" />
-				<Option type="1" />
+				<Option type="2" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-g" />
+					<Add option="-Og" />
 				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/ascede" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
 				<Option object_output="obj/Release/" />
-				<Option type="1" />
+				<Option type="2" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
@@ -30,13 +35,25 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c99" />
+			<Add option="-m32" />
+			<Add option="-lgdi32 -lopengl32" />
 		</Compiler>
+		<Linker>
+			<Add option="-s" />
+			<Add option="-static" />
+			<Add option="-m32" />
+		</Linker>
+		<Unit filename="ascede.h" />
 		<Unit filename="config.h" />
+		<Unit filename="patch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="patch.h" />
 		<Unit filename="raudio.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="raudio.h" />
-		<Unit filename="raylib.h" />
 		<Unit filename="raymath.h" />
 		<Unit filename="rcore.c">
 			<Option compilerVar="CC" />

@@ -2,14 +2,19 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="rshapes.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="config.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="6685" topLine="171" />
+			<Cursor1 position="1302" topLine="21" />
 		</Cursor>
 	</File>
-	<File name="rcore.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="rlgl.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7436" topLine="137" />
+			<Cursor1 position="43615" topLine="740" />
+		</Cursor>
+	</File>
+	<File name="raudio.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3157" topLine="117" />
 		</Cursor>
 	</File>
 	<File name="utils.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -17,39 +22,109 @@
 			<Cursor1 position="2929" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="rtextures.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="rshapes.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="18" />
+			<Cursor1 position="432" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="raylib.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="utils.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="65374" topLine="1101" />
-		</Cursor>
-	</File>
-	<File name="raudio.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="97" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="config.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="97" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="rlgl.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="111" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="raudio.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="189" topLine="0" />
+			<Cursor1 position="1362" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="rtext.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="273" topLine="0" />
+			<Cursor1 position="2121" topLine="42" />
 		</Cursor>
+	</File>
+	<File name="rtextures.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2664" topLine="60" />
+		</Cursor>
+	</File>
+	<File name="raudio.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2295" topLine="48" />
+		</Cursor>
+	</File>
+	<File name="rglfw.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3256" topLine="61" />
+		</Cursor>
+	</File>
+	<File name="ascede.h" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="50013" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="0" />
+			<Collapse line="185" />
+			<Collapse line="191" />
+			<Collapse line="198" />
+			<Collapse line="209" />
+			<Collapse line="217" />
+			<Collapse line="225" />
+			<Collapse line="233" />
+			<Collapse line="242" />
+			<Collapse line="257" />
+			<Collapse line="267" />
+			<Collapse line="277" />
+			<Collapse line="286" />
+			<Collapse line="296" />
+			<Collapse line="307" />
+			<Collapse line="315" />
+			<Collapse line="340" />
+			<Collapse line="346" />
+			<Collapse line="353" />
+			<Collapse line="360" />
+			<Collapse line="367" />
+			<Collapse line="373" />
+			<Collapse line="389" />
+			<Collapse line="397" />
+			<Collapse line="403" />
+			<Collapse line="411" />
+			<Collapse line="417" />
+			<Collapse line="428" />
+			<Collapse line="437" />
+			<Collapse line="443" />
+			<Collapse line="453" />
+			<Collapse line="467" />
+			<Collapse line="484" />
+			<Collapse line="503" />
+			<Collapse line="517" />
+			<Collapse line="640" />
+			<Collapse line="651" />
+			<Collapse line="666" />
+			<Collapse line="688" />
+			<Collapse line="698" />
+			<Collapse line="716" />
+			<Collapse line="749" />
+			<Collapse line="762" />
+			<Collapse line="771" />
+			<Collapse line="798" />
+			<Collapse line="808" />
+			<Collapse line="816" />
+			<Collapse line="826" />
+			<Collapse line="833" />
+			<Collapse line="844" />
+			<Collapse line="859" />
+			<Collapse line="868" />
+			<Collapse line="874" />
+		</Folding>
+	</File>
+	<File name="raymath.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="15070" topLine="580" />
+		</Cursor>
+	</File>
+	<File name="rcore.c" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="102405" topLine="2582" />
+		</Cursor>
+		<Folding>
+			<Collapse line="691" />
+			<Collapse line="696" />
+			<Collapse line="4500" />
+		</Folding>
 	</File>
 </CodeBlocks_layout_file>
