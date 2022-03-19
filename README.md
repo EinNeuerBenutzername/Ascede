@@ -55,7 +55,7 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
 
 ## API
 
-#### v0.3.2.2 Cheatsheet
+#### v0.3.4.2 Cheatsheet
 
 ```c
 ASCAPI void Buffer_Init();
