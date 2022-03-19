@@ -80,6 +80,7 @@
 #ifndef ASCEDE_H
 #define ASCEDE_H
 #include <stdarg.h>     // Required for: va_list - Only used by TraceLogCallback
+#include <stddef.h>
 #define ASCEDE_VERSION  "0.3.2"
 // Function specifiers in case library is build/used as a shared library (Windows)
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll

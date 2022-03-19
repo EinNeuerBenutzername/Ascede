@@ -59,7 +59,7 @@
 *
 **********************************************************************************************/
 
-#include "raylib.h"             // Declares module functions
+#include "ascede.h"             // Declares module functions
 
 // Check if config flags have been externally provided on compilation line
 #if !defined(EXTERNAL_CONFIG_FLAGS)
@@ -3001,7 +3001,7 @@ void GenTextureMipmaps(Texture2D *texture)
 }
 
 // Set texture scaling filter mode
-void SetTextureFilter(Texture2D texture, int filter)
+void Texture_SetFilter(Texture2D texture, int filter)
 {
     switch (filter)
     {
@@ -3067,7 +3067,7 @@ void SetTextureFilter(Texture2D texture, int filter)
 }
 
 // Set texture wrapping mode
-void SetTextureWrap(Texture2D texture, int wrap)
+void Texture_SetWrap(Texture2D texture, int wrap)
 {
     switch (wrap)
     {

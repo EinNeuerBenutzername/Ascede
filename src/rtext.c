@@ -48,7 +48,7 @@
 *
 **********************************************************************************************/
 
-#include "raylib.h"         // Declares module functions
+#include "ascede.h"         // Declares module functions
 
 // Check if config flags have been externally provided on compilation line
 #if !defined(EXTERNAL_CONFIG_FLAGS)
@@ -294,7 +294,7 @@ Font GetFontDefault()
 }
 
 // Load Font from file into GPU memory (VRAM)
-Font LoadFont(const char *fileName)
+Font Font_Load(const char *fileName)
 {
     // Default values for ttf font generation
 #ifndef FONT_TTF_DEFAULT_SIZE
@@ -313,7 +313,7 @@ Font LoadFont(const char *fileName)
     Font font = { 0 };
 
 #if defined(SUPPORT_FILEFORMAT_TTF)
-    if (IsFileExtension(fileName, ".ttf;.otf")) font = LoadFontEx(fileName, FONT_TTF_DEFAULT_SIZE, NULL, FONT_TTF_DEFAULT_NUMCHARS);
+    if (IsFileExtension(fileName, ".ttf;.otf")) font = Font_LoadEx(fileName, FONT_TTF_DEFAULT_SIZE, NULL, FONT_TTF_DEFAULT_NUMCHARS);
     else
 #endif
 #if defined(SUPPORT_FILEFORMAT_FNT)
@@ -331,7 +331,7 @@ Font LoadFont(const char *fileName)
         TRACELOG(LOG_WARNING, "FONT: [%s] Failed to load font texture -> Using default font", fileName);
         font = GetFontDefault();
     }
-    else SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);    // By default we set point filter (best performance)
+    else Texture_SetFilter(font.texture, TEXTURE_FILTER_POINT);    // By default we set point filter (best performance)
 
     return font;
 }
@@ -339,7 +339,7 @@ Font LoadFont(const char *fileName)
 // Load Font from TTF font file with generation parameters
 // NOTE: You can pass an array with desired characters, those characters should be available in the font
 // if array is NULL, default char set is selected 32..126
-Font LoadFontEx(const char *fileName, int fontSize, int *fontChars, int glyphCount)
+Font Font_LoadEx(const char *fileName, int fontSize, int *fontChars, int glyphCount)
 {
     Font font = { 0 };
 

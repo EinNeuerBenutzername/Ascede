@@ -105,7 +105,7 @@
 *
 **********************************************************************************************/
 
-#include "raylib.h"                 // Declares module functions
+#include "ascede.h"                 // Declares module functions
 
 // Check if config flags have been externally provided on compilation line
 #if !defined(EXTERNAL_CONFIG_FLAGS)
@@ -146,6 +146,7 @@
 #include <math.h>                   // Required for: tan() [Used in BeginMode3D()], atan2f() [Used in LoadVrStereoConfig()]
 
 #include <sys/stat.h>               // Required for: stat() [Used in GetFileModTime()]
+#include "external/mtwister.h"
 
 #if defined(PLATFORM_DESKTOP) && defined(_WIN32) && (defined(_MSC_VER) || defined(__TINYC__))
     #define DIRENT_MALLOC RL_MALLOC
@@ -456,6 +457,7 @@ typedef struct CoreData {
 #endif
         unsigned int frameCounter;          // Frame counter
     } Time;
+    MTRand mtrand;
 } CoreData;
 
 //----------------------------------------------------------------------------------
@@ -663,9 +665,9 @@ struct android_app *GetAndroidApp(void)
 
 // Initialize window and OpenGL context
 // NOTE: data parameter could be used to pass any kind of required data to the initialization
-void InitWindow(int width, int height, const char *title)
+void Window_Init(int width, int height, const char *title)
 {
-    TRACELOG(LOG_INFO, "Initializing raylib %s", RAYLIB_VERSION);
+    TRACELOG(LOG_INFO, "Initializing ascede %s", ASCEDE_VERSION);
 
     if ((title != NULL) && (title[0] != 0)) CORE.Window.title = title;
 
@@ -777,7 +779,7 @@ void InitWindow(int width, int height, const char *title)
     if ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0)
     {
         // Set default font texture filter for HighDPI (blurry)
-        SetTextureFilter(GetFontDefault().texture, TEXTURE_FILTER_BILINEAR);
+        Texture_SetFilter(GetFontDefault().texture, TEXTURE_FILTER_BILINEAR);
     }
 #endif
 
@@ -826,7 +828,7 @@ void InitWindow(int width, int height, const char *title)
 }
 
 // Close window and unload OpenGL context
-void CloseWindow(void)
+void Window_Close(void)
 {
 
 #if defined(SUPPORT_DEFAULT_FONT)
@@ -966,7 +968,7 @@ void CloseWindow(void)
 }
 
 // Check if KEY_ESCAPE pressed or Close icon pressed
-bool WindowShouldClose(void)
+bool Window_ShouldClose(void)
 {
 #if defined(PLATFORM_WEB)
     // Emterpreter-Async required to run sync code
@@ -1001,19 +1003,19 @@ bool WindowShouldClose(void)
 }
 
 // Check if window has been initialized successfully
-bool IsWindowReady(void)
+bool Window_IsReady(void)
 {
     return CORE.Window.ready;
 }
 
 // Check if window is currently fullscreen
-bool IsWindowFullscreen(void)
+bool Window_IsFullscreen(void)
 {
     return CORE.Window.fullscreen;
 }
 
 // Check if window is currently hidden
-bool IsWindowHidden(void)
+bool Window_IsHidden(void)
 {
 #if defined(PLATFORM_DESKTOP)
     return ((CORE.Window.flags & FLAG_WINDOW_HIDDEN) > 0);
@@ -1022,7 +1024,7 @@ bool IsWindowHidden(void)
 }
 
 // Check if window has been minimized
-bool IsWindowMinimized(void)
+bool Window_IsMinimized(void)
 {
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     return ((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) > 0);
@@ -1032,7 +1034,7 @@ bool IsWindowMinimized(void)
 }
 
 // Check if window has been maximized (only PLATFORM_DESKTOP)
-bool IsWindowMaximized(void)
+bool Window_IsMaximized(void)
 {
 #if defined(PLATFORM_DESKTOP)
     return ((CORE.Window.flags & FLAG_WINDOW_MAXIMIZED) > 0);
@@ -1042,7 +1044,7 @@ bool IsWindowMaximized(void)
 }
 
 // Check if window has the focus
-bool IsWindowFocused(void)
+bool Window_IsFocused(void)
 {
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     return ((CORE.Window.flags & FLAG_WINDOW_UNFOCUSED) == 0);
@@ -1052,7 +1054,7 @@ bool IsWindowFocused(void)
 }
 
 // Check if window has been resizedLastFrame
-bool IsWindowResized(void)
+bool Window_IsResized(void)
 {
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     return CORE.Window.resizedLastFrame;
@@ -1438,7 +1440,7 @@ void SetWindowIcon(Image image)
 }
 
 // Set title for window (only PLATFORM_DESKTOP)
-void SetWindowTitle(const char *title)
+void Window_SetTitle(const char *title)
 {
     CORE.Window.title = title;
 #if defined(PLATFORM_DESKTOP)
@@ -1447,7 +1449,7 @@ void SetWindowTitle(const char *title)
 }
 
 // Set window position on screen (windowed mode)
-void SetWindowPosition(int x, int y)
+void Window_SetPos(int x, int y)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetWindowPos(CORE.Window.handle, x, y);
@@ -1473,7 +1475,7 @@ void SetWindowMonitor(int monitor)
 }
 
 // Set window minimum dimensions (FLAG_WINDOW_RESIZABLE)
-void SetWindowMinSize(int width, int height)
+void Window_SetMinSize(int width, int height)
 {
 #if defined(PLATFORM_DESKTOP)
     const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -1482,7 +1484,7 @@ void SetWindowMinSize(int width, int height)
 }
 
 // Set window dimensions
-void SetWindowSize(int width, int height)
+void Window_SetSize(size_t width,size_t height)
 {
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     glfwSetWindowSize(CORE.Window.handle, width, height);
@@ -1541,18 +1543,18 @@ void *GetWindowHandle(void)
 
     return NULL;
 }
-
-// Get number of monitors
-int GetMonitorCount(void)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    glfwGetMonitors(&monitorCount);
-    return monitorCount;
-#else
-    return 1;
-#endif
-}
+//
+//// Get number of monitors
+//int GetMonitorCount(void)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    glfwGetMonitors(&monitorCount);
+//    return monitorCount;
+//#else
+//    return 1;
+//#endif
+//}
 
 // Get number of monitors
 int GetCurrentMonitor(void)
@@ -1565,7 +1567,7 @@ int GetCurrentMonitor(void)
     if (monitorCount == 1) // easy out
         return 0;
 
-    if (IsWindowFullscreen())
+    if (Window_IsFullscreen())
     {
         monitor = glfwGetWindowMonitor(CORE.Window.handle);
         for (int i = 0; i < monitorCount; i++)
@@ -1602,127 +1604,143 @@ int GetCurrentMonitor(void)
 #endif
 }
 
-// Get selected monitor width
-Vector2 GetMonitorPosition(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+//// Get selected monitor width
+//Vector2 GetMonitorPosition(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        int x, y;
+//        glfwGetMonitorPos(monitors[monitor], &x, &y);
+//
+//        return (Vector2){ (float)x, (float)y };
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//    return (Vector2){ 0, 0 };
+//}
+//
+//// Get selected monitor width (max available by monitor)
+//int GetMonitorWidth(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        int count = 0;
+//        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
+//
+//        // We return the maximum resolution available, the last one in the modes array
+//        if (count > 0) return modes[count - 1].width;
+//        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//    return 0;
+//}
+//
+//// Get selected monitor width (max available by monitor)
+//int GetMonitorHeight(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        int count = 0;
+//        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
+//
+//        // We return the maximum resolution available, the last one in the modes array
+//        if (count > 0) return modes[count - 1].height;
+//        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//    return 0;
+//}
+//
+//// Get selected monitor physical width in millimetres
+//int GetMonitorPhysicalWidth(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        int physicalWidth;
+//        glfwGetMonitorPhysicalSize(monitors[monitor], &physicalWidth, NULL);
+//        return physicalWidth;
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//    return 0;
+//}
+//
+//// Get primary monitor physical height in millimetres
+//int GetMonitorPhysicalHeight(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        int physicalHeight;
+//        glfwGetMonitorPhysicalSize(monitors[monitor], NULL, &physicalHeight);
+//        return physicalHeight;
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//    return 0;
+//}
+//
+//int GetMonitorRefreshRate(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        const GLFWvidmode *vidmode = glfwGetVideoMode(monitors[monitor]);
+//        return vidmode->refreshRate;
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//#if defined(PLATFORM_DRM)
+//    if ((CORE.Window.connector) && (CORE.Window.modeIndex >= 0))
+//    {
+//        return CORE.Window.connector->modes[CORE.Window.modeIndex].vrefresh;
+//    }
+//#endif
+//    return 0;
+//}
 
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        int x, y;
-        glfwGetMonitorPos(monitors[monitor], &x, &y);
-
-        return (Vector2){ (float)x, (float)y };
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-    return (Vector2){ 0, 0 };
-}
-
-// Get selected monitor width (max available by monitor)
-int GetMonitorWidth(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        int count = 0;
-        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
-
-        // We return the maximum resolution available, the last one in the modes array
-        if (count > 0) return modes[count - 1].width;
-        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-    return 0;
-}
-
-// Get selected monitor width (max available by monitor)
-int GetMonitorHeight(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        int count = 0;
-        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
-
-        // We return the maximum resolution available, the last one in the modes array
-        if (count > 0) return modes[count - 1].height;
-        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-    return 0;
-}
-
-// Get selected monitor physical width in millimetres
-int GetMonitorPhysicalWidth(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        int physicalWidth;
-        glfwGetMonitorPhysicalSize(monitors[monitor], &physicalWidth, NULL);
-        return physicalWidth;
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-    return 0;
-}
-
-// Get primary monitor physical height in millimetres
-int GetMonitorPhysicalHeight(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        int physicalHeight;
-        glfwGetMonitorPhysicalSize(monitors[monitor], NULL, &physicalHeight);
-        return physicalHeight;
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-    return 0;
-}
-
-int GetMonitorRefreshRate(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        const GLFWvidmode *vidmode = glfwGetVideoMode(monitors[monitor]);
-        return vidmode->refreshRate;
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-#if defined(PLATFORM_DRM)
-    if ((CORE.Window.connector) && (CORE.Window.modeIndex >= 0))
-    {
-        return CORE.Window.connector->modes[CORE.Window.modeIndex].vrefresh;
-    }
-#endif
-    return 0;
-}
+// Get the human-readable, UTF-8 encoded name of the primary monitor
+//const char *GetMonitorName(int monitor)
+//{
+//#if defined(PLATFORM_DESKTOP)
+//    int monitorCount;
+//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+//
+//    if ((monitor >= 0) && (monitor < monitorCount))
+//    {
+//        return glfwGetMonitorName(monitors[monitor]);
+//    }
+//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+//#endif
+//    return "";
+//}
 
 // Get window position XY on monitor
-Vector2 GetWindowPosition(void)
+Vector2 Window_GetPos(void)
 {
     int x = 0;
     int y = 0;
@@ -1740,7 +1758,7 @@ Vector2 GetWindowScaleDPI(void)
 #if defined(PLATFORM_DESKTOP)
     float xdpi = 1.0;
     float ydpi = 1.0;
-    Vector2 windowPos = GetWindowPosition();
+    Vector2 windowPos = Window_GetPos();
 
     int monitorCount = 0;
     GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
@@ -1764,22 +1782,6 @@ Vector2 GetWindowScaleDPI(void)
 #endif
 
     return scale;
-}
-
-// Get the human-readable, UTF-8 encoded name of the primary monitor
-const char *GetMonitorName(int monitor)
-{
-#if defined(PLATFORM_DESKTOP)
-    int monitorCount;
-    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-
-    if ((monitor >= 0) && (monitor < monitorCount))
-    {
-        return glfwGetMonitorName(monitors[monitor]);
-    }
-    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-#endif
-    return "";
 }
 
 // Get clipboard text content
@@ -1860,14 +1862,14 @@ bool IsCursorOnScreen(void)
 }
 
 // Set background color (framebuffer clear color)
-void ClearBackground(Color color)
+void Buffer_Clear(Color color)
 {
     rlClearColor(color.r, color.g, color.b, color.a);   // Set clear color
     rlClearScreenBuffers();                             // Clear current framebuffers
 }
 
 // Setup canvas (framebuffer) to start drawing
-void BeginDrawing(void)
+void Buffer_Init(void)
 {
     // WARNING: Previously to BeginDrawing() other render textures drawing could happen,
     // consequently the measure for update vs draw is not accurate (only the total frame time is accurate)
@@ -1883,86 +1885,11 @@ void BeginDrawing(void)
                                         // NOTE: Not required with OpenGL 3.3+
 }
 
-// End canvas drawing and swap buffers (double buffering)
-void EndDrawing(void)
-{
-    rlDrawRenderBatchActive();      // Update and draw internal render batch
-
-#if defined(SUPPORT_MOUSE_CURSOR_POINT)
-    // Draw a small rectangle on mouse position for user reference
-    if (!CORE.Input.Mouse.cursorHidden)
-    {
-        DrawRectangle(CORE.Input.Mouse.currentPosition.x, CORE.Input.Mouse.currentPosition.y, 3, 3, MAROON);
-        rlDrawRenderBatchActive();  // Update and draw internal render batch
-    }
-#endif
-
-#if defined(SUPPORT_EVENTS_AUTOMATION)
-    // Draw record/play indicator
-    if (eventsRecording)
-    {
-        gifFrameCounter++;
-
-        if (((gifFrameCounter/15)%2) == 1)
-        {
-            DrawCircle(30, CORE.Window.screen.height - 20, 10, MAROON);
-            DrawText("EVENTS RECORDING", 50, CORE.Window.screen.height - 25, 10, RED);
-        }
-
-        rlDrawRenderBatchActive();  // Update and draw internal render batch
-    }
-    else if (eventsPlaying)
-    {
-        gifFrameCounter++;
-
-        if (((gifFrameCounter/15)%2) == 1)
-        {
-            DrawCircle(30, CORE.Window.screen.height - 20, 10, LIME);
-            DrawText("EVENTS PLAYING", 50, CORE.Window.screen.height - 25, 10, GREEN);
-        }
-
-        rlDrawRenderBatchActive();  // Update and draw internal render batch
-    }
-#endif
-
-#if !defined(SUPPORT_CUSTOM_FRAME_CONTROL)
-    SwapScreenBuffer();                  // Copy back buffer to front buffer (screen)
-
-    // Frame time control system
-    CORE.Time.current = GetTime();
-    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
-    CORE.Time.previous = CORE.Time.current;
-
-    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
-
-    // Wait for some milliseconds...
-    if (CORE.Time.frame < CORE.Time.target)
-    {
-        WaitTime((float)(CORE.Time.target - CORE.Time.frame)*1000.0f);
-
-        CORE.Time.current = GetTime();
-        double waitTime = CORE.Time.current - CORE.Time.previous;
-        CORE.Time.previous = CORE.Time.current;
-
-        CORE.Time.frame += waitTime;    // Total frame time: update + draw + wait
-    }
-
-    PollInputEvents();      // Poll user events (before next frame update)
-#endif
-
-#if defined(SUPPORT_EVENTS_AUTOMATION)
-    // Events recording and playing logic
-    if (eventsRecording) RecordAutomationEvent(CORE.Time.frameCounter);
-    else if (eventsPlaying)
-    {
-        // TODO: When should we play? After/before/replace PollInputEvents()?
-        if (CORE.Time.frameCounter >= eventCount) eventsPlaying = false;
-        PlayAutomationEvent(CORE.Time.frameCounter);
-    }
-#endif
-
-    CORE.Time.frameCounter++;
-}
+//// End canvas drawing and swap buffers (double buffering)
+//void EndDrawing(void)
+//{
+//    rlDrawRenderBatchActive();      // Update and draw internal render batch
+//}
 
 // Initialize 2D mode with custom camera (2D)
 void BeginMode2D(Camera2D camera)
@@ -2593,7 +2520,7 @@ void SetConfigFlags(unsigned int flags)
 // NOTE TRACELOG() function is located in [utils.h]
 
 // Get a random value between min and max (both included)
-int GetRandomValue(int min, int max)
+int RNG_Gen(int min, int max)
 {
     if (min > max)
     {
@@ -2602,13 +2529,21 @@ int GetRandomValue(int min, int max)
         min = tmp;
     }
 
-    return (rand()%(abs(max - min) + 1) + min);
+    return (genRandLong(&CORE.mtrand)%(abs(max - min) + 1) + min);
 }
 
 // Set the seed for the random number generator
-void SetRandomSeed(unsigned int seed)
+void RNG_Init(unsigned int seed)
 {
-    srand(seed);
+    CORE.mtrand=seedRand(seed);
+}
+
+void RNG_SetState(int state){
+    CORE.mtrand.index=state;
+}
+
+int RNG_GetState(){
+    return CORE.mtrand.index;
 }
 
 // Check if the file exists
@@ -3189,7 +3124,7 @@ void OpenURL(const char *url)
 // Module Functions Definition - Input (Keyboard, Mouse, Gamepad) Functions
 //----------------------------------------------------------------------------------
 // Check if a key has been pressed once
-bool IsKeyPressed(int key)
+bool Key_IsPressed(int key)
 {
     bool pressed = false;
 
@@ -3199,14 +3134,14 @@ bool IsKeyPressed(int key)
 }
 
 // Check if a key is being pressed (key held down)
-bool IsKeyDown(int key)
+bool Key_IsDown(int key)
 {
     if (CORE.Input.Keyboard.currentKeyState[key] == 1) return true;
     else return false;
 }
 
 // Check if a key has been released once
-bool IsKeyReleased(int key)
+bool Key_IsReleased(int key)
 {
     bool released = false;
 
@@ -3216,14 +3151,14 @@ bool IsKeyReleased(int key)
 }
 
 // Check if a key is NOT being pressed (key not held down)
-bool IsKeyUp(int key)
+bool Key_IsUp(int key)
 {
     if (CORE.Input.Keyboard.currentKeyState[key] == 0) return true;
     else return false;
 }
 
 // Get the last key pressed
-int GetKeyPressed(void)
+int Key_Get(void)
 {
     int value = 0;
 
@@ -3245,7 +3180,7 @@ int GetKeyPressed(void)
 }
 
 // Get the last char pressed
-int GetCharPressed(void)
+int Key_GetChar(void)
 {
     int value = 0;
 
@@ -3268,7 +3203,7 @@ int GetCharPressed(void)
 
 // Set a custom key to exit program
 // NOTE: default exitKey is ESCAPE
-void SetExitKey(int key)
+void Key_SetExitHotkey(int key)
 {
 #if !defined(PLATFORM_ANDROID)
     CORE.Input.Keyboard.exitKey = key;
@@ -4353,7 +4288,7 @@ static bool InitGraphicsDevice(int width, int height)
     // NOTE: It updated CORE.Window.render.width and CORE.Window.render.height
     SetupViewport(CORE.Window.currentFbo.width, CORE.Window.currentFbo.height);
 
-    ClearBackground(WHITE);      // Default background color for raylib games :P
+    Buffer_Clear(WHITE);      // Default background color for raylib games :P
 
 #if defined(PLATFORM_ANDROID)
     CORE.Window.ready = true;
@@ -4542,8 +4477,9 @@ void WaitTime(float ms)
 }
 
 // Swap back buffer with front buffer (screen drawing)
-void SwapScreenBuffer(void)
+void Buffer_Update(void)
 {
+    rlDrawRenderBatchActive();      // Update and draw internal render batch
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     glfwSwapBuffers(CORE.Window.handle);
 #endif
@@ -4604,7 +4540,7 @@ void SwapScreenBuffer(void)
 }
 
 // Register all input events
-void PollInputEvents(void)
+void Events_Poll(void)
 {
 #if defined(SUPPORT_GESTURES_SYSTEM)
     // NOTE: Gestures update must be called every frame to reset gestures correctly
@@ -4755,11 +4691,8 @@ void PollInputEvents(void)
 
     CORE.Window.resizedLastFrame = false;
 
-#if defined(SUPPORT_EVENTS_WAITING)
-    glfwWaitEvents();
-#else
     glfwPollEvents();       // Register keyboard/mouse events (callbacks)... and window events!
-#endif
+
 #endif  // PLATFORM_DESKTOP
 
 #if defined(PLATFORM_WEB)
@@ -4871,6 +4804,347 @@ void PollInputEvents(void)
 #endif
 }
 
+// Register all input events
+void Events_Wait(void)
+{
+#if defined(SUPPORT_GESTURES_SYSTEM)
+    // NOTE: Gestures update must be called every frame to reset gestures correctly
+    // because ProcessGestureEvent() is just called on an event, not every frame
+    UpdateGestures();
+#endif
+
+    // Reset keys/chars pressed registered
+    CORE.Input.Keyboard.keyPressedQueueCount = 0;
+    CORE.Input.Keyboard.charPressedQueueCount = 0;
+
+#if !(defined(PLATFORM_RPI) || defined(PLATFORM_DRM))
+    // Reset last gamepad button/axis registered state
+    CORE.Input.Gamepad.lastButtonPressed = -1;
+    CORE.Input.Gamepad.axisCount = 0;
+#endif
+
+#if defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
+    // Register previous keys states
+    for (int i = 0; i < MAX_KEYBOARD_KEYS; i++) CORE.Input.Keyboard.previousKeyState[i] = CORE.Input.Keyboard.currentKeyState[i];
+
+    PollKeyboardEvents();
+
+    // Register previous mouse states
+    CORE.Input.Mouse.previousWheelMove = CORE.Input.Mouse.currentWheelMove;
+    CORE.Input.Mouse.currentWheelMove = 0.0f;
+    for (int i = 0; i < MAX_MOUSE_BUTTONS; i++)
+    {
+        CORE.Input.Mouse.previousButtonState[i] = CORE.Input.Mouse.currentButtonState[i];
+        CORE.Input.Mouse.currentButtonState[i] = CORE.Input.Mouse.currentButtonStateEvdev[i];
+    }
+
+    // Register gamepads buttons events
+    for (int i = 0; i < MAX_GAMEPADS; i++)
+    {
+        if (CORE.Input.Gamepad.ready[i])
+        {
+            // Register previous gamepad states
+            for (int k = 0; k < MAX_GAMEPAD_BUTTONS; k++) CORE.Input.Gamepad.previousButtonState[i][k] = CORE.Input.Gamepad.currentButtonState[i][k];
+        }
+    }
+#endif
+
+#if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
+    // Keyboard/Mouse input polling (automatically managed by GLFW3 through callback)
+
+    // Register previous keys states
+    for (int i = 0; i < MAX_KEYBOARD_KEYS; i++) CORE.Input.Keyboard.previousKeyState[i] = CORE.Input.Keyboard.currentKeyState[i];
+
+    // Register previous mouse states
+    for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) CORE.Input.Mouse.previousButtonState[i] = CORE.Input.Mouse.currentButtonState[i];
+
+    // Register previous mouse wheel state
+    CORE.Input.Mouse.previousWheelMove = CORE.Input.Mouse.currentWheelMove;
+    CORE.Input.Mouse.currentWheelMove = 0.0f;
+
+    // Register previous mouse position
+    CORE.Input.Mouse.previousPosition = CORE.Input.Mouse.currentPosition;
+#endif
+
+    // Register previous touch states
+    for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.previousTouchState[i] = CORE.Input.Touch.currentTouchState[i];
+
+    // Reset touch positions
+    // TODO: It resets on PLATFORM_WEB the mouse position and not filled again until a move-event,
+    // so, if mouse is not moved it returns a (0, 0) position... this behaviour should be reviewed!
+    //for (int i = 0; i < MAX_TOUCH_POINTS; i++) CORE.Input.Touch.position[i] = (Vector2){ 0, 0 };
+
+#if defined(PLATFORM_DESKTOP)
+    // Check if gamepads are ready
+    // NOTE: We do it here in case of disconnection
+    for (int i = 0; i < MAX_GAMEPADS; i++)
+    {
+        if (glfwJoystickPresent(i)) CORE.Input.Gamepad.ready[i] = true;
+        else CORE.Input.Gamepad.ready[i] = false;
+    }
+
+    // Register gamepads buttons events
+    for (int i = 0; i < MAX_GAMEPADS; i++)
+    {
+        if (CORE.Input.Gamepad.ready[i])     // Check if gamepad is available
+        {
+            // Register previous gamepad states
+            for (int k = 0; k < MAX_GAMEPAD_BUTTONS; k++) CORE.Input.Gamepad.previousButtonState[i][k] = CORE.Input.Gamepad.currentButtonState[i][k];
+
+            // Get current gamepad state
+            // NOTE: There is no callback available, so we get it manually
+            // Get remapped buttons
+            GLFWgamepadstate state = { 0 };
+            glfwGetGamepadState(i, &state); // This remapps all gamepads so they have their buttons mapped like an xbox controller
+
+            const unsigned char *buttons = state.buttons;
+
+            for (int k = 0; (buttons != NULL) && (k < GLFW_GAMEPAD_BUTTON_DPAD_LEFT + 1) && (k < MAX_GAMEPAD_BUTTONS); k++)
+            {
+                GamepadButton button = -1;
+
+                switch (k)
+                {
+                    case GLFW_GAMEPAD_BUTTON_Y: button = GAMEPAD_BUTTON_RIGHT_FACE_UP; break;
+                    case GLFW_GAMEPAD_BUTTON_B: button = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT; break;
+                    case GLFW_GAMEPAD_BUTTON_A: button = GAMEPAD_BUTTON_RIGHT_FACE_DOWN; break;
+                    case GLFW_GAMEPAD_BUTTON_X: button = GAMEPAD_BUTTON_RIGHT_FACE_LEFT; break;
+
+                    case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER: button = GAMEPAD_BUTTON_LEFT_TRIGGER_1; break;
+                    case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER: button = GAMEPAD_BUTTON_RIGHT_TRIGGER_1; break;
+
+                    case GLFW_GAMEPAD_BUTTON_BACK: button = GAMEPAD_BUTTON_MIDDLE_LEFT; break;
+                    case GLFW_GAMEPAD_BUTTON_GUIDE: button = GAMEPAD_BUTTON_MIDDLE; break;
+                    case GLFW_GAMEPAD_BUTTON_START: button = GAMEPAD_BUTTON_MIDDLE_RIGHT; break;
+
+                    case GLFW_GAMEPAD_BUTTON_DPAD_UP: button = GAMEPAD_BUTTON_LEFT_FACE_UP; break;
+                    case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT: button = GAMEPAD_BUTTON_LEFT_FACE_RIGHT; break;
+                    case GLFW_GAMEPAD_BUTTON_DPAD_DOWN: button = GAMEPAD_BUTTON_LEFT_FACE_DOWN; break;
+                    case GLFW_GAMEPAD_BUTTON_DPAD_LEFT: button = GAMEPAD_BUTTON_LEFT_FACE_LEFT; break;
+
+                    case GLFW_GAMEPAD_BUTTON_LEFT_THUMB: button = GAMEPAD_BUTTON_LEFT_THUMB; break;
+                    case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB: button = GAMEPAD_BUTTON_RIGHT_THUMB; break;
+                    default: break;
+                }
+
+                if (button != -1)   // Check for valid button
+                {
+                    if (buttons[k] == GLFW_PRESS)
+                    {
+                        CORE.Input.Gamepad.currentButtonState[i][button] = 1;
+                        CORE.Input.Gamepad.lastButtonPressed = button;
+                    }
+                    else CORE.Input.Gamepad.currentButtonState[i][button] = 0;
+                }
+            }
+
+            // Get current axis state
+            const float *axes = state.axes;
+
+            for (int k = 0; (axes != NULL) && (k < GLFW_GAMEPAD_AXIS_LAST + 1) && (k < MAX_GAMEPAD_AXIS); k++)
+            {
+                CORE.Input.Gamepad.axisState[i][k] = axes[k];
+            }
+
+            // Register buttons for 2nd triggers (because GLFW doesn't count these as buttons but rather axis)
+            CORE.Input.Gamepad.currentButtonState[i][GAMEPAD_BUTTON_LEFT_TRIGGER_2] = (char)(CORE.Input.Gamepad.axisState[i][GAMEPAD_AXIS_LEFT_TRIGGER] > 0.1);
+            CORE.Input.Gamepad.currentButtonState[i][GAMEPAD_BUTTON_RIGHT_TRIGGER_2] = (char)(CORE.Input.Gamepad.axisState[i][GAMEPAD_AXIS_RIGHT_TRIGGER] > 0.1);
+
+            CORE.Input.Gamepad.axisCount = GLFW_GAMEPAD_AXIS_LAST + 1;
+        }
+    }
+
+    CORE.Window.resizedLastFrame = false;
+
+    glfwWaitEvents();
+
+#endif  // PLATFORM_DESKTOP
+
+#if defined(PLATFORM_WEB)
+    CORE.Window.resizedLastFrame = false;
+#endif  // PLATFORM_WEB
+
+// Gamepad support using emscripten API
+// NOTE: GLFW3 joystick functionality not available in web
+#if defined(PLATFORM_WEB)
+    // Get number of gamepads connected
+    int numGamepads = 0;
+    if (emscripten_sample_gamepad_data() == EMSCRIPTEN_RESULT_SUCCESS) numGamepads = emscripten_get_num_gamepads();
+
+    for (int i = 0; (i < numGamepads) && (i < MAX_GAMEPADS); i++)
+    {
+        // Register previous gamepad button states
+        for (int k = 0; k < MAX_GAMEPAD_BUTTONS; k++) CORE.Input.Gamepad.previousButtonState[i][k] = CORE.Input.Gamepad.currentButtonState[i][k];
+
+        EmscriptenGamepadEvent gamepadState;
+
+        int result = emscripten_get_gamepad_status(i, &gamepadState);
+
+        if (result == EMSCRIPTEN_RESULT_SUCCESS)
+        {
+            // Register buttons data for every connected gamepad
+            for (int j = 0; (j < gamepadState.numButtons) && (j < MAX_GAMEPAD_BUTTONS); j++)
+            {
+                GamepadButton button = -1;
+
+                // Gamepad Buttons reference: https://www.w3.org/TR/gamepad/#gamepad-interface
+                switch (j)
+                {
+                    case 0: button = GAMEPAD_BUTTON_RIGHT_FACE_DOWN; break;
+                    case 1: button = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT; break;
+                    case 2: button = GAMEPAD_BUTTON_RIGHT_FACE_LEFT; break;
+                    case 3: button = GAMEPAD_BUTTON_RIGHT_FACE_UP; break;
+                    case 4: button = GAMEPAD_BUTTON_LEFT_TRIGGER_1; break;
+                    case 5: button = GAMEPAD_BUTTON_RIGHT_TRIGGER_1; break;
+                    case 6: button = GAMEPAD_BUTTON_LEFT_TRIGGER_2; break;
+                    case 7: button = GAMEPAD_BUTTON_RIGHT_TRIGGER_2; break;
+                    case 8: button = GAMEPAD_BUTTON_MIDDLE_LEFT; break;
+                    case 9: button = GAMEPAD_BUTTON_MIDDLE_RIGHT; break;
+                    case 10: button = GAMEPAD_BUTTON_LEFT_THUMB; break;
+                    case 11: button = GAMEPAD_BUTTON_RIGHT_THUMB; break;
+                    case 12: button = GAMEPAD_BUTTON_LEFT_FACE_UP; break;
+                    case 13: button = GAMEPAD_BUTTON_LEFT_FACE_DOWN; break;
+                    case 14: button = GAMEPAD_BUTTON_LEFT_FACE_LEFT; break;
+                    case 15: button = GAMEPAD_BUTTON_LEFT_FACE_RIGHT; break;
+                    default: break;
+                }
+
+                if (button != -1)   // Check for valid button
+                {
+                    if (gamepadState.digitalButton[j] == 1)
+                    {
+                        CORE.Input.Gamepad.currentButtonState[i][button] = 1;
+                        CORE.Input.Gamepad.lastButtonPressed = button;
+                    }
+                    else CORE.Input.Gamepad.currentButtonState[i][button] = 0;
+                }
+
+                //TRACELOGD("INPUT: Gamepad %d, button %d: Digital: %d, Analog: %g", gamepadState.index, j, gamepadState.digitalButton[j], gamepadState.analogButton[j]);
+            }
+
+            // Register axis data for every connected gamepad
+            for (int j = 0; (j < gamepadState.numAxes) && (j < MAX_GAMEPAD_AXIS); j++)
+            {
+                CORE.Input.Gamepad.axisState[i][j] = gamepadState.axis[j];
+            }
+
+            CORE.Input.Gamepad.axisCount = gamepadState.numAxes;
+        }
+    }
+#endif
+
+#if defined(PLATFORM_ANDROID)
+    // Register previous keys states
+    // NOTE: Android supports up to 260 keys
+    for (int i = 0; i < 260; i++) CORE.Input.Keyboard.previousKeyState[i] = CORE.Input.Keyboard.currentKeyState[i];
+
+    // Android ALooper_pollAll() variables
+    int pollResult = 0;
+    int pollEvents = 0;
+
+    // Poll Events (registered events)
+    // NOTE: Activity is paused if not enabled (CORE.Android.appEnabled)
+    while ((pollResult = ALooper_pollAll(CORE.Android.appEnabled? 0 : -1, NULL, &pollEvents, (void**)&CORE.Android.source)) >= 0)
+    {
+        // Process this event
+        if (CORE.Android.source != NULL) CORE.Android.source->process(CORE.Android.app, CORE.Android.source);
+
+        // NOTE: Never close window, native activity is controlled by the system!
+        if (CORE.Android.app->destroyRequested != 0)
+        {
+            //CORE.Window.shouldClose = true;
+            //ANativeActivity_finish(CORE.Android.app->activity);
+        }
+    }
+#endif
+
+#if (defined(PLATFORM_RPI) || defined(PLATFORM_DRM)) && defined(SUPPORT_SSH_KEYBOARD_RPI)
+    // NOTE: Keyboard reading could be done using input_event(s) or just read from stdin, both methods are used here.
+    // stdin reading is still used for legacy purposes, it allows keyboard input trough SSH console
+
+    if (!CORE.Input.Keyboard.evtMode) ProcessKeyboard();
+
+    // NOTE: Mouse input events polling is done asynchronously in another pthread - EventThread()
+    // NOTE: Gamepad (Joystick) input events polling is done asynchonously in another pthread - GamepadThread()
+#endif
+}
+
+// End event loop
+void Events_EndLoop(void){
+
+#if defined(SUPPORT_MOUSE_CURSOR_POINT)
+    // Draw a small rectangle on mouse position for user reference
+    if (!CORE.Input.Mouse.cursorHidden)
+    {
+        DrawRectangle(CORE.Input.Mouse.currentPosition.x, CORE.Input.Mouse.currentPosition.y, 3, 3, MAROON);
+        rlDrawRenderBatchActive();  // Update and draw internal render batch
+    }
+#endif
+
+#if defined(SUPPORT_EVENTS_AUTOMATION)
+    // Draw record/play indicator
+    if (eventsRecording)
+    {
+        gifFrameCounter++;
+
+        if (((gifFrameCounter/15)%2) == 1)
+        {
+            DrawCircle(30, CORE.Window.screen.height - 20, 10, MAROON);
+            DrawText("EVENTS RECORDING", 50, CORE.Window.screen.height - 25, 10, RED);
+        }
+
+        rlDrawRenderBatchActive();  // Update and draw internal render batch
+    }
+    else if (eventsPlaying)
+    {
+        gifFrameCounter++;
+
+        if (((gifFrameCounter/15)%2) == 1)
+        {
+            DrawCircle(30, CORE.Window.screen.height - 20, 10, LIME);
+            DrawText("EVENTS PLAYING", 50, CORE.Window.screen.height - 25, 10, GREEN);
+        }
+
+        rlDrawRenderBatchActive();  // Update and draw internal render batch
+    }
+#endif
+
+#if !defined(SUPPORT_CUSTOM_FRAME_CONTROL)
+
+    // Frame time control system
+    CORE.Time.current = GetTime();
+    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
+    CORE.Time.previous = CORE.Time.current;
+
+    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
+
+    // Wait for some milliseconds...
+    if (CORE.Time.frame < CORE.Time.target)
+    {
+        WaitTime((float)(CORE.Time.target - CORE.Time.frame)*1000.0f);
+
+        CORE.Time.current = GetTime();
+        double waitTime = CORE.Time.current - CORE.Time.previous;
+        CORE.Time.previous = CORE.Time.current;
+
+        CORE.Time.frame += waitTime;    // Total frame time: update + draw + wait
+    }
+#endif
+
+#if defined(SUPPORT_EVENTS_AUTOMATION)
+    // Events recording and playing logic
+    if (eventsRecording) RecordAutomationEvent(CORE.Time.frameCounter);
+    else if (eventsPlaying)
+    {
+        // TODO: When should we play? After/before/replace PollInputEvents()?
+        if (CORE.Time.frameCounter >= eventCount) eventsPlaying = false;
+        PlayAutomationEvent(CORE.Time.frameCounter);
+    }
+#endif
+
+    CORE.Time.frameCounter++;
+}
+
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
 // GLFW3 Error Callback, runs on GLFW3 error
 static void ErrorCallback(int error, const char *description)
@@ -4899,7 +5173,7 @@ static EM_BOOL EmscriptenResizeCallback(int eventType, const EmscriptenUiEvent *
     CORE.Window.currentFbo.height = height;
     CORE.Window.resizedLastFrame = true;
 
-    if (IsWindowFullscreen()) return 1;
+    if (Window_IsFullscreen()) return 1;
 
     // Set current screen size
     CORE.Window.screen.width = width;
@@ -4922,7 +5196,7 @@ static void WindowSizeCallback(GLFWwindow *window, int width, int height)
     CORE.Window.currentFbo.height = height;
     CORE.Window.resizedLastFrame = true;
 
-    if (IsWindowFullscreen()) return;
+    if (Window_IsFullscreen()) return;
 
     // Set current screen size
 #if defined(__APPLE__)
@@ -6607,7 +6881,7 @@ static void PlayAutomationEvent(unsigned int frame)
                 case WINDOW_CLOSE: CORE.Window.shouldClose = true; break;
                 case WINDOW_MAXIMIZE: MaximizeWindow(); break;
                 case WINDOW_MINIMIZE: MinimizeWindow(); break;
-                case WINDOW_RESIZE: SetWindowSize(events[i].params[0], events[i].params[1]); break;
+                case WINDOW_RESIZE: Window_SetSize(events[i].params[0], events[i].params[1]); break;
 
                 // Custom events
                 case ACTION_TAKE_SCREENSHOT:

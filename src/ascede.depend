@@ -23,11 +23,11 @@
 
 1644155696 g:\-guten\prog\c\proj\ascede\src\raudio.h
 
-1647610456 g:\-guten\prog\c\proj\ascede\src\raylib.h
+1647670837 g:\-guten\prog\c\proj\ascede\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
-1646996572 g:\-guten\prog\c\proj\ascede\src\config.h
+1647668966 g:\-guten\prog\c\proj\ascede\src\config.h
 
 1644143214 g:\-guten\prog\c\proj\ascede\src\utils.h
 	<stdio.h>
@@ -208,7 +208,7 @@
 	<wchar.h>
 	<errno.h>
 
-1646993473 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
+1647668868 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
 	"raylib.h"
 	"config.h"
 	"utils.h"
@@ -223,6 +223,7 @@
 	<time.h>
 	<math.h>
 	<sys/stat.h>
+	"external/mtwister.h"
 	"external/dirent.h"
 	<dirent.h>
 	<direct.h>
@@ -257,7 +258,7 @@
 	<emscripten/emscripten.h>
 	<emscripten/html5.h>
 
-1647609432 g:\-guten\prog\c\proj\ascede\src\rlgl.h
+1647663139 g:\-guten\prog\c\proj\ascede\src\rlgl.h
 	<stdbool.h>
 	<OpenGL/gl.h>
 	<OpenGL/glext.h>
@@ -720,14 +721,14 @@
 	<unistd.h>
 	<math.h>
 
-1647609432 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
+1647663164 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
 	"raylib.h"
 	"config.h"
 	"rlgl.h"
 	<math.h>
 	<float.h>
 
-1646996632 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
+1647663168 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
 	"raylib.h"
 	"config.h"
 	"utils.h"
@@ -758,7 +759,7 @@
 	<string.h>
 	<string.h>
 
-1647611254 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
+1647663176 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
 	"raylib.h"
 	"config.h"
 	"utils.h"
@@ -1700,7 +1701,10 @@
 	<EGL/egl.h>
 	<GL/osmesa.h>
 
-1647611016 source:g:\-guten\prog\c\proj\ascede\covergen.c
+1647670487 source:g:\-guten\prog\c\proj\ascede\covergen.c
 	"src/raylib.h"
 	<stddef.h>
+
+1643071532 g:\-guten\prog\c\proj\ascede\src\external\mtwister.h
+	<inttypes.h>
 
