@@ -32,6 +32,21 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
+			<Target title="Test">
+				<Option output="../ascede" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../ascede" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Os" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="../win32_lib/libgdi32.a" />
+					<Add library="../win32_lib/libopengl32.a" />
+					<Add library="bin/Release/libascede.a" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -44,37 +59,53 @@
 			<Add option="-static" />
 			<Add option="-m32" />
 		</Linker>
-		<Unit filename="ascede.h" />
-		<Unit filename="config.h" />
-		<Unit filename="patch.c">
+		<Unit filename="../covergen.c">
 			<Option compilerVar="CC" />
+			<Option target="Test" />
 		</Unit>
-		<Unit filename="patch.h" />
-		<Unit filename="raudio.c">
-			<Option compilerVar="CC" />
+		<Unit filename="config.h">
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
-		<Unit filename="raudio.h" />
-		<Unit filename="raymath.h" />
+		<Unit filename="raylib.h" />
 		<Unit filename="rcore.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="rglfw.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
-		<Unit filename="rlgl.h" />
+		<Unit filename="rlgl.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Unit filename="rshapes.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="rtext.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="rtextures.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
 		<Unit filename="utils.c">
 			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
 		</Unit>
-		<Unit filename="utils.h" />
+		<Unit filename="utils.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+		</Unit>
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

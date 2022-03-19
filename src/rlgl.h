@@ -1,5 +1,7 @@
 /**********************************************************************************************
 *
+*   ALTERED
+*
 *   rlgl v4.0 - A multi-OpenGL abstraction layer with an immediate-mode style API
 *
 *   An abstraction layer for multiple OpenGL versions (1.1, 2.1, 3.3 Core, 4.3 Core, ES 2.0)
@@ -1100,7 +1102,7 @@ void rlRotatef(float angle, float x, float y, float z)
 
     // Axis vector (x, y, z) normalization
     float lengthSquared = x*x + y*y + z*z;
-    if ((lengthSquared != 1.0f) && (lengthSquared != 0.0f))
+    if (lengthSquared!=1.0f && lengthSquared!=0.0f)
     {
         float inverseLength = 1.0f/sqrtf(lengthSquared);
         x *= inverseLength;
@@ -3895,7 +3897,7 @@ void rlComputeShaderDispatch(unsigned int groupX, unsigned int groupY, unsigned 
 unsigned int rlLoadShaderBuffer(unsigned long long size, const void *data, int usageHint)
 {
     unsigned int ssbo = 0;
-    
+
 #if defined(GRAPHICS_API_OPENGL_43)
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -3926,7 +3928,7 @@ void rlUpdateShaderBufferElements(unsigned int id, const void *data, unsigned lo
 unsigned long long rlGetShaderBufferSize(unsigned int id)
 {
     long long size = 0;
-    
+
 #if defined(GRAPHICS_API_OPENGL_43)
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, id);
     glGetInteger64v(GL_SHADER_STORAGE_BUFFER_SIZE, &size);

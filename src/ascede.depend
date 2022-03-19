@@ -1,0 +1,1706 @@
+# depslib dependency file v1.0
+1646996582 source:g:\-guten\prog\c\proj\ascede\src\raudio.c
+	"raudio.h"
+	<stdarg.h>
+	"raylib.h"
+	"config.h"
+	"utils.h"
+	<windows.h>
+	<objbase.h>
+	<mmreg.h>
+	<mmsystem.h>
+	"propidl.h"
+	"external/miniaudio.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"external/stb_vorbis.h"
+	"external/jar_xm.h"
+	"external/jar_mod.h"
+	"external/dr_wav.h"
+	"external/dr_mp3.h"
+	"external/dr_flac.h"
+
+1644155696 g:\-guten\prog\c\proj\ascede\src\raudio.h
+
+1647610456 g:\-guten\prog\c\proj\ascede\src\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+
+1646996572 g:\-guten\prog\c\proj\ascede\src\config.h
+
+1644143214 g:\-guten\prog\c\proj\ascede\src\utils.h
+	<stdio.h>
+	<android/asset_manager.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\miniaudio.h
+	"miniaudio.h"
+	"miniaudio.h"
+	"extras/stb_vorbis.c"
+	"miniaudio.h"
+	"extras/stb_vorbis.c"
+	"extras/speex_resampler/ma_speex_resampler.h"
+	"extras/speex_resampler/ma_speex_resampler.h"
+	<pthread.h>
+	<stddef.h>
+	<stdarg.h>
+	<assert.h>
+	<limits.h>
+	<math.h>
+	<stdarg.h>
+	<stdio.h>
+	<strings.h>
+	<wchar.h>
+	<windows.h>
+	<stdlib.h>
+	<string.h>
+	<sched.h>
+	<sys/time.h>
+	<sys/stat.h>
+	<emscripten/emscripten.h>
+	<stdint.h>
+	<immintrin.h>
+	<immintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<errno.h>
+	<stdint.h>
+	<intrin.h>
+	<objbase.h>
+	<mmreg.h>
+	<mmsystem.h>
+	<mach/mach_time.h>
+	<sys/types.h>
+	<unistd.h>
+	<dlfcn.h>
+	<audioclient.h>
+	<mmdeviceapi.h>
+	<mmdeviceapi.h>
+	<poll.h>
+	<sys/eventfd.h>
+	<alsa/asoundlib.h>
+	<errno.h>
+	<pulse/pulseaudio.h>
+	<jack/jack.h>
+	<TargetConditionals.h>
+	<CoreAudio/CoreAudio.h>
+	<AVFoundation/AVFoundation.h>
+	<AudioToolbox/AudioToolbox.h>
+	<fcntl.h>
+	<sys/audioio.h>
+	<sys/soundcard.h>
+	<fcntl.h>
+	<poll.h>
+	<errno.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<sys/ioctl.h>
+	<sys/audioio.h>
+	<sys/param.h>
+	<sys/ioctl.h>
+	<unistd.h>
+	<fcntl.h>
+	<sys/soundcard.h>
+	<SLES/OpenSLES.h>
+	<SLES/OpenSLES_Android.h>
+	<emscripten/emscripten.h>
+	<stddef.h>
+	<stddef.h>
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<wchar.h>
+	<assert.h>
+	<errno.h>
+	<endian.h>
+	<stdlib.h>
+	<string.h>
+	<smmintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<assert.h>
+	<intrin.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<intrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<assert.h>
+	<math.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\stb_vorbis.h
+	<stdio.h>
+	"utils.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	<math.h>
+	<malloc.h>
+	<alloca.h>
+	<limits.h>
+	<crtdbg.h>
+
+1644156669 g:\-guten\prog\c\proj\ascede\src\external\jar_xm.h
+	<stdint.h>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+	<string.h>
+	<stdio.h>
+	"raylib.h"
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\jar_mod.h
+	<stdio.h>
+	<stdlib.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede\src\external\dr_wav.h
+	"dr_wav.h"
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<wchar.h>
+	<assert.h>
+	<errno.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede\src\external\dr_mp3.h
+	"dr_mp3.h"
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<intrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<assert.h>
+	<math.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede\src\external\dr_flac.h
+	"dr_flac.h"
+	<stddef.h>
+	<endian.h>
+	<stdlib.h>
+	<string.h>
+	<smmintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<assert.h>
+	<intrin.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+
+1646993473 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
+	"raylib.h"
+	"config.h"
+	"utils.h"
+	"rlgl.h"
+	"raymath.h"
+	"rgestures.h"
+	"external/sinfl.h"
+	"external/sdefl.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<time.h>
+	<math.h>
+	<sys/stat.h>
+	"external/dirent.h"
+	<dirent.h>
+	<direct.h>
+	<io.h>
+	<unistd.h>
+	"external/glfw/include/GLFW/glfw3.h"
+	"external/glfw/include/GLFW/glfw3native.h"
+	<sys/time.h>
+	"external/glfw/include/GLFW/glfw3native.h"
+	<unistd.h>
+	"external/glfw/include/GLFW/glfw3native.h"
+	<android/window.h>
+	<android_native_app_glue.h>
+	<EGL/egl.h>
+	<fcntl.h>
+	<unistd.h>
+	<termios.h>
+	<pthread.h>
+	<dirent.h>
+	<sys/ioctl.h>
+	<linux/kd.h>
+	<linux/input.h>
+	<linux/joystick.h>
+	"bcm_host.h"
+	<gbm.h>
+	<xf86drm.h>
+	<xf86drmMode.h>
+	"EGL/egl.h"
+	"EGL/eglext.h"
+	"GLFW/glfw3.h"
+	<sys/time.h>
+	<emscripten/emscripten.h>
+	<emscripten/html5.h>
+
+1647609432 g:\-guten\prog\c\proj\ascede\src\rlgl.h
+	<stdbool.h>
+	<OpenGL/gl.h>
+	<OpenGL/glext.h>
+	<GL/gl.h>
+	<OpenGL/gl3.h>
+	<OpenGL/gl3ext.h>
+	"external/glad.h"
+	<GLES2/gl2.h>
+	<GLES2/gl2ext.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede\src\external\glad.h
+	<winapifamily.h>
+	<stdint.h>
+	<inttypes.h>
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1647609386 g:\-guten\prog\c\proj\ascede\src\raymath.h
+	<math.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\sinfl.h
+	<string.h>
+	<assert.h>
+	<emmintrin.h>
+	<arm_neon.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\sdefl.h
+	<assert.h>
+	<string.h>
+	<limits.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede\src\external\dirent.h
+	<io.h>
+	<stdlib.h>
+	<string.h>
+	<errno.h>
+
+1644214379 source:g:\-guten\prog\c\proj\ascede\src\rglfw.c
+	"external/glfw/src/context.c"
+	"external/glfw/src/init.c"
+	"external/glfw/src/input.c"
+	"external/glfw/src/monitor.c"
+	"external/glfw/src/vulkan.c"
+	"external/glfw/src/window.c"
+	"external/glfw/src/win32_init.c"
+	"external/glfw/src/win32_time.c"
+	"external/glfw/src/win32_thread.c"
+	"external/glfw/src/win32_window.c"
+	"external/glfw/src/win32_joystick.c"
+	"external/glfw/src/win32_monitor.c"
+	"external/glfw/src/wgl_context.c"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+	"external/glfw/src/wl_init.c"
+	"external/glfw/src/wl_monitor.c"
+	"external/glfw/src/wl_window.c"
+	"external/glfw/src/wayland-pointer-constraints-unstable-v1-client-protocol.c"
+	"external/glfw/src/wayland-relative-pointer-unstable-v1-client-protocol.c"
+	"external/glfw/src/x11_init.c"
+	"external/glfw/src/x11_monitor.c"
+	"external/glfw/src/x11_window.c"
+	"external/glfw/src/glx_context.c"
+	"external/glfw/src/linux_joystick.c"
+	"external/glfw/src/posix_thread.c"
+	"external/glfw/src/posix_time.c"
+	"external/glfw/src/xkb_unicode.c"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+	"external/glfw/src/x11_init.c"
+	"external/glfw/src/x11_monitor.c"
+	"external/glfw/src/x11_window.c"
+	"external/glfw/src/xkb_unicode.c"
+	"external/glfw/src/null_joystick.c"
+	"external/glfw/src/posix_time.c"
+	"external/glfw/src/posix_thread.c"
+	"external/glfw/src/glx_context.c"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+	"external/glfw/src/cocoa_init.m"
+	"external/glfw/src/cocoa_joystick.m"
+	"external/glfw/src/cocoa_monitor.m"
+	"external/glfw/src/cocoa_window.m"
+	"external/glfw/src/cocoa_time.c"
+	"external/glfw/src/posix_thread.c"
+	"external/glfw/src/nsgl_context.m"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\context.c
+	"internal.h"
+	<assert.h>
+	<stdio.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\internal.h
+	"glfw_config.h"
+	"../include/GLFW/glfw3.h"
+	"cocoa_platform.h"
+	"win32_platform.h"
+	"x11_platform.h"
+	"wl_platform.h"
+	"null_platform.h"
+	"egl_context.h"
+	"osmesa_context.h"
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\include\glfw\glfw3.h
+	<stddef.h>
+	<stdint.h>
+	<vulkan/vulkan.h>
+	<GLES/gl.h>
+	<GLES/glext.h>
+	<GLES2/gl2.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl3.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl31.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl32.h>
+	<GLES2/gl2ext.h>
+	<OpenGL/gl3.h>
+	<OpenGL/gl3ext.h>
+	<GL/glcorearb.h>
+	<OpenGL/glu.h>
+	<GL/glu.h>
+	<OpenGL/gl.h>
+	<GL/gl.h>
+	<GL/glext.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_platform.h
+	<stdint.h>
+	<dlfcn.h>
+	<Carbon/Carbon.h>
+	"posix_thread.h"
+	"cocoa_joystick.h"
+	"nsgl_context.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\posix_thread.h
+	<pthread.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_joystick.h
+	<IOKit/IOKitLib.h>
+	<IOKit/IOCFPlugIn.h>
+	<IOKit/hid/IOHIDLib.h>
+	<IOKit/hid/IOHIDKeys.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\nsgl_context.h
+	<stdatomic.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_platform.h
+	<wctype.h>
+	<windows.h>
+	<dinput.h>
+	<xinput.h>
+	<dbt.h>
+	<dwmapi.h>
+	"win32_joystick.h"
+	"wgl_context.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_joystick.h
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\wgl_context.h
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\x11_platform.h
+	<unistd.h>
+	<signal.h>
+	<stdint.h>
+	<dlfcn.h>
+	<X11/Xlib.h>
+	<X11/keysym.h>
+	<X11/Xatom.h>
+	<X11/Xresource.h>
+	<X11/Xcursor/Xcursor.h>
+	<X11/extensions/Xrandr.h>
+	<X11/XKBlib.h>
+	<X11/extensions/Xinerama.h>
+	<X11/extensions/XInput2.h>
+	<X11/extensions/shape.h>
+	"posix_thread.h"
+	"posix_time.h"
+	"xkb_unicode.h"
+	"glx_context.h"
+	"linux_joystick.h"
+	"null_joystick.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\posix_time.h
+	<stdint.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\xkb_unicode.h
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\glx_context.h
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\linux_joystick.h
+	<linux/input.h>
+	<linux/limits.h>
+	<regex.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\null_joystick.h
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\wl_platform.h
+	<wayland-client.h>
+	<xkbcommon/xkbcommon.h>
+	<xkbcommon/xkbcommon-compose.h>
+	<dlfcn.h>
+	"posix_thread.h"
+	"posix_time.h"
+	"linux_joystick.h"
+	"null_joystick.h"
+	"xkb_unicode.h"
+	"wayland-xdg-shell-client-protocol.h"
+	"wayland-xdg-decoration-client-protocol.h"
+	"wayland-viewporter-client-protocol.h"
+	"wayland-relative-pointer-unstable-v1-client-protocol.h"
+	"wayland-pointer-constraints-unstable-v1-client-protocol.h"
+	"wayland-idle-inhibit-unstable-v1-client-protocol.h"
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\null_platform.h
+	<dlfcn.h>
+	"posix_time.h"
+	"posix_thread.h"
+	"null_joystick.h"
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\egl_context.h
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\osmesa_context.h
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\init.c
+	"internal.h"
+	"mappings.h"
+	<string.h>
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\mappings.h
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\input.c
+	"internal.h"
+	<assert.h>
+	<float.h>
+	<math.h>
+	<stdlib.h>
+	<string.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\monitor.c
+	"internal.h"
+	<assert.h>
+	<math.h>
+	<float.h>
+	<string.h>
+	<stdlib.h>
+	<limits.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\vulkan.c
+	"internal.h"
+	<assert.h>
+	<string.h>
+	<stdlib.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\window.c
+	"internal.h"
+	<assert.h>
+	<string.h>
+	<stdlib.h>
+	<float.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_init.c
+	"internal.h"
+	<stdlib.h>
+	<malloc.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_joystick.c
+	"internal.h"
+	<stdio.h>
+	<math.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_monitor.c
+	"internal.h"
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<malloc.h>
+	<wchar.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_time.c
+	"internal.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_thread.c
+	"internal.h"
+	<assert.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\win32_window.c
+	"internal.h"
+	<limits.h>
+	<stdlib.h>
+	<malloc.h>
+	<string.h>
+	<windowsx.h>
+	<shellapi.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\wgl_context.c
+	"internal.h"
+	<stdlib.h>
+	<malloc.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\egl_context.c
+	"internal.h"
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\osmesa_context.c
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	"internal.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\wl_init.c
+	"internal.h"
+	<assert.h>
+	<errno.h>
+	<limits.h>
+	<linux/input.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<sys/mman.h>
+	<sys/timerfd.h>
+	<unistd.h>
+	<time.h>
+	<wayland-client.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\wl_monitor.c
+	"internal.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<errno.h>
+	<math.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\wl_window.c
+	"internal.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<unistd.h>
+	<string.h>
+	<fcntl.h>
+	<sys/mman.h>
+	<sys/timerfd.h>
+	<poll.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\x11_init.c
+	"internal.h"
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<locale.h>
+	<unistd.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\x11_monitor.c
+	"internal.h"
+	<limits.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\x11_window.c
+	"internal.h"
+	<X11/cursorfont.h>
+	<X11/Xmd.h>
+	<sys/select.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+	<errno.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\glx_context.c
+	"internal.h"
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\linux_joystick.c
+	"internal.h"
+	<sys/types.h>
+	<sys/stat.h>
+	<sys/inotify.h>
+	<fcntl.h>
+	<errno.h>
+	<dirent.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\posix_thread.c
+	"internal.h"
+	<assert.h>
+	<string.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\posix_time.c
+	"internal.h"
+	<unistd.h>
+	<sys/time.h>
+	<time.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\xkb_unicode.c
+	"internal.h"
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\null_joystick.c
+	"internal.h"
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_init.m
+	"internal.h"
+	<sys/param.h>
+	<crt_externs.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_joystick.m
+	"internal.h"
+	<unistd.h>
+	<ctype.h>
+	<string.h>
+	<mach/mach.h>
+	<mach/mach_error.h>
+	<CoreFoundation/CoreFoundation.h>
+	<Kernel/IOKit/hidsystem/IOHIDUsageTables.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_monitor.m
+	"internal.h"
+	<stdlib.h>
+	<limits.h>
+	<math.h>
+	<IOKit/graphics/IOGraphicsLib.h>
+	<ApplicationServices/ApplicationServices.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_window.m
+	"internal.h"
+	<float.h>
+	<string.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\cocoa_time.c
+	"internal.h"
+	<mach/mach_time.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede\src\external\glfw\src\nsgl_context.m
+	"internal.h"
+	<unistd.h>
+	<math.h>
+
+1647609432 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
+	"raylib.h"
+	"config.h"
+	"rlgl.h"
+	<math.h>
+	<float.h>
+
+1646996632 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
+	"raylib.h"
+	"config.h"
+	"utils.h"
+	"rlgl.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<stdarg.h>
+	<ctype.h>
+	"external/stb_rect_pack.h"
+	"external/stb_truetype.h"
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\stb_rect_pack.h
+	<stdlib.h>
+	<assert.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\stb_truetype.h
+	"stb_truetype.h"
+	<stdio.h>
+	"stb_truetype.h"
+	<math.h>
+	<math.h>
+	<math.h>
+	<math.h>
+	<math.h>
+	<stdlib.h>
+	<assert.h>
+	<string.h>
+	<string.h>
+
+1647611254 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
+	"raylib.h"
+	"config.h"
+	"utils.h"
+	"rlgl.h"
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<stdio.h>
+	"external/stb_image.h"
+	"external/stb_image_write.h"
+	"external/stb_image_resize.h"
+
+1644197048 g:\-guten\prog\c\proj\ascede\src\external\stb_image.h
+	"stb_image.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<math.h>
+	<stdio.h>
+	<assert.h>
+	<stdint.h>
+	<emmintrin.h>
+	<intrin.h>
+	<arm_neon.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede\src\external\stb_image_write.h
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<assert.h>
+
+1647611243 g:\-guten\prog\c\proj\ascede\src\external\stb_image_resize.h
+	"stb_image_resize.h"
+	<stdint.h>
+	<assert.h>
+	<string.h>
+	<math.h>
+	<stdlib.h>
+
+1646996645 source:g:\-guten\prog\c\proj\ascede\src\utils.c
+	"raylib.h"
+	"config.h"
+	"utils.h"
+	<errno.h>
+	<android/log.h>
+	<android/asset_manager.h>
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<string.h>
+
+1644197702 g:\-guten\prog\c\proj\ascede\src\patch.h
+	<stdbool.h>
+
+1644197693 source:g:\-guten\prog\c\proj\ascede\src\patch.c
+	"patch.h"
+
+1644197693 source:g:\-guten\prog\c\proj\ascede4\src\patch.c
+	"patch.h"
+
+1644197702 g:\-guten\prog\c\proj\ascede4\src\patch.h
+	<stdbool.h>
+
+1644215250 source:g:\-guten\prog\c\proj\ascede4\src\raudio.c
+	"raudio.h"
+	<stdarg.h>
+	"ascede.h"
+	"config.h"
+	"utils.h"
+	<windows.h>
+	<objbase.h>
+	<mmreg.h>
+	<mmsystem.h>
+	"propidl.h"
+	"external/miniaudio.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"external/stb_vorbis.h"
+	"external/jar_xm.h"
+	"external/jar_mod.h"
+	"external/dr_wav.h"
+	"external/dr_mp3.h"
+	"external/dr_flac.h"
+
+1644155696 g:\-guten\prog\c\proj\ascede4\src\raudio.h
+
+1644213643 g:\-guten\prog\c\proj\ascede4\src\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+
+1644213482 g:\-guten\prog\c\proj\ascede4\src\config.h
+
+1644143214 g:\-guten\prog\c\proj\ascede4\src\utils.h
+	<stdio.h>
+	<android/asset_manager.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\miniaudio.h
+	"miniaudio.h"
+	"miniaudio.h"
+	"extras/stb_vorbis.c"
+	"miniaudio.h"
+	"extras/stb_vorbis.c"
+	"extras/speex_resampler/ma_speex_resampler.h"
+	"extras/speex_resampler/ma_speex_resampler.h"
+	<pthread.h>
+	<stddef.h>
+	<stdarg.h>
+	<assert.h>
+	<limits.h>
+	<math.h>
+	<stdarg.h>
+	<stdio.h>
+	<strings.h>
+	<wchar.h>
+	<windows.h>
+	<stdlib.h>
+	<string.h>
+	<sched.h>
+	<sys/time.h>
+	<sys/stat.h>
+	<emscripten/emscripten.h>
+	<stdint.h>
+	<immintrin.h>
+	<immintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<errno.h>
+	<stdint.h>
+	<intrin.h>
+	<objbase.h>
+	<mmreg.h>
+	<mmsystem.h>
+	<mach/mach_time.h>
+	<sys/types.h>
+	<unistd.h>
+	<dlfcn.h>
+	<audioclient.h>
+	<mmdeviceapi.h>
+	<mmdeviceapi.h>
+	<poll.h>
+	<sys/eventfd.h>
+	<alsa/asoundlib.h>
+	<errno.h>
+	<pulse/pulseaudio.h>
+	<jack/jack.h>
+	<TargetConditionals.h>
+	<CoreAudio/CoreAudio.h>
+	<AVFoundation/AVFoundation.h>
+	<AudioToolbox/AudioToolbox.h>
+	<fcntl.h>
+	<sys/audioio.h>
+	<sys/soundcard.h>
+	<fcntl.h>
+	<poll.h>
+	<errno.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<sys/ioctl.h>
+	<sys/audioio.h>
+	<sys/param.h>
+	<sys/ioctl.h>
+	<unistd.h>
+	<fcntl.h>
+	<sys/soundcard.h>
+	<SLES/OpenSLES.h>
+	<SLES/OpenSLES_Android.h>
+	<emscripten/emscripten.h>
+	<stddef.h>
+	<stddef.h>
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<wchar.h>
+	<assert.h>
+	<errno.h>
+	<endian.h>
+	<stdlib.h>
+	<string.h>
+	<smmintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<assert.h>
+	<intrin.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<intrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<assert.h>
+	<math.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\stb_vorbis.h
+	<stdio.h>
+	"utils.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	<math.h>
+	<malloc.h>
+	<alloca.h>
+	<limits.h>
+	<crtdbg.h>
+
+1644156669 g:\-guten\prog\c\proj\ascede4\src\external\jar_xm.h
+	<stdint.h>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+	<string.h>
+	<stdio.h>
+	"raylib.h"
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\jar_mod.h
+	<stdio.h>
+	<stdlib.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede4\src\external\dr_wav.h
+	"dr_wav.h"
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<wchar.h>
+	<assert.h>
+	<errno.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede4\src\external\dr_mp3.h
+	"dr_mp3.h"
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<intrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<assert.h>
+	<math.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede4\src\external\dr_flac.h
+	"dr_flac.h"
+	<stddef.h>
+	<endian.h>
+	<stdlib.h>
+	<string.h>
+	<smmintrin.h>
+	<emmintrin.h>
+	<arm_neon.h>
+	<intrin.h>
+	<assert.h>
+	<intrin.h>
+	<stdio.h>
+	<wchar.h>
+	<errno.h>
+
+1644213543 source:g:\-guten\prog\c\proj\ascede4\src\rcore.c
+	"raylib.h"
+	"config.h"
+	"utils.h"
+	"rlgl.h"
+	"raymath.h"
+	"rgestures.h"
+	"external/sinfl.h"
+	"external/sdefl.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<time.h>
+	<math.h>
+	<sys/stat.h>
+	"external/dirent.h"
+	<dirent.h>
+	<direct.h>
+	<io.h>
+	<unistd.h>
+	"external/glfw/include/GLFW/glfw3.h"
+	"external/glfw/include/GLFW/glfw3native.h"
+	<sys/time.h>
+	"external/glfw/include/GLFW/glfw3native.h"
+	<unistd.h>
+	"external/glfw/include/GLFW/glfw3native.h"
+	<android/window.h>
+	<android_native_app_glue.h>
+	<EGL/egl.h>
+	<fcntl.h>
+	<unistd.h>
+	<termios.h>
+	<pthread.h>
+	<dirent.h>
+	<sys/ioctl.h>
+	<linux/kd.h>
+	<linux/input.h>
+	<linux/joystick.h>
+	"bcm_host.h"
+	<gbm.h>
+	<xf86drm.h>
+	<xf86drmMode.h>
+	"EGL/egl.h"
+	"EGL/eglext.h"
+	"GLFW/glfw3.h"
+	<sys/time.h>
+	<emscripten/emscripten.h>
+	<emscripten/html5.h>
+
+1644196644 g:\-guten\prog\c\proj\ascede4\src\rlgl.h
+	"patch.h"
+	<stdbool.h>
+	<OpenGL/gl.h>
+	<OpenGL/glext.h>
+	<GL/gl.h>
+	<OpenGL/gl3.h>
+	<OpenGL/gl3ext.h>
+	"external/glad.h"
+	<GLES2/gl2.h>
+	<GLES2/gl2ext.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede4\src\external\glad.h
+	<winapifamily.h>
+	<stdint.h>
+	<inttypes.h>
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
+1644196779 g:\-guten\prog\c\proj\ascede4\src\raymath.h
+	<math.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\sinfl.h
+	<string.h>
+	<assert.h>
+	<emmintrin.h>
+	<arm_neon.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\sdefl.h
+	<assert.h>
+	<string.h>
+	<limits.h>
+
+1644143214 g:\-guten\prog\c\proj\ascede4\src\external\dirent.h
+	<io.h>
+	<stdlib.h>
+	<string.h>
+	<errno.h>
+
+1644214379 source:g:\-guten\prog\c\proj\ascede4\src\rglfw.c
+	"external/glfw/src/context.c"
+	"external/glfw/src/init.c"
+	"external/glfw/src/input.c"
+	"external/glfw/src/monitor.c"
+	"external/glfw/src/vulkan.c"
+	"external/glfw/src/window.c"
+	"external/glfw/src/win32_init.c"
+	"external/glfw/src/win32_time.c"
+	"external/glfw/src/win32_thread.c"
+	"external/glfw/src/win32_window.c"
+	"external/glfw/src/win32_joystick.c"
+	"external/glfw/src/win32_monitor.c"
+	"external/glfw/src/wgl_context.c"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+	"external/glfw/src/wl_init.c"
+	"external/glfw/src/wl_monitor.c"
+	"external/glfw/src/wl_window.c"
+	"external/glfw/src/wayland-pointer-constraints-unstable-v1-client-protocol.c"
+	"external/glfw/src/wayland-relative-pointer-unstable-v1-client-protocol.c"
+	"external/glfw/src/x11_init.c"
+	"external/glfw/src/x11_monitor.c"
+	"external/glfw/src/x11_window.c"
+	"external/glfw/src/glx_context.c"
+	"external/glfw/src/linux_joystick.c"
+	"external/glfw/src/posix_thread.c"
+	"external/glfw/src/posix_time.c"
+	"external/glfw/src/xkb_unicode.c"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+	"external/glfw/src/x11_init.c"
+	"external/glfw/src/x11_monitor.c"
+	"external/glfw/src/x11_window.c"
+	"external/glfw/src/xkb_unicode.c"
+	"external/glfw/src/null_joystick.c"
+	"external/glfw/src/posix_time.c"
+	"external/glfw/src/posix_thread.c"
+	"external/glfw/src/glx_context.c"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+	"external/glfw/src/cocoa_init.m"
+	"external/glfw/src/cocoa_joystick.m"
+	"external/glfw/src/cocoa_monitor.m"
+	"external/glfw/src/cocoa_window.m"
+	"external/glfw/src/cocoa_time.c"
+	"external/glfw/src/posix_thread.c"
+	"external/glfw/src/nsgl_context.m"
+	"external/glfw/src/egl_context.c"
+	"external/glfw/src/osmesa_context.c"
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\context.c
+	"internal.h"
+	<assert.h>
+	<stdio.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\internal.h
+	"glfw_config.h"
+	"../include/GLFW/glfw3.h"
+	"cocoa_platform.h"
+	"win32_platform.h"
+	"x11_platform.h"
+	"wl_platform.h"
+	"null_platform.h"
+	"egl_context.h"
+	"osmesa_context.h"
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\include\glfw\glfw3.h
+	<stddef.h>
+	<stdint.h>
+	<vulkan/vulkan.h>
+	<GLES/gl.h>
+	<GLES/glext.h>
+	<GLES2/gl2.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl3.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl31.h>
+	<GLES2/gl2ext.h>
+	<GLES3/gl32.h>
+	<GLES2/gl2ext.h>
+	<OpenGL/gl3.h>
+	<OpenGL/gl3ext.h>
+	<GL/glcorearb.h>
+	<OpenGL/glu.h>
+	<GL/glu.h>
+	<OpenGL/gl.h>
+	<GL/gl.h>
+	<GL/glext.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_platform.h
+	<stdint.h>
+	<dlfcn.h>
+	<Carbon/Carbon.h>
+	"posix_thread.h"
+	"cocoa_joystick.h"
+	"nsgl_context.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\posix_thread.h
+	<pthread.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_joystick.h
+	<IOKit/IOKitLib.h>
+	<IOKit/IOCFPlugIn.h>
+	<IOKit/hid/IOHIDLib.h>
+	<IOKit/hid/IOHIDKeys.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\nsgl_context.h
+	<stdatomic.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_platform.h
+	<wctype.h>
+	<windows.h>
+	<dinput.h>
+	<xinput.h>
+	<dbt.h>
+	<dwmapi.h>
+	"win32_joystick.h"
+	"wgl_context.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_joystick.h
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\wgl_context.h
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\x11_platform.h
+	<unistd.h>
+	<signal.h>
+	<stdint.h>
+	<dlfcn.h>
+	<X11/Xlib.h>
+	<X11/keysym.h>
+	<X11/Xatom.h>
+	<X11/Xresource.h>
+	<X11/Xcursor/Xcursor.h>
+	<X11/extensions/Xrandr.h>
+	<X11/XKBlib.h>
+	<X11/extensions/Xinerama.h>
+	<X11/extensions/XInput2.h>
+	<X11/extensions/shape.h>
+	"posix_thread.h"
+	"posix_time.h"
+	"xkb_unicode.h"
+	"glx_context.h"
+	"linux_joystick.h"
+	"null_joystick.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\posix_time.h
+	<stdint.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\xkb_unicode.h
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\glx_context.h
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\linux_joystick.h
+	<linux/input.h>
+	<linux/limits.h>
+	<regex.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\null_joystick.h
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\wl_platform.h
+	<wayland-client.h>
+	<xkbcommon/xkbcommon.h>
+	<xkbcommon/xkbcommon-compose.h>
+	<dlfcn.h>
+	"posix_thread.h"
+	"posix_time.h"
+	"linux_joystick.h"
+	"null_joystick.h"
+	"xkb_unicode.h"
+	"wayland-xdg-shell-client-protocol.h"
+	"wayland-xdg-decoration-client-protocol.h"
+	"wayland-viewporter-client-protocol.h"
+	"wayland-relative-pointer-unstable-v1-client-protocol.h"
+	"wayland-pointer-constraints-unstable-v1-client-protocol.h"
+	"wayland-idle-inhibit-unstable-v1-client-protocol.h"
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\null_platform.h
+	<dlfcn.h>
+	"posix_time.h"
+	"posix_thread.h"
+	"null_joystick.h"
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\egl_context.h
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\osmesa_context.h
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\init.c
+	"internal.h"
+	"mappings.h"
+	<string.h>
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\mappings.h
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\input.c
+	"internal.h"
+	<assert.h>
+	<float.h>
+	<math.h>
+	<stdlib.h>
+	<string.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\monitor.c
+	"internal.h"
+	<assert.h>
+	<math.h>
+	<float.h>
+	<string.h>
+	<stdlib.h>
+	<limits.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\vulkan.c
+	"internal.h"
+	<assert.h>
+	<string.h>
+	<stdlib.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\window.c
+	"internal.h"
+	<assert.h>
+	<string.h>
+	<stdlib.h>
+	<float.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_init.c
+	"internal.h"
+	<stdlib.h>
+	<malloc.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_joystick.c
+	"internal.h"
+	<stdio.h>
+	<math.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_monitor.c
+	"internal.h"
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<malloc.h>
+	<wchar.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_time.c
+	"internal.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_thread.c
+	"internal.h"
+	<assert.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\win32_window.c
+	"internal.h"
+	<limits.h>
+	<stdlib.h>
+	<malloc.h>
+	<string.h>
+	<windowsx.h>
+	<shellapi.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\wgl_context.c
+	"internal.h"
+	<stdlib.h>
+	<malloc.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\egl_context.c
+	"internal.h"
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\osmesa_context.c
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	"internal.h"
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\wl_init.c
+	"internal.h"
+	<assert.h>
+	<errno.h>
+	<limits.h>
+	<linux/input.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<sys/mman.h>
+	<sys/timerfd.h>
+	<unistd.h>
+	<time.h>
+	<wayland-client.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\wl_monitor.c
+	"internal.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<errno.h>
+	<math.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\wl_window.c
+	"internal.h"
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<unistd.h>
+	<string.h>
+	<fcntl.h>
+	<sys/mman.h>
+	<sys/timerfd.h>
+	<poll.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\x11_init.c
+	"internal.h"
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<stdio.h>
+	<locale.h>
+	<unistd.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\x11_monitor.c
+	"internal.h"
+	<limits.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\x11_window.c
+	"internal.h"
+	<X11/cursorfont.h>
+	<X11/Xmd.h>
+	<sys/select.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+	<errno.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\glx_context.c
+	"internal.h"
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\linux_joystick.c
+	"internal.h"
+	<sys/types.h>
+	<sys/stat.h>
+	<sys/inotify.h>
+	<fcntl.h>
+	<errno.h>
+	<dirent.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<unistd.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\posix_thread.c
+	"internal.h"
+	<assert.h>
+	<string.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\posix_time.c
+	"internal.h"
+	<unistd.h>
+	<sys/time.h>
+	<time.h>
+
+1644143218 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\xkb_unicode.c
+	"internal.h"
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\null_joystick.c
+	"internal.h"
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_init.m
+	"internal.h"
+	<sys/param.h>
+	<crt_externs.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_joystick.m
+	"internal.h"
+	<unistd.h>
+	<ctype.h>
+	<string.h>
+	<mach/mach.h>
+	<mach/mach_error.h>
+	<CoreFoundation/CoreFoundation.h>
+	<Kernel/IOKit/hidsystem/IOHIDUsageTables.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_monitor.m
+	"internal.h"
+	<stdlib.h>
+	<limits.h>
+	<math.h>
+	<IOKit/graphics/IOGraphicsLib.h>
+	<ApplicationServices/ApplicationServices.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_window.m
+	"internal.h"
+	<float.h>
+	<string.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\cocoa_time.c
+	"internal.h"
+	<mach/mach_time.h>
+
+1644143217 g:\-guten\prog\c\proj\ascede4\src\external\glfw\src\nsgl_context.m
+	"internal.h"
+	<unistd.h>
+	<math.h>
+
+1644215249 source:g:\-guten\prog\c\proj\ascede4\src\rshapes.c
+	"ascede.h"
+	"config.h"
+	"rlgl.h"
+	<math.h>
+	<float.h>
+
+1644215252 source:g:\-guten\prog\c\proj\ascede4\src\rtext.c
+	"ascede.h"
+	"config.h"
+	"utils.h"
+	"rlgl.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<stdarg.h>
+	<ctype.h>
+	"external/stb_rect_pack.h"
+	"external/stb_truetype.h"
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\stb_rect_pack.h
+	<stdlib.h>
+	<assert.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\stb_truetype.h
+	"stb_truetype.h"
+	<stdio.h>
+	"stb_truetype.h"
+	<math.h>
+	<math.h>
+	<math.h>
+	<math.h>
+	<math.h>
+	<stdlib.h>
+	<assert.h>
+	<string.h>
+	<string.h>
+
+1644215251 source:g:\-guten\prog\c\proj\ascede4\src\rtextures.c
+	"ascede.h"
+	"config.h"
+	"utils.h"
+	"rlgl.h"
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<stdio.h>
+	"external/stb_image.h"
+	"external/stb_image_write.h"
+	"external/stb_image_resize.h"
+
+1644197048 g:\-guten\prog\c\proj\ascede4\src\external\stb_image.h
+	"stb_image.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<stddef.h>
+	<stdlib.h>
+	<string.h>
+	<limits.h>
+	<math.h>
+	<stdio.h>
+	<assert.h>
+	<stdint.h>
+	<emmintrin.h>
+	<intrin.h>
+	<arm_neon.h>
+
+1644143215 g:\-guten\prog\c\proj\ascede4\src\external\stb_image_write.h
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<assert.h>
+
+1644196902 g:\-guten\prog\c\proj\ascede4\src\external\stb_image_resize.h
+	"stb_image_resize.h"
+	<stdint.h>
+	<assert.h>
+	<string.h>
+	<math.h>
+	<stdlib.h>
+
+1644215250 source:g:\-guten\prog\c\proj\ascede4\src\utils.c
+	"ascede.h"
+	"config.h"
+	"utils.h"
+	<errno.h>
+	<android/log.h>
+	<android/asset_manager.h>
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<string.h>
+
+1644143216 source:g:\-guten\prog\c\proj\ascede4\src\external\glfw\deps\getopt.c
+	"getopt.h"
+	<stddef.h>
+	<string.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\deps\getopt.h
+
+1644203896 source:g:\-guten\prog\c\proj\ascede4\src\external\glfw\deps\glad_gl.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"glad/gl.h"
+
+1644203932 g:\-guten\prog\c\proj\ascede4\src\external\glfw\deps\glad\gl.h
+	<winapifamily.h>
+	"khrplatform.h"
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\deps\glad\khrplatform.h
+	<stdint.h>
+	<inttypes.h>
+	<stdint.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede4\src\external\glfw\include\glfw\glfw3native.h
+	<ApplicationServices/ApplicationServices.h>
+	<X11/Xlib.h>
+	<X11/extensions/Xrandr.h>
+	<wayland-client.h>
+	<GL/glx.h>
+	<EGL/egl.h>
+	<GL/osmesa.h>
+
+1644215573 g:\-guten\prog\c\proj\ascede4\src\ascede.h
+	<stdarg.h>
+	<stdbool.h>
+
+1644215573 g:\-guten\prog\c\proj\ascede\src\ascede.h
+	<stdarg.h>
+	<stdbool.h>
+
+1647611016 source:g:\-guten\prog\c\proj\ascede\main.c
+	"src/raylib.h"
+	<stddef.h>
+
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\glfw\include\glfw\glfw3native.h
+	<ApplicationServices/ApplicationServices.h>
+	<X11/Xlib.h>
+	<X11/extensions/Xrandr.h>
+	<wayland-client.h>
+	<GL/glx.h>
+	<EGL/egl.h>
+	<GL/osmesa.h>
+
+1647611016 source:g:\-guten\prog\c\proj\ascede\covergen.c
+	"src/raylib.h"
+	<stddef.h>
+
