@@ -95,6 +95,17 @@
 #ifndef RLAPI
     #define RLAPI       // Functions defined as 'extern' by default (implicit specifiers)
 #endif
+
+// Function specifiers in case library is build/used as a shared library (Windows)
+// NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
+#if defined(_WIN32)
+    #if defined(BUILD_LIBTYPE_SHARED)
+        #define ASCAPI __declspec(dllexport)     // We are building the library as a Win32 shared library (.dll)
+    #elif defined(USE_LIBTYPE_SHARED)
+        #define ASCAPI __declspec(dllimport)     // We are using the library as a Win32 shared library (.dll)
+    #endif
+#endif
+
 #ifndef ASCAPI
     #define ASCAPI       // Functions defined as 'extern' by default (implicit specifiers)
 #endif
@@ -905,7 +916,7 @@ extern "C" {            // Prevents name mangling of functions
 #endif
 
 // Window-related functions
-ASCAPI void Window_Init(int width, int height, const char *title);  // Initialize window and OpenGL context
+ASCAPI void Window_Init(size_t width, size_t height, const char *title);  // Initialize window and OpenGL context
 ASCAPI bool Window_ShouldClose(void);                               // Check if KEY_ESCAPE pressed or Close icon pressed
 ASCAPI void Window_Close(void);                                     // Close window and unload OpenGL context
 ASCAPI bool Window_IsReady(void);                                   // Check if window has been initialized successfully
@@ -949,7 +960,14 @@ ASCAPI void Events_Poll(void);                                 // Register all i
 ASCAPI void Events_Wait(void);                                 // Register all input events
 ASCAPI void Events_EndLoop(void);
 
-RLAPI void WaitTime(float ms);                                    // Wait for some milliseconds (halt program execution)
+// Timing-related functions
+RLAPI int GetFPS(void);                                           // Get current FPS
+RLAPI float GetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
+ASCAPI double Time_Get(void);                                      // Get elapsed time in seconds since InitWindow()
+ASCAPI void Time_Sleep(float ms);                                  // Precise sleep
+ASCAPI void Time_SoftSleep(float ms);
+ASCAPI void Time_Wait(float targetFPS);
+ASCAPI void Time_SoftWait(float targetFPS);
 
 // Cursor-related functions
 RLAPI void ShowCursor(void);                                      // Shows cursor
@@ -966,8 +984,6 @@ ASCAPI void Buffer_Update(void);                                // Swap back buf
 //RLAPI void EndDrawing(void);                                      // End canvas drawing and swap buffers (double buffering)
 RLAPI void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
 RLAPI void EndMode2D(void);                                       // Ends 2D mode with custom camera
-RLAPI void BeginMode3D(Camera3D camera);                          // Begin 3D mode with custom camera (3D)
-RLAPI void EndMode3D(void);                                       // Ends 3D mode and returns to default 2D orthographic mode
 RLAPI void BeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
 RLAPI void EndTextureMode(void);                                  // Ends drawing to render texture
 RLAPI void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
@@ -976,12 +992,12 @@ RLAPI void BeginBlendMode(int mode);                              // Begin blend
 RLAPI void EndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
 RLAPI void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
 RLAPI void EndScissorMode(void);                                  // End scissor mode
-RLAPI void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
-RLAPI void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
+//RLAPI void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
+//RLAPI void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
 
 // VR stereo config functions for VR simulator
-RLAPI VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
-RLAPI void UnloadVrStereoConfig(VrStereoConfig config);           // Unload VR stereo config
+//RLAPI VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
+//RLAPI void UnloadVrStereoConfig(VrStereoConfig config);           // Unload VR stereo config
 
 // Shader management functions
 // NOTE: Shader functionality is not available on OpenGL 1.1
@@ -1003,12 +1019,6 @@ RLAPI Vector2 GetWorldToScreen(Vector3 position, Camera camera);  // Get the scr
 RLAPI Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
 RLAPI Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera); // Get the screen space position for a 2d camera world space position
 RLAPI Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera); // Get the world space position for a 2d camera screen space position
-
-// Timing-related functions
-RLAPI void SetTargetFPS(int fps);                                 // Set target FPS (maximum)
-RLAPI int GetFPS(void);                                           // Get current FPS
-RLAPI float GetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
-RLAPI double GetTime(void);                                       // Get elapsed time in seconds since InitWindow()
 
 // Misc. functions
 ASCAPI int RNG_Gen(int min, int max);                       // Get a random value between min and max (both included)
@@ -1114,18 +1124,6 @@ RLAPI int GetTouchY(void);                                    // Get touch posit
 RLAPI Vector2 GetTouchPosition(int index);                    // Get touch position XY for a touch point index (relative to screen size)
 RLAPI int GetTouchPointId(int index);                         // Get touch point identifier for given index
 RLAPI int GetTouchPointCount(void);                           // Get number of touch points
-
-//------------------------------------------------------------------------------------
-// Gestures and Touch Handling Functions (Module: rgestures)
-//------------------------------------------------------------------------------------
-RLAPI void SetGesturesEnabled(unsigned int flags);      // Enable a set of gestures using flags
-RLAPI bool IsGestureDetected(int gesture);              // Check if a gesture have been detected
-RLAPI int GetGestureDetected(void);                     // Get latest detected gesture
-RLAPI float GetGestureHoldDuration(void);               // Get gesture hold time in milliseconds
-RLAPI Vector2 GetGestureDragVector(void);               // Get gesture drag vector
-RLAPI float GetGestureDragAngle(void);                  // Get gesture drag angle
-RLAPI Vector2 GetGesturePinchVector(void);              // Get gesture pinch delta
-RLAPI float GetGesturePinchAngle(void);                 // Get gesture pinch angle
 
 //------------------------------------------------------------------------------------
 // Basic Shapes Drawing Functions (Module: shapes)

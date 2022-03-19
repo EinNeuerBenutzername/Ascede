@@ -143,7 +143,6 @@
 #include <stdio.h>                  // Required for: sprintf() [Used in OpenURL()]
 #include <string.h>                 // Required for: strrchr(), strcmp(), strlen()
 #include <time.h>                   // Required for: time() [Used in InitTimer()]
-#include <math.h>                   // Required for: tan() [Used in BeginMode3D()], atan2f() [Used in LoadVrStereoConfig()]
 
 #include <sys/stat.h>               // Required for: stat() [Used in GetFileModTime()]
 #include "external/mtwister.h"
@@ -636,7 +635,7 @@ static void PlayAutomationEvent(unsigned int frame);        // Play frame events
 
 #if defined(_WIN32)
 // NOTE: We declare Sleep() function symbol to avoid including windows.h (kernel32.lib linkage required)
-void __stdcall Sleep(unsigned long msTimeout);              // Required for: WaitTime()
+void __stdcall Sleep(unsigned long msTimeout);
 #endif
 
 //----------------------------------------------------------------------------------
@@ -983,9 +982,6 @@ bool Window_ShouldClose(void)
 #if defined(PLATFORM_DESKTOP)
     if (CORE.Window.ready)
     {
-        // While window minimized, stop loop execution
-        while (IsWindowState(FLAG_WINDOW_MINIMIZED) && !IsWindowState(FLAG_WINDOW_ALWAYS_RUN)) glfwWaitEvents();
-
         CORE.Window.shouldClose = glfwWindowShouldClose(CORE.Window.handle);
 
         // Reset close status for next frame
@@ -1874,7 +1870,7 @@ void Buffer_Init(void)
     // WARNING: Previously to BeginDrawing() other render textures drawing could happen,
     // consequently the measure for update vs draw is not accurate (only the total frame time is accurate)
 
-    CORE.Time.current = GetTime();      // Number of elapsed seconds since InitTimer()
+    CORE.Time.current = Time_Get();      // Number of elapsed seconds since InitTimer()
     CORE.Time.update = CORE.Time.current - CORE.Time.previous;
     CORE.Time.previous = CORE.Time.current;
 
@@ -1912,61 +1908,6 @@ void EndMode2D(void)
 
     rlLoadIdentity();               // Reset current matrix (modelview)
     rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
-}
-
-// Initializes 3D mode with custom camera (3D)
-void BeginMode3D(Camera3D camera)
-{
-    rlDrawRenderBatchActive();      // Update and draw internal render batch
-
-    rlMatrixMode(RL_PROJECTION);    // Switch to projection matrix
-    rlPushMatrix();                 // Save previous matrix, which contains the settings for the 2d ortho projection
-    rlLoadIdentity();               // Reset current matrix (projection)
-
-    float aspect = (float)CORE.Window.currentFbo.width/(float)CORE.Window.currentFbo.height;
-
-    // NOTE: zNear and zFar values are important when computing depth buffer values
-    if (camera.projection == CAMERA_PERSPECTIVE)
-    {
-        // Setup perspective projection
-        double top = RL_CULL_DISTANCE_NEAR*tan(camera.fovy*0.5*DEG2RAD);
-        double right = top*aspect;
-
-        rlFrustum(-right, right, -top, top, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-    }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
-    {
-        // Setup orthographic projection
-        double top = camera.fovy/2.0;
-        double right = top*aspect;
-
-        rlOrtho(-right, right, -top,top, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-    }
-
-    rlMatrixMode(RL_MODELVIEW);     // Switch back to modelview matrix
-    rlLoadIdentity();               // Reset current matrix (modelview)
-
-    // Setup Camera view
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
-    rlMultMatrixf(MatrixToFloat(matView));      // Multiply modelview matrix by view matrix (camera)
-
-    rlEnableDepthTest();            // Enable DEPTH_TEST for 3D
-}
-
-// Ends 3D mode and returns to default 2D orthographic mode
-void EndMode3D(void)
-{
-    rlDrawRenderBatchActive();      // Update and draw internal render batch
-
-    rlMatrixMode(RL_PROJECTION);    // Switch to projection matrix
-    rlPopMatrix();                  // Restore previous matrix (projection) from matrix stack
-
-    rlMatrixMode(RL_MODELVIEW);     // Switch back to modelview matrix
-    rlLoadIdentity();               // Reset current matrix (modelview)
-
-    rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
-
-    rlDisableDepthTest();           // Disable DEPTH_TEST for 2D
 }
 
 // Initializes render texture for drawing
@@ -2063,102 +2004,102 @@ void EndScissorMode(void)
     rlDrawRenderBatchActive();      // Update and draw internal render batch
     rlDisableScissorTest();
 }
-
-// Begin VR drawing configuration
-void BeginVrStereoMode(VrStereoConfig config)
-{
-    rlEnableStereoRender();
-
-    // Set stereo render matrices
-    rlSetMatrixProjectionStereo(config.projection[0], config.projection[1]);
-    rlSetMatrixViewOffsetStereo(config.viewOffset[0], config.viewOffset[1]);
-}
-
-// End VR drawing process (and desktop mirror)
-void EndVrStereoMode(void)
-{
-    rlDisableStereoRender();
-}
-
-// Load VR stereo config for VR simulator device parameters
-VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
-{
-    VrStereoConfig config = { 0 };
-
-    if ((rlGetVersion() == OPENGL_33) || (rlGetVersion() == OPENGL_ES_20))
-    {
-        // Compute aspect ratio
-        float aspect = ((float)device.hResolution*0.5f)/(float)device.vResolution;
-
-        // Compute lens parameters
-        float lensShift = (device.hScreenSize*0.25f - device.lensSeparationDistance*0.5f)/device.hScreenSize;
-        config.leftLensCenter[0] = 0.25f + lensShift;
-        config.leftLensCenter[1] = 0.5f;
-        config.rightLensCenter[0] = 0.75f - lensShift;
-        config.rightLensCenter[1] = 0.5f;
-        config.leftScreenCenter[0] = 0.25f;
-        config.leftScreenCenter[1] = 0.5f;
-        config.rightScreenCenter[0] = 0.75f;
-        config.rightScreenCenter[1] = 0.5f;
-
-        // Compute distortion scale parameters
-        // NOTE: To get lens max radius, lensShift must be normalized to [-1..1]
-        float lensRadius = fabsf(-1.0f - 4.0f*lensShift);
-        float lensRadiusSq = lensRadius*lensRadius;
-        float distortionScale = device.lensDistortionValues[0] +
-                                device.lensDistortionValues[1]*lensRadiusSq +
-                                device.lensDistortionValues[2]*lensRadiusSq*lensRadiusSq +
-                                device.lensDistortionValues[3]*lensRadiusSq*lensRadiusSq*lensRadiusSq;
-
-        float normScreenWidth = 0.5f;
-        float normScreenHeight = 1.0f;
-        config.scaleIn[0] = 2.0f/normScreenWidth;
-        config.scaleIn[1] = 2.0f/normScreenHeight/aspect;
-        config.scale[0] = normScreenWidth*0.5f/distortionScale;
-        config.scale[1] = normScreenHeight*0.5f*aspect/distortionScale;
-
-        // Fovy is normally computed with: 2*atan2f(device.vScreenSize, 2*device.eyeToScreenDistance)
-        // ...but with lens distortion it is increased (see Oculus SDK Documentation)
-        //float fovy = 2.0f*atan2f(device.vScreenSize*0.5f*distortionScale, device.eyeToScreenDistance);     // Really need distortionScale?
-        float fovy = 2.0f*(float)atan2f(device.vScreenSize*0.5f, device.eyeToScreenDistance);
-
-        // Compute camera projection matrices
-        float projOffset = 4.0f*lensShift;      // Scaled to projection space coordinates [-1..1]
-        Matrix proj = MatrixPerspective(fovy, aspect, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-
-        config.projection[0] = MatrixMultiply(proj, MatrixTranslate(projOffset, 0.0f, 0.0f));
-        config.projection[1] = MatrixMultiply(proj, MatrixTranslate(-projOffset, 0.0f, 0.0f));
-
-        // Compute camera transformation matrices
-        // NOTE: Camera movement might seem more natural if we model the head.
-        // Our axis of rotation is the base of our head, so we might want to add
-        // some y (base of head to eye level) and -z (center of head to eye protrusion) to the camera positions.
-        config.viewOffset[0] = MatrixTranslate(-device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
-        config.viewOffset[1] = MatrixTranslate(device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
-
-        // Compute eyes Viewports
-        /*
-        config.eyeViewportRight[0] = 0;
-        config.eyeViewportRight[1] = 0;
-        config.eyeViewportRight[2] = device.hResolution/2;
-        config.eyeViewportRight[3] = device.vResolution;
-
-        config.eyeViewportLeft[0] = device.hResolution/2;
-        config.eyeViewportLeft[1] = 0;
-        config.eyeViewportLeft[2] = device.hResolution/2;
-        config.eyeViewportLeft[3] = device.vResolution;
-        */
-    }
-    else TRACELOG(LOG_WARNING, "RLGL: VR Simulator not supported on OpenGL 1.1");
-
-    return config;
-}
-
-// Unload VR stereo config properties
-void UnloadVrStereoConfig(VrStereoConfig config)
-{
-    //...
-}
+//
+//// Begin VR drawing configuration
+//void BeginVrStereoMode(VrStereoConfig config)
+//{
+//    rlEnableStereoRender();
+//
+//    // Set stereo render matrices
+//    rlSetMatrixProjectionStereo(config.projection[0], config.projection[1]);
+//    rlSetMatrixViewOffsetStereo(config.viewOffset[0], config.viewOffset[1]);
+//}
+//
+//// End VR drawing process (and desktop mirror)
+//void EndVrStereoMode(void)
+//{
+//    rlDisableStereoRender();
+//}
+//
+//// Load VR stereo config for VR simulator device parameters
+//VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
+//{
+//    VrStereoConfig config = { 0 };
+//
+//    if ((rlGetVersion() == OPENGL_33) || (rlGetVersion() == OPENGL_ES_20))
+//    {
+//        // Compute aspect ratio
+//        float aspect = ((float)device.hResolution*0.5f)/(float)device.vResolution;
+//
+//        // Compute lens parameters
+//        float lensShift = (device.hScreenSize*0.25f - device.lensSeparationDistance*0.5f)/device.hScreenSize;
+//        config.leftLensCenter[0] = 0.25f + lensShift;
+//        config.leftLensCenter[1] = 0.5f;
+//        config.rightLensCenter[0] = 0.75f - lensShift;
+//        config.rightLensCenter[1] = 0.5f;
+//        config.leftScreenCenter[0] = 0.25f;
+//        config.leftScreenCenter[1] = 0.5f;
+//        config.rightScreenCenter[0] = 0.75f;
+//        config.rightScreenCenter[1] = 0.5f;
+//
+//        // Compute distortion scale parameters
+//        // NOTE: To get lens max radius, lensShift must be normalized to [-1..1]
+//        float lensRadius = fabsf(-1.0f - 4.0f*lensShift);
+//        float lensRadiusSq = lensRadius*lensRadius;
+//        float distortionScale = device.lensDistortionValues[0] +
+//                                device.lensDistortionValues[1]*lensRadiusSq +
+//                                device.lensDistortionValues[2]*lensRadiusSq*lensRadiusSq +
+//                                device.lensDistortionValues[3]*lensRadiusSq*lensRadiusSq*lensRadiusSq;
+//
+//        float normScreenWidth = 0.5f;
+//        float normScreenHeight = 1.0f;
+//        config.scaleIn[0] = 2.0f/normScreenWidth;
+//        config.scaleIn[1] = 2.0f/normScreenHeight/aspect;
+//        config.scale[0] = normScreenWidth*0.5f/distortionScale;
+//        config.scale[1] = normScreenHeight*0.5f*aspect/distortionScale;
+//
+//        // Fovy is normally computed with: 2*atan2f(device.vScreenSize, 2*device.eyeToScreenDistance)
+//        // ...but with lens distortion it is increased (see Oculus SDK Documentation)
+//        //float fovy = 2.0f*atan2f(device.vScreenSize*0.5f*distortionScale, device.eyeToScreenDistance);     // Really need distortionScale?
+//        float fovy = 2.0f*(float)atan2f(device.vScreenSize*0.5f, device.eyeToScreenDistance);
+//
+//        // Compute camera projection matrices
+//        float projOffset = 4.0f*lensShift;      // Scaled to projection space coordinates [-1..1]
+//        Matrix proj = MatrixPerspective(fovy, aspect, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+//
+//        config.projection[0] = MatrixMultiply(proj, MatrixTranslate(projOffset, 0.0f, 0.0f));
+//        config.projection[1] = MatrixMultiply(proj, MatrixTranslate(-projOffset, 0.0f, 0.0f));
+//
+//        // Compute camera transformation matrices
+//        // NOTE: Camera movement might seem more natural if we model the head.
+//        // Our axis of rotation is the base of our head, so we might want to add
+//        // some y (base of head to eye level) and -z (center of head to eye protrusion) to the camera positions.
+//        config.viewOffset[0] = MatrixTranslate(-device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
+//        config.viewOffset[1] = MatrixTranslate(device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
+//
+//        // Compute eyes Viewports
+//        /*
+//        config.eyeViewportRight[0] = 0;
+//        config.eyeViewportRight[1] = 0;
+//        config.eyeViewportRight[2] = device.hResolution/2;
+//        config.eyeViewportRight[3] = device.vResolution;
+//
+//        config.eyeViewportLeft[0] = device.hResolution/2;
+//        config.eyeViewportLeft[1] = 0;
+//        config.eyeViewportLeft[2] = device.hResolution/2;
+//        config.eyeViewportLeft[3] = device.vResolution;
+//        */
+//    }
+//    else TRACELOG(LOG_WARNING, "RLGL: VR Simulator not supported on OpenGL 1.1");
+//
+//    return config;
+//}
+//
+//// Unload VR stereo config properties
+//void UnloadVrStereoConfig(VrStereoConfig config)
+//{
+//    //...
+//}
 
 // Load shader from files and bind default locations
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
@@ -2440,15 +2381,6 @@ Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
     return (Vector2){ transform.x, transform.y };
 }
 
-// Set target FPS (maximum)
-void SetTargetFPS(int fps)
-{
-    if (fps < 1) CORE.Time.target = 0.0;
-    else CORE.Time.target = 1.0/(double)fps;
-
-    TRACELOG(LOG_INFO, "TIMER: Target time per frame: %02.03f milliseconds", (float)CORE.Time.target*1000);
-}
-
 // Get current FPS
 // NOTE: We calculate an average framerate
 int GetFPS(void)
@@ -2467,9 +2399,9 @@ int GetFPS(void)
 
     if (fpsFrame == 0) return 0;
 
-    if ((GetTime() - last) > FPS_STEP)
+    if ((Time_Get() - last) > FPS_STEP)
     {
-        last = (float)GetTime();
+        last = (float)Time_Get();
         index = (index + 1)%FPS_CAPTURE_FRAMES_COUNT;
         average -= history[index];
         history[index] = fpsFrame/FPS_CAPTURE_FRAMES_COUNT;
@@ -2491,7 +2423,7 @@ float GetFrameTime(void)
 // Get elapsed time measure in seconds since InitTimer()
 // NOTE: On PLATFORM_DESKTOP InitTimer() is called on InitWindow()
 // NOTE: On PLATFORM_DESKTOP, timer is initialized on glfwInit()
-double GetTime(void)
+double Time_Get(void)
 {
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     return glfwGetTime();   // Elapsed time since glfwInit()
@@ -2499,11 +2431,145 @@ double GetTime(void)
 
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
     struct timespec ts = { 0 };
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_Time_Get(CLOCK_MONOTONIC, &ts);
     unsigned long long int time = (unsigned long long int)ts.tv_sec*1000000000LLU + (unsigned long long int)ts.tv_nsec;
 
     return (double)(time - CORE.Time.base)*1e-9;  // Elapsed time since InitTimer()
 #endif
+}
+
+// Wait for some milliseconds (stop program execution)
+// NOTE: Sleep() granularity could be around 10 ms, it means, Sleep() could
+// take longer than expected... for that reason we use the busy wait loop
+// Ref: http://stackoverflow.com/questions/43057578/c-programming-win32-games-sleep-taking-longer-than-expected
+// Ref: http://www.geisswerks.com/ryan/FAQS/timing.html --> All about timming on Win32!
+void Time_Sleep(float ms)
+{
+    if(ms<0)return;
+    double busyWait = ms*0.05;     // NOTE: We are using a busy wait of 5% of the time
+    ms -= (float)busyWait;
+
+    // System halt functions
+    #if defined(_WIN32)
+        Sleep((unsigned int)ms);
+    #endif
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__EMSCRIPTEN__)
+        struct timespec req = { 0 };
+        time_t sec = (int)(ms/1000.0f);
+        ms -= (sec*1000);
+        req.tv_sec = sec;
+        req.tv_nsec = ms*1000000L;
+
+        // NOTE: Use nanosleep() on Unix platforms... usleep() it's deprecated.
+        while (nanosleep(&req, &req) == -1) continue;
+    #endif
+    #if defined(__APPLE__)
+        usleep(ms*1000.0f);
+    #endif
+
+    double previousTime = Time_Get();
+    double currentTime = 0.0;
+
+    // Partial busy wait loop (only a fraction of the total wait time)
+    while ((currentTime - previousTime) < busyWait/1000.0f) currentTime = Time_Get();
+#endif
+}
+
+void Time_SoftSleep(float ms)
+{
+    if(ms<=0)return;
+    static double extratime=0;
+    double previoustime=Time_Get();
+    double targetwaittime=ms;
+    // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
+    if(extratime>targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
+    double wait=(targetwaittime+extratime)*1000.0f;
+
+    #if defined(_WIN32)
+        Sleep((unsigned int)ms);
+    #endif
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__EMSCRIPTEN__)
+        struct timespec req = { 0 };
+        time_t sec = (int)(ms/1000.0f);
+        ms -= (sec*1000);
+        req.tv_sec = sec;
+        req.tv_nsec = ms*1000000L;
+
+        // NOTE: Use nanosleep() on Unix platforms... usleep() it's deprecated.
+        while (nanosleep(&req, &req) == -1) continue;
+    #endif
+    #if defined(__APPLE__)
+        usleep(ms*1000.0f);
+    #endif
+
+    double currenttime=Time_Get();
+    extratime=previoustime+targetwaittime+extratime-currenttime;
+}
+
+void Time_Wait(float targetFPS)
+{
+//    CORE.Time.current = Time_Get();
+//    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
+//    CORE.Time.previous = CORE.Time.current;
+//    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
+//    if (CORE.Time.frame <targetFPS){
+//        Time_Sleep((float)(targetFPS - CORE.Time.frame)*1000.0f);
+//        CORE.Time.current = Time_Get();
+//        double waitTime = CORE.Time.current - CORE.Time.previous;
+//        CORE.Time.previous = CORE.Time.current;
+//        CORE.Time.frame += waitTime;
+//    }
+    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
+
+    if(targetFPS<=0)return;
+    if(targetFPS>32767)return;
+    static double extratime=0;
+    double previoustime=Time_Get();
+    double targetwaittime=1.0f/targetFPS;
+    // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
+    if(extratime>targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
+    double wait=(targetwaittime+extratime)*1000.0f;
+    Time_Sleep(wait);
+    double currenttime=Time_Get();
+    extratime=previoustime+targetwaittime+extratime-currenttime;
+
+    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
+    CORE.Time.current = currenttime;
+    CORE.Time.previous = currenttime;
+    CORE.Time.frame += wait;
+}
+
+void Time_SoftWait(float targetFPS)
+{
+//    CORE.Time.current = Time_Get();
+//    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
+//    CORE.Time.previous = CORE.Time.current;
+//    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
+//    if (CORE.Time.frame <targetFPS){
+//        Time_Sleep((float)(targetFPS - CORE.Time.frame)*1000.0f);
+//        CORE.Time.current = Time_Get();
+//        double waitTime = CORE.Time.current - CORE.Time.previous;
+//        CORE.Time.previous = CORE.Time.current;
+//        CORE.Time.frame += waitTime;
+//    }
+    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
+
+    if(targetFPS<=0)return;
+    if(targetFPS>32767)return;
+    static double extratime=0;
+    double previoustime=Time_Get();
+    double targetwaittime=1.0f/targetFPS;
+    // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
+    if(extratime>targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
+    double wait=(targetwaittime+extratime)*1000.0f;
+    Time_SoftSleep(wait);
+    double currenttime=Time_Get();
+    extratime=previoustime+targetwaittime+extratime-currenttime;
+
+    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
+    CORE.Time.current = currenttime;
+    CORE.Time.previous = currenttime;
+    CORE.Time.frame += wait;
 }
 
 // Setup window configuration flags (view FLAGS)
@@ -4419,61 +4485,14 @@ static void InitTimer(void)
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
     struct timespec now = { 0 };
 
-    if (clock_gettime(CLOCK_MONOTONIC, &now) == 0)  // Success
+    if (clock_Time_Get(CLOCK_MONOTONIC, &now) == 0)  // Success
     {
         CORE.Time.base = (unsigned long long int)now.tv_sec*1000000000LLU + (unsigned long long int)now.tv_nsec;
     }
     else TRACELOG(LOG_WARNING, "TIMER: Hi-resolution timer not available");
 #endif
 
-    CORE.Time.previous = GetTime();     // Get time as double
-}
-
-// Wait for some milliseconds (stop program execution)
-// NOTE: Sleep() granularity could be around 10 ms, it means, Sleep() could
-// take longer than expected... for that reason we use the busy wait loop
-// Ref: http://stackoverflow.com/questions/43057578/c-programming-win32-games-sleep-taking-longer-than-expected
-// Ref: http://www.geisswerks.com/ryan/FAQS/timing.html --> All about timming on Win32!
-void WaitTime(float ms)
-{
-#if defined(SUPPORT_BUSY_WAIT_LOOP)
-    double previousTime = GetTime();
-    double currentTime = 0.0;
-
-    // Busy wait loop
-    while ((currentTime - previousTime) < ms/1000.0f) currentTime = GetTime();
-#else
-    #if defined(SUPPORT_PARTIALBUSY_WAIT_LOOP)
-        double busyWait = ms*0.05;     // NOTE: We are using a busy wait of 5% of the time
-        ms -= (float)busyWait;
-    #endif
-
-    // System halt functions
-    #if defined(_WIN32)
-        Sleep((unsigned int)ms);
-    #endif
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__EMSCRIPTEN__)
-        struct timespec req = { 0 };
-        time_t sec = (int)(ms/1000.0f);
-        ms -= (sec*1000);
-        req.tv_sec = sec;
-        req.tv_nsec = ms*1000000L;
-
-        // NOTE: Use nanosleep() on Unix platforms... usleep() it's deprecated.
-        while (nanosleep(&req, &req) == -1) continue;
-    #endif
-    #if defined(__APPLE__)
-        usleep(ms*1000.0f);
-    #endif
-
-    #if defined(SUPPORT_PARTIALBUSY_WAIT_LOOP)
-        double previousTime = GetTime();
-        double currentTime = 0.0;
-
-        // Partial busy wait loop (only a fraction of the total wait time)
-        while ((currentTime - previousTime) < busyWait/1000.0f) currentTime = GetTime();
-    #endif
-#endif
+    CORE.Time.previous = Time_Get();     // Get time as double
 }
 
 // Swap back buffer with front buffer (screen drawing)
@@ -5106,28 +5125,6 @@ void Events_EndLoop(void){
         }
 
         rlDrawRenderBatchActive();  // Update and draw internal render batch
-    }
-#endif
-
-#if !defined(SUPPORT_CUSTOM_FRAME_CONTROL)
-
-    // Frame time control system
-    CORE.Time.current = GetTime();
-    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
-    CORE.Time.previous = CORE.Time.current;
-
-    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
-
-    // Wait for some milliseconds...
-    if (CORE.Time.frame < CORE.Time.target)
-    {
-        WaitTime((float)(CORE.Time.target - CORE.Time.frame)*1000.0f);
-
-        CORE.Time.current = GetTime();
-        double waitTime = CORE.Time.current - CORE.Time.previous;
-        CORE.Time.previous = CORE.Time.current;
-
-        CORE.Time.frame += waitTime;    // Total frame time: update + draw + wait
     }
 #endif
 
@@ -6346,7 +6343,7 @@ static void *EventThread(void *arg)
 #endif
         }
 
-        WaitTime(5);    // Sleep for 5ms to avoid hogging CPU time
+        Time_Sleep(5);    // Sleep for 5ms to avoid hogging CPU time
     }
 
     close(worker->fd);
@@ -6434,7 +6431,7 @@ static void *GamepadThread(void *arg)
                     }
                 }
             }
-            else WaitTime(1);    // Sleep for 1 ms to avoid hogging CPU time
+            else Time_Sleep(1);    // Sleep for 1 ms to avoid hogging CPU time
         }
     }
 
