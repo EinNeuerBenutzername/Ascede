@@ -27,9 +27,9 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1647668966 g:\-guten\prog\c\proj\ascede\src\config.h
+1647741127 g:\-guten\prog\c\proj\ascede\src\config.h
 
-1644143214 g:\-guten\prog\c\proj\ascede\src\utils.h
+1647697203 g:\-guten\prog\c\proj\ascede\src\utils.h
 	<stdio.h>
 	<android/asset_manager.h>
 
@@ -208,7 +208,7 @@
 	<wchar.h>
 	<errno.h>
 
-1647672893 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
+1647740407 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -221,7 +221,6 @@
 	<stdio.h>
 	<string.h>
 	<time.h>
-	<math.h>
 	<sys/stat.h>
 	"external/mtwister.h"
 	"external/dirent.h"
@@ -258,7 +257,7 @@
 	<emscripten/emscripten.h>
 	<emscripten/html5.h>
 
-1647663139 g:\-guten\prog\c\proj\ascede\src\rlgl.h
+1647697203 g:\-guten\prog\c\proj\ascede\src\rlgl.h
 	<stdbool.h>
 	<OpenGL/gl.h>
 	<OpenGL/glext.h>
@@ -281,7 +280,7 @@
 	<stdlib.h>
 	<string.h>
 
-1647609386 g:\-guten\prog\c\proj\ascede\src\raymath.h
+1647697203 g:\-guten\prog\c\proj\ascede\src\raymath.h
 	<math.h>
 
 1644143215 g:\-guten\prog\c\proj\ascede\src\external\sinfl.h
@@ -301,7 +300,7 @@
 	<string.h>
 	<errno.h>
 
-1644214379 source:g:\-guten\prog\c\proj\ascede\src\rglfw.c
+1647697203 source:g:\-guten\prog\c\proj\ascede\src\rglfw.c
 	"external/glfw/src/context.c"
 	"external/glfw/src/init.c"
 	"external/glfw/src/input.c"
@@ -721,14 +720,14 @@
 	<unistd.h>
 	<math.h>
 
-1647671893 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
+1647742940 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
 	"ascede.h"
 	"config.h"
 	"rlgl.h"
 	<math.h>
 	<float.h>
 
-1647671896 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
+1647741121 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -759,7 +758,7 @@
 	<string.h>
 	<string.h>
 
-1647671899 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
+1647739074 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -806,7 +805,7 @@
 	<math.h>
 	<stdlib.h>
 
-1647671902 source:g:\-guten\prog\c\proj\ascede\src\utils.c
+1647697203 source:g:\-guten\prog\c\proj\ascede\src\utils.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -1684,7 +1683,7 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1647677221 g:\-guten\prog\c\proj\ascede\src\ascede.h
+1647742918 g:\-guten\prog\c\proj\ascede\src\ascede.h
 	<stdarg.h>
 	<stddef.h>
 	<stdbool.h>
@@ -1702,7 +1701,7 @@
 	<EGL/egl.h>
 	<GL/osmesa.h>
 
-1647682084 source:g:\-guten\prog\c\proj\ascede\covergen.c
+1647741172 source:g:\-guten\prog\c\proj\ascede\covergen.c
 	"src/ascede.h"
 	<stddef.h>
 	<stdio.h>

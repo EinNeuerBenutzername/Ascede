@@ -38,7 +38,7 @@
 //#define SUPPORT_MOUSE_CURSOR_POINT   1
 // Setting a higher resolution can improve the accuracy of time-out intervals in wait functions.
 // However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
-//#define SUPPORT_WINMM_HIGHRES_TIMER 1
+#define SUPPORT_WINMM_HIGHRES_TIMER 1
 // Use busy wait loop for timing sync, if not defined, a high-resolution timer is setup and used
 //#define SUPPORT_BUSY_WAIT_LOOP      1
 // Use a partial-busy wait loop, in this case frame sleeps for most of the time, but then runs a busy loop at the end for accuracy
@@ -160,10 +160,6 @@
 // Selected desired font fileformats to be supported for loading
 #define SUPPORT_FILEFORMAT_FNT      1
 #define SUPPORT_FILEFORMAT_TTF      1
-
-// Support text management functions
-// If not defined, still some functions are supported: TextLength(), TextFormat()
-#define SUPPORT_TEXT_MANIPULATION   1
 
 // text: Configuration values
 //------------------------------------------------------------------------------------

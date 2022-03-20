@@ -926,43 +926,44 @@ ASCAPI bool Window_IsMinimized(void);                               // Check if 
 ASCAPI bool Window_IsMaximized(void);                               // Check if window is currently maximized (only PLATFORM_DESKTOP)
 ASCAPI bool Window_IsFocused(void);                                 // Check if window is currently focused (only PLATFORM_DESKTOP)
 ASCAPI bool Window_IsResized(void);                                 // Check if window has been resized last frame
-RLAPI bool IsWindowState(unsigned int flag);                      // Check if one specific window flag is enabled
-RLAPI void SetWindowState(unsigned int flags);                    // Set window configuration state using flags
-RLAPI void ClearWindowState(unsigned int flags);                  // Clear window configuration state flags
-RLAPI void ToggleFullscreen(void);                                // Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
-RLAPI void MaximizeWindow(void);                                  // Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
-RLAPI void MinimizeWindow(void);                                  // Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
-RLAPI void RestoreWindow(void);                                   // Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
-RLAPI void SetWindowIcon(Image image);                            // Set icon for window (only PLATFORM_DESKTOP)
+ASCAPI bool Window_GetFlags(unsigned int flag);                      // Check if one specific window flag is enabled
+ASCAPI void Window_SetFlags(unsigned int flags);                    // Set window configuration state using flags
+ASCAPI void Window_PresetFlags(unsigned int flags);                    // Setup init configuration flags (view FLAGS)
+ASCAPI void Window_ResetFlags(unsigned int flags);                  // Clear window configuration state flags
+ASCAPI void Window_ToggleFullscreen(void);                                // Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
+ASCAPI void Window_Maximize(void);                                  // Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
+ASCAPI void Window_Minimize(void);                                  // Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
+ASCAPI void Window_Restore(void);                                   // Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
+ASCAPI void Window_SetIcon(Image image);                            // Set icon for window (only PLATFORM_DESKTOP)
 ASCAPI void Window_SetTitle(const char *title);                    // Set title for window (only PLATFORM_DESKTOP)
 ASCAPI void Window_SetPos(int x, int y);                           // Set window position on screen (only PLATFORM_DESKTOP)
-RLAPI void SetWindowMonitor(int monitor);                         // Set monitor for the current window (fullscreen mode)
+ASCAPI void Monitor_Set(int monitor);                         // Set monitor for the current window (fullscreen mode)
 ASCAPI void Window_SetMinSize(int width, int height);               // Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
 ASCAPI void Window_SetSize(size_t width,size_t height);            // Set window dimensions
-RLAPI void *GetWindowHandle(void);                                // Get native window handle
-RLAPI int GetScreenWidth(void);                                   // Get current screen width
-RLAPI int GetScreenHeight(void);                                  // Get current screen height
+ASCAPI void *Window_GetHandle(void);                                // Get native window handle
+ASCAPI size_t Window_GetWidth(void);                                   // Get current screen width
+ASCAPI size_t Window_GetHeight(void);                                  // Get current screen height
 ASCAPI Vector2 Window_GetPos(void);                                // Get window position XY on monitor
-RLAPI Vector2 GetWindowScaleDPI(void);                            // Get window scale DPI factor
-RLAPI void SetClipboardText(const char *text);                    // Set clipboard text content
-RLAPI const char *GetClipboardText(void);                         // Get clipboard text content
-//RLAPI int GetMonitorCount(void);                                  // Get number of connected monitors
-RLAPI int GetCurrentMonitor(void);                                // Get current connected monitor
-//RLAPI Vector2 GetMonitorPosition(int monitor);                    // Get specified monitor position
-//RLAPI int GetMonitorWidth(int monitor);                           // Get specified monitor width (max available by monitor)
-//RLAPI int GetMonitorHeight(int monitor);                          // Get specified monitor height (max available by monitor)
-//RLAPI int GetMonitorPhysicalWidth(int monitor);                   // Get specified monitor physical width in millimetres
-//RLAPI int GetMonitorPhysicalHeight(int monitor);                  // Get specified monitor physical height in millimetres
-//RLAPI int GetMonitorRefreshRate(int monitor);                     // Get specified monitor refresh rate
-//RLAPI const char *GetMonitorName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the primary monitor
+ASCAPI Vector2 Window_GetDPI(void);                            // Get window scale DPI factor
+ASCAPI void Clipboard_Set(const char *text);                    // Set clipboard text content
+ASCAPI const char *Clipboard_Get(void);                         // Get clipboard text content
+ASCAPI int Monitor_Count(void);                                  // Get number of connected monitors
+ASCAPI int Monitor_Get(void);                                // Get current connected monitor
+ASCAPI Vector2 Monitor_GetPos(int monitor);                    // Get specified monitor position
+ASCAPI int Monitor_GetWidth(int monitor);                           // Get specified monitor width (max available by monitor)
+ASCAPI int Monitor_GetHeight(int monitor);                          // Get specified monitor height (max available by monitor)
+ASCAPI int Monitor_GetPhysicalWidth(int monitor);                   // Get specified monitor physical width in millimetres
+ASCAPI int Monitor_GetPhysicalHeight(int monitor);                  // Get specified monitor physical height in millimetres
+ASCAPI int Monitor_GetRefreshRate(int monitor);                     // Get specified monitor refresh rate
+ASCAPI const char *Monitor_GetName(int monitor);                    // Get the human-readable, UTF-8 encoded name of the primary monitor
 
 ASCAPI void Events_Poll(void);                                 // Register all input events
 ASCAPI void Events_Wait(void);                                 // Register all input events
 ASCAPI void Events_EndLoop(void);
 
 // Timing-related functions
-RLAPI int GetFPS(void);                                           // Get current FPS
-RLAPI float GetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
+ASCAPI float Time_GetFPS(void);                                           // Get current FPS
+ASCAPI float Time_GetFrame(void);                                   // Get time in seconds for last frame drawn (delta time)
 ASCAPI double Time_Get(void);                                      // Get elapsed time in seconds since InitWindow()
 ASCAPI void Time_Sleep(float ms);                                  // Precise sleep
 ASCAPI void Time_SoftSleep(float ms);
@@ -970,12 +971,12 @@ ASCAPI void Time_Wait(float targetFPS);
 ASCAPI void Time_SoftWait(float targetFPS);
 
 // Cursor-related functions
-RLAPI void ShowCursor(void);                                      // Shows cursor
-RLAPI void HideCursor(void);                                      // Hides cursor
-RLAPI bool IsCursorHidden(void);                                  // Check if cursor is not visible
-RLAPI void EnableCursor(void);                                    // Enables cursor (unlock cursor)
-RLAPI void DisableCursor(void);                                   // Disables cursor (lock cursor)
-RLAPI bool IsCursorOnScreen(void);                                // Check if cursor is on the screen
+ASCAPI void Cursor_Show(void);                                      // Shows cursor
+ASCAPI void Cursor_Hide(void);                                      // Hides cursor
+ASCAPI bool Cursor_IsHidden(void);                                  // Check if cursor is not visible
+ASCAPI void Cursor_Enable(void);                                    // Enables cursor (unlock cursor)
+ASCAPI void Cursor_Disable(void);                                   // Disables cursor (lock cursor)
+ASCAPI bool Cursor_IsOnScreen(void);                                // Check if cursor is on the screen
 
 // Drawing-related functions
 ASCAPI void Buffer_Init(void);                                    // Setup canvas (framebuffer) to start drawing
@@ -992,12 +993,6 @@ RLAPI void BeginBlendMode(int mode);                              // Begin blend
 RLAPI void EndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
 RLAPI void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
 RLAPI void EndScissorMode(void);                                  // End scissor mode
-//RLAPI void BeginVrStereoMode(VrStereoConfig config);              // Begin stereo rendering (requires VR simulator)
-//RLAPI void EndVrStereoMode(void);                                 // End stereo rendering (requires VR simulator)
-
-// VR stereo config functions for VR simulator
-//RLAPI VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device);     // Load VR stereo config for VR simulator device parameters
-//RLAPI void UnloadVrStereoConfig(VrStereoConfig config);           // Unload VR stereo config
 
 // Shader management functions
 // NOTE: Shader functionality is not available on OpenGL 1.1
@@ -1026,7 +1021,6 @@ ASCAPI void RNG_Init(unsigned int seed);                      // Set the seed fo
 ASCAPI void RNG_SetState(int state);
 ASCAPI int RNG_GetState();
 
-RLAPI void SetConfigFlags(unsigned int flags);                    // Setup init configuration flags (view FLAGS)
 
 RLAPI void TraceLog(int logLevel, const char *text, ...);         // Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
 RLAPI void SetTraceLogLevel(int logLevel);                        // Set the current threshold (minimum) log level
@@ -1069,12 +1063,6 @@ RLAPI long GetFileModTime(const char *fileName);                  // Get file mo
 // Compression/Encoding functionality
 RLAPI unsigned char *CompressData(unsigned char *data, int dataLength, int *compDataLength);        // Compress data (DEFLATE algorithm)
 RLAPI unsigned char *DecompressData(unsigned char *compData, int compDataLength, int *dataLength);  // Decompress data (DEFLATE algorithm)
-RLAPI char *EncodeDataBase64(const unsigned char *data, int dataLength, int *outputLength);         // Encode data to Base64 string
-RLAPI unsigned char *DecodeDataBase64(unsigned char *data, int *outputLength);                      // Decode Base64 string data
-
-// Persistent storage management
-RLAPI bool SaveStorageValue(unsigned int position, int value);    // Save integer value to storage file (to defined position), returns true on success
-RLAPI int LoadStorageValue(unsigned int position);                // Load integer value from storage file (from defined position)
 
 RLAPI void OpenURL(const char *url);                              // Open URL with default system browser (if available)
 
@@ -1092,38 +1080,38 @@ ASCAPI int Key_Get(void);                                // Get key pressed (key
 ASCAPI int Key_GetChar(void);                               // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
 
 // Input-related functions: gamepads
-RLAPI bool IsGamepadAvailable(int gamepad);                   // Check if a gamepad is available
-RLAPI const char *GetGamepadName(int gamepad);                // Get gamepad internal name id
-RLAPI bool IsGamepadButtonPressed(int gamepad, int button);   // Check if a gamepad button has been pressed once
-RLAPI bool IsGamepadButtonDown(int gamepad, int button);      // Check if a gamepad button is being pressed
-RLAPI bool IsGamepadButtonReleased(int gamepad, int button);  // Check if a gamepad button has been released once
-RLAPI bool IsGamepadButtonUp(int gamepad, int button);        // Check if a gamepad button is NOT being pressed
-RLAPI int GetGamepadButtonPressed(void);                      // Get the last gamepad button pressed
-RLAPI int GetGamepadAxisCount(int gamepad);                   // Get gamepad axis count for a gamepad
-RLAPI float GetGamepadAxisMovement(int gamepad, int axis);    // Get axis movement value for a gamepad axis
-RLAPI int SetGamepadMappings(const char *mappings);           // Set internal gamepad mappings (SDL_GameControllerDB)
+ASCAPI bool Gamepad_IsAvailable(int gamepad);                   // Check if a gamepad is available
+ASCAPI const char *Gamepad_GetName(int gamepad);                // Get gamepad internal name id
+ASCAPI bool Gamepad_IsPressed(int gamepad, int button);   // Check if a gamepad button has been pressed once
+ASCAPI bool Gamepad_IsDown(int gamepad, int button);      // Check if a gamepad button is being pressed
+ASCAPI bool Gamepad_IsReleased(int gamepad, int button);  // Check if a gamepad button has been released once
+ASCAPI bool Gamepad_IsUp(int gamepad, int button);        // Check if a gamepad button is NOT being pressed
+ASCAPI int Gamepad_GetPressed(void);                      // Get the last gamepad button pressed
+ASCAPI int Gamepad_CountAxis(int gamepad);                   // Get gamepad axis count for a gamepad
+ASCAPI float Gamepad_GetAxisMovment(int gamepad, int axis);    // Get axis movement value for a gamepad axis
+ASCAPI int Gamepad_SetMappings(const char *mappings);           // Set internal gamepad mappings (SDL_GameControllerDB)
 
 // Input-related functions: mouse
-RLAPI bool IsMouseButtonPressed(int button);                  // Check if a mouse button has been pressed once
-RLAPI bool IsMouseButtonDown(int button);                     // Check if a mouse button is being pressed
-RLAPI bool IsMouseButtonReleased(int button);                 // Check if a mouse button has been released once
-RLAPI bool IsMouseButtonUp(int button);                       // Check if a mouse button is NOT being pressed
-RLAPI int GetMouseX(void);                                    // Get mouse position X
-RLAPI int GetMouseY(void);                                    // Get mouse position Y
-RLAPI Vector2 GetMousePosition(void);                         // Get mouse position XY
-RLAPI Vector2 GetMouseDelta(void);                            // Get mouse delta between frames
-RLAPI void SetMousePosition(int x, int y);                    // Set mouse position XY
-RLAPI void SetMouseOffset(int offsetX, int offsetY);          // Set mouse offset
-RLAPI void SetMouseScale(float scaleX, float scaleY);         // Set mouse scaling
-RLAPI float GetMouseWheelMove(void);                          // Get mouse wheel movement Y
-RLAPI void SetMouseCursor(int cursor);                        // Set mouse cursor
+ASCAPI bool Mouse_IsPressed(int button);                  // Check if a mouse button has been pressed once
+ASCAPI bool Mouse_IsDown(int button);                     // Check if a mouse button is being pressed
+ASCAPI bool Mouse_IsReleased(int button);                 // Check if a mouse button has been released once
+ASCAPI bool Mouse_IsUp(int button);                       // Check if a mouse button is NOT being pressed
+ASCAPI int Mouse_GetX(void);                                    // Get mouse position X
+ASCAPI int Mouse_GetY(void);                                    // Get mouse position Y
+ASCAPI Vector2 Mouse_GetPos(void);                         // Get mouse position XY
+ASCAPI Vector2 Mouse_GetDelta(void);                            // Get mouse delta between frames
+ASCAPI void Mouse_SetPos(int x, int y);                    // Set mouse position XY
+ASCAPI void Mouse_SetOffset(int offsetX, int offsetY);          // Set mouse offset
+ASCAPI void Mouse_SetScale(float scaleX, float scaleY);         // Set mouse scaling
+ASCAPI float Mouse_GetWheelDelta(void);                          // Get mouse wheel movement Y
+ASCAPI void Mouse_SetCursor(int cursor);                        // Set mouse cursor
 
 // Input-related functions: touch
-RLAPI int GetTouchX(void);                                    // Get touch position X for touch point 0 (relative to screen size)
-RLAPI int GetTouchY(void);                                    // Get touch position Y for touch point 0 (relative to screen size)
-RLAPI Vector2 GetTouchPosition(int index);                    // Get touch position XY for a touch point index (relative to screen size)
-RLAPI int GetTouchPointId(int index);                         // Get touch point identifier for given index
-RLAPI int GetTouchPointCount(void);                           // Get number of touch points
+ASCAPI int Touch_GetX(void);                                    // Get touch position X for touch point 0 (relative to screen size)
+ASCAPI int Touch_GetY(void);                                    // Get touch position Y for touch point 0 (relative to screen size)
+ASCAPI Vector2 Touch_GetPos(int index);                    // Get touch position XY for a touch point index (relative to screen size)
+ASCAPI int Touch_GetID(int index);                         // Get touch point identifier for given index
+ASCAPI int Touch_Count(void);                           // Get number of touch points
 
 //------------------------------------------------------------------------------------
 // Basic Shapes Drawing Functions (Module: shapes)
@@ -1143,16 +1131,6 @@ RLAPI void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color c
 RLAPI void DrawLineBezierQuad(Vector2 startPos, Vector2 endPos, Vector2 controlPos, float thick, Color color); // Draw line using quadratic bezier curves with a control point
 RLAPI void DrawLineBezierCubic(Vector2 startPos, Vector2 endPos, Vector2 startControlPos, Vector2 endControlPos, float thick, Color color); // Draw line using cubic bezier curves with 2 control points
 RLAPI void DrawLineStrip(Vector2 *points, int pointCount, Color color);                                  // Draw lines sequence
-RLAPI void DrawCircle(int centerX, int centerY, float radius, Color color);                              // Draw a color-filled circle
-RLAPI void DrawCircleSector(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color);      // Draw a piece of a circle
-RLAPI void DrawCircleSectorLines(Vector2 center, float radius, float startAngle, float endAngle, int segments, Color color); // Draw circle sector outline
-RLAPI void DrawCircleGradient(int centerX, int centerY, float radius, Color color1, Color color2);       // Draw a gradient-filled circle
-RLAPI void DrawCircleV(Vector2 center, float radius, Color color);                                       // Draw a color-filled circle (Vector version)
-RLAPI void DrawCircleLines(int centerX, int centerY, float radius, Color color);                         // Draw circle outline
-RLAPI void DrawEllipse(int centerX, int centerY, float radiusH, float radiusV, Color color);             // Draw ellipse
-RLAPI void DrawEllipseLines(int centerX, int centerY, float radiusH, float radiusV, Color color);        // Draw ellipse outline
-RLAPI void DrawRing(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color); // Draw ring
-RLAPI void DrawRingLines(Vector2 center, float innerRadius, float outerRadius, float startAngle, float endAngle, int segments, Color color);    // Draw ring outline
 RLAPI void DrawRectangle(int posX, int posY, int width, int height, Color color);                        // Draw a color-filled rectangle
 RLAPI void DrawRectangleV(Vector2 position, Vector2 size, Color color);                                  // Draw a color-filled rectangle (Vector version)
 RLAPI void DrawRectangleRec(Rectangle rec, Color color);                                                 // Draw a color-filled rectangle
@@ -1316,7 +1294,6 @@ RLAPI void UnloadFontData(GlyphInfo *chars, int glyphCount);                    
 RLAPI void UnloadFont(Font font);                                                           // Unload Font from GPU memory (VRAM)
 
 // Text drawing functions
-RLAPI void DrawFPS(int posX, int posY);                                                     // Draw current FPS
 RLAPI void DrawText(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
 RLAPI void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);    // Draw text using font and additional parameters
 RLAPI void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
@@ -1339,21 +1316,10 @@ RLAPI char *TextCodepointsToUTF8(int *codepoints, int length);        // Encode 
 
 // Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!
-RLAPI int TextCopy(char *dst, const char *src);                                             // Copy one string to another, returns bytes copied
 RLAPI bool TextIsEqual(const char *text1, const char *text2);                               // Check if two text string are equal
 RLAPI unsigned int TextLength(const char *text);                                            // Get text length, checks for '\0' ending
 RLAPI const char *TextFormat(const char *text, ...);                                        // Text formatting with variables (sprintf() style)
-RLAPI const char *TextSubtext(const char *text, int position, int length);                  // Get a piece of a text string
-RLAPI char *TextReplace(char *text, const char *replace, const char *by);                   // Replace text string (WARNING: memory must be freed!)
-RLAPI char *TextInsert(const char *text, const char *insert, int position);                 // Insert text in a position (WARNING: memory must be freed!)
-RLAPI const char *TextJoin(const char **textList, int count, const char *delimiter);        // Join text strings with delimiter
-RLAPI const char **TextSplit(const char *text, char delimiter, int *count);                 // Split text into multiple strings
-RLAPI void TextAppend(char *text, const char *append, int *position);                       // Append text at specific position and move cursor!
-RLAPI int TextFindIndex(const char *text, const char *find);                                // Find first text occurrence within a string
-RLAPI const char *TextToUpper(const char *text);                      // Get upper case version of provided string
 RLAPI const char *TextToLower(const char *text);                      // Get lower case version of provided string
-RLAPI const char *TextToPascal(const char *text);                     // Get Pascal case notation version of provided string
-RLAPI int TextToInteger(const char *text);                            // Get integer value from text (negative values not supported)
 
 //------------------------------------------------------------------------------------
 // Audio Loading and Playing Functions (Module: audio)

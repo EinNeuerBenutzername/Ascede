@@ -322,7 +322,7 @@ typedef struct {
 #endif
 
 typedef struct { int x; int y; } Point;
-typedef struct { unsigned int width; unsigned int height; } Size;
+typedef struct { size_t width; size_t height; } Size;
 
 // Core global state context data
 typedef struct CoreData {
@@ -664,7 +664,7 @@ struct android_app *GetAndroidApp(void)
 
 // Initialize window and OpenGL context
 // NOTE: data parameter could be used to pass any kind of required data to the initialization
-void Window_Init(int width, int height, const char *title)
+void Window_Init(size_t width, size_t height, const char *title)
 {
     TRACELOG(LOG_INFO, "Initializing ascede %s", ASCEDE_VERSION);
 
@@ -1060,13 +1060,13 @@ bool Window_IsResized(void)
 }
 
 // Check if one specific window flag is enabled
-bool IsWindowState(unsigned int flag)
+bool Window_GetFlags(unsigned int flag)
 {
     return ((CORE.Window.flags & flag) > 0);
 }
 
 // Toggle fullscreen mode (only PLATFORM_DESKTOP)
-void ToggleFullscreen(void)
+void Window_ToggleFullscreen(void)
 {
 #if defined(PLATFORM_DESKTOP)
     // NOTE: glfwSetWindowMonitor() doesn't work properly (bugs)
@@ -1078,7 +1078,7 @@ void ToggleFullscreen(void)
         int monitorCount = 0;
         GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
 
-        int monitorIndex = GetCurrentMonitor();
+        int monitorIndex = Monitor_Get();
 
         // Use current monitor, so we correctly get the display the window is on
         GLFWmonitor* monitor = monitorIndex < monitorCount ?  monitors[monitorIndex] : NULL;
@@ -1176,7 +1176,7 @@ void ToggleFullscreen(void)
 }
 
 // Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
-void MaximizeWindow(void)
+void Window_Maximize(void)
 {
 #if defined(PLATFORM_DESKTOP)
     if (glfwGetWindowAttrib(CORE.Window.handle, GLFW_RESIZABLE) == GLFW_TRUE)
@@ -1188,7 +1188,7 @@ void MaximizeWindow(void)
 }
 
 // Set window state: minimized (only PLATFORM_DESKTOP)
-void MinimizeWindow(void)
+void Window_Minimize(void)
 {
 #if defined(PLATFORM_DESKTOP)
     // NOTE: Following function launches callback that sets appropiate flag!
@@ -1197,7 +1197,7 @@ void MinimizeWindow(void)
 }
 
 // Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
-void RestoreWindow(void)
+void Window_Restore(void)
 {
 #if defined(PLATFORM_DESKTOP)
     if (glfwGetWindowAttrib(CORE.Window.handle, GLFW_RESIZABLE) == GLFW_TRUE)
@@ -1211,7 +1211,7 @@ void RestoreWindow(void)
 }
 
 // Set window configuration state using flags
-void SetWindowState(unsigned int flags)
+void Window_SetFlags(unsigned int flags)
 {
 #if defined(PLATFORM_DESKTOP)
     // Check previous state and requested state to apply required changes
@@ -1227,7 +1227,7 @@ void SetWindowState(unsigned int flags)
     // State change: FLAG_FULLSCREEN_MODE
     if ((CORE.Window.flags & FLAG_FULLSCREEN_MODE) != (flags & FLAG_FULLSCREEN_MODE))
     {
-        ToggleFullscreen();     // NOTE: Window state flag updated inside function
+        Window_ToggleFullscreen();     // NOTE: Window state flag updated inside function
     }
 
     // State change: FLAG_WINDOW_RESIZABLE
@@ -1255,14 +1255,14 @@ void SetWindowState(unsigned int flags)
     if (((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) != (flags & FLAG_WINDOW_MINIMIZED)) && ((flags & FLAG_WINDOW_MINIMIZED) > 0))
     {
         //GLFW_ICONIFIED
-        MinimizeWindow();       // NOTE: Window state flag updated inside function
+        Window_Minimize();       // NOTE: Window state flag updated inside function
     }
 
     // State change: FLAG_WINDOW_MAXIMIZED
     if (((CORE.Window.flags & FLAG_WINDOW_MAXIMIZED) != (flags & FLAG_WINDOW_MAXIMIZED)) && ((flags & FLAG_WINDOW_MAXIMIZED) > 0))
     {
         //GLFW_MAXIMIZED
-        MaximizeWindow();       // NOTE: Window state flag updated inside function
+        Window_Maximize();       // NOTE: Window state flag updated inside function
     }
 
     // State change: FLAG_WINDOW_UNFOCUSED
@@ -1314,7 +1314,7 @@ void SetWindowState(unsigned int flags)
 }
 
 // Clear window configuration state flags
-void ClearWindowState(unsigned int flags)
+void Window_ResetFlags(unsigned int flags)
 {
 #if defined(PLATFORM_DESKTOP)
     // Check previous state and requested state to apply required changes
@@ -1330,7 +1330,7 @@ void ClearWindowState(unsigned int flags)
     // State change: FLAG_FULLSCREEN_MODE
     if (((CORE.Window.flags & FLAG_FULLSCREEN_MODE) > 0) && ((flags & FLAG_FULLSCREEN_MODE) > 0))
     {
-        ToggleFullscreen();     // NOTE: Window state flag updated inside function
+        Window_ToggleFullscreen();     // NOTE: Window state flag updated inside function
     }
 
     // State change: FLAG_WINDOW_RESIZABLE
@@ -1357,13 +1357,13 @@ void ClearWindowState(unsigned int flags)
     // State change: FLAG_WINDOW_MINIMIZED
     if (((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) > 0) && ((flags & FLAG_WINDOW_MINIMIZED) > 0))
     {
-        RestoreWindow();       // NOTE: Window state flag updated inside function
+        Window_Restore();       // NOTE: Window state flag updated inside function
     }
 
     // State change: FLAG_WINDOW_MAXIMIZED
     if (((CORE.Window.flags & FLAG_WINDOW_MAXIMIZED) > 0) && ((flags & FLAG_WINDOW_MAXIMIZED) > 0))
     {
-        RestoreWindow();       // NOTE: Window state flag updated inside function
+        Window_Restore();       // NOTE: Window state flag updated inside function
     }
 
     // State change: FLAG_WINDOW_UNFOCUSED
@@ -1416,7 +1416,7 @@ void ClearWindowState(unsigned int flags)
 
 // Set icon for window (only PLATFORM_DESKTOP)
 // NOTE: Image must be in RGBA format, 8bit per channel
-void SetWindowIcon(Image image)
+void Window_SetIcon(Image image)
 {
 #if defined(PLATFORM_DESKTOP)
     if (image.format == PIXELFORMAT_UNCOMPRESSED_R8G8B8A8)
@@ -1453,7 +1453,7 @@ void Window_SetPos(int x, int y)
 }
 
 // Set monitor for the current window (fullscreen mode)
-void SetWindowMonitor(int monitor)
+void Monitor_Set(int monitor)
 {
 #if defined(PLATFORM_DESKTOP)
     int monitorCount = 0;
@@ -1495,13 +1495,13 @@ void Window_SetSize(size_t width,size_t height)
 }
 
 // Get current screen width
-int GetScreenWidth(void)
+size_t Window_GetWidth(void)
 {
     return CORE.Window.screen.width;
 }
 
 // Get current screen height
-int GetScreenHeight(void)
+size_t Window_GetHeight(void)
 {
     return CORE.Window.screen.height;
 }
@@ -1519,7 +1519,7 @@ int GetRenderHeight(void)
 }
 
 // Get native window handle
-void *GetWindowHandle(void)
+void *Window_GetHandle(void)
 {
 #if defined(PLATFORM_DESKTOP) && defined(_WIN32)
     // NOTE: Returned handle is: void *HWND (windows.h)
@@ -1539,21 +1539,21 @@ void *GetWindowHandle(void)
 
     return NULL;
 }
-//
-//// Get number of monitors
-//int GetMonitorCount(void)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    glfwGetMonitors(&monitorCount);
-//    return monitorCount;
-//#else
-//    return 1;
-//#endif
-//}
 
 // Get number of monitors
-int GetCurrentMonitor(void)
+int Monitor_Count(void)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    glfwGetMonitors(&monitorCount);
+    return monitorCount;
+#else
+    return 1;
+#endif
+}
+
+// Get number of monitors
+int Monitor_Get(void)
 {
 #if defined(PLATFORM_DESKTOP)
     int monitorCount;
@@ -1600,140 +1600,140 @@ int GetCurrentMonitor(void)
 #endif
 }
 
-//// Get selected monitor width
-//Vector2 GetMonitorPosition(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        int x, y;
-//        glfwGetMonitorPos(monitors[monitor], &x, &y);
-//
-//        return (Vector2){ (float)x, (float)y };
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//    return (Vector2){ 0, 0 };
-//}
-//
-//// Get selected monitor width (max available by monitor)
-//int GetMonitorWidth(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        int count = 0;
-//        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
-//
-//        // We return the maximum resolution available, the last one in the modes array
-//        if (count > 0) return modes[count - 1].width;
-//        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//    return 0;
-//}
-//
-//// Get selected monitor width (max available by monitor)
-//int GetMonitorHeight(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        int count = 0;
-//        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
-//
-//        // We return the maximum resolution available, the last one in the modes array
-//        if (count > 0) return modes[count - 1].height;
-//        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//    return 0;
-//}
-//
-//// Get selected monitor physical width in millimetres
-//int GetMonitorPhysicalWidth(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        int physicalWidth;
-//        glfwGetMonitorPhysicalSize(monitors[monitor], &physicalWidth, NULL);
-//        return physicalWidth;
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//    return 0;
-//}
-//
-//// Get primary monitor physical height in millimetres
-//int GetMonitorPhysicalHeight(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        int physicalHeight;
-//        glfwGetMonitorPhysicalSize(monitors[monitor], NULL, &physicalHeight);
-//        return physicalHeight;
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//    return 0;
-//}
-//
-//int GetMonitorRefreshRate(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        const GLFWvidmode *vidmode = glfwGetVideoMode(monitors[monitor]);
-//        return vidmode->refreshRate;
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//#if defined(PLATFORM_DRM)
-//    if ((CORE.Window.connector) && (CORE.Window.modeIndex >= 0))
-//    {
-//        return CORE.Window.connector->modes[CORE.Window.modeIndex].vrefresh;
-//    }
-//#endif
-//    return 0;
-//}
+// Get selected monitor width
+Vector2 Monitor_GetPos(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        int x, y;
+        glfwGetMonitorPos(monitors[monitor], &x, &y);
+
+        return (Vector2){ (float)x, (float)y };
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+    return (Vector2){ 0, 0 };
+}
+
+// Get selected monitor width (max available by monitor)
+int Monitor_GetWidth(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        int count = 0;
+        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
+
+        // We return the maximum resolution available, the last one in the modes array
+        if (count > 0) return modes[count - 1].width;
+        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+    return 0;
+}
+
+// Get selected monitor width (max available by monitor)
+int Monitor_GetHeight(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        int count = 0;
+        const GLFWvidmode *modes = glfwGetVideoModes(monitors[monitor], &count);
+
+        // We return the maximum resolution available, the last one in the modes array
+        if (count > 0) return modes[count - 1].height;
+        else TRACELOG(LOG_WARNING, "GLFW: Failed to find video mode for selected monitor");
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+    return 0;
+}
+
+// Get selected monitor physical width in millimetres
+int Monitor_GetPhysicalWidth(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        int physicalWidth;
+        glfwGetMonitorPhysicalSize(monitors[monitor], &physicalWidth, NULL);
+        return physicalWidth;
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+    return 0;
+}
+
+// Get primary monitor physical height in millimetres
+int Monitor_GetPhysicalHeight(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        int physicalHeight;
+        glfwGetMonitorPhysicalSize(monitors[monitor], NULL, &physicalHeight);
+        return physicalHeight;
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+    return 0;
+}
+
+int Monitor_GetRefreshRate(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        const GLFWvidmode *vidmode = glfwGetVideoMode(monitors[monitor]);
+        return vidmode->refreshRate;
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+#if defined(PLATFORM_DRM)
+    if ((CORE.Window.connector) && (CORE.Window.modeIndex >= 0))
+    {
+        return CORE.Window.connector->modes[CORE.Window.modeIndex].vrefresh;
+    }
+#endif
+    return 0;
+}
 
 // Get the human-readable, UTF-8 encoded name of the primary monitor
-//const char *GetMonitorName(int monitor)
-//{
-//#if defined(PLATFORM_DESKTOP)
-//    int monitorCount;
-//    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
-//
-//    if ((monitor >= 0) && (monitor < monitorCount))
-//    {
-//        return glfwGetMonitorName(monitors[monitor]);
-//    }
-//    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
-//#endif
-//    return "";
-//}
+const char *Monitor_GetName(int monitor)
+{
+#if defined(PLATFORM_DESKTOP)
+    int monitorCount;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+    if ((monitor >= 0) && (monitor < monitorCount))
+    {
+        return glfwGetMonitorName(monitors[monitor]);
+    }
+    else TRACELOG(LOG_WARNING, "GLFW: Failed to find selected monitor");
+#endif
+    return "";
+}
 
 // Get window position XY on monitor
 Vector2 Window_GetPos(void)
@@ -1747,7 +1747,7 @@ Vector2 Window_GetPos(void)
 }
 
 // Get window scale DPI factor
-Vector2 GetWindowScaleDPI(void)
+Vector2 Window_GetDPI(void)
 {
     Vector2 scale = { 1.0f, 1.0f };
 
@@ -1782,7 +1782,7 @@ Vector2 GetWindowScaleDPI(void)
 
 // Get clipboard text content
 // NOTE: returned string is allocated and freed by GLFW
-const char *GetClipboardText(void)
+const char *Clipboard_Get(void)
 {
 #if defined(PLATFORM_DESKTOP)
     return glfwGetClipboardString(CORE.Window.handle);
@@ -1792,7 +1792,7 @@ const char *GetClipboardText(void)
 }
 
 // Set clipboard text content
-void SetClipboardText(const char *text)
+void Clipboard_Set(const char *text)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetClipboardString(CORE.Window.handle, text);
@@ -1800,7 +1800,7 @@ void SetClipboardText(const char *text)
 }
 
 // Show mouse cursor
-void ShowCursor(void)
+void Cursor_Show(void)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetInputMode(CORE.Window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -1810,7 +1810,7 @@ void ShowCursor(void)
 }
 
 // Hides mouse cursor
-void HideCursor(void)
+void Cursor_Hide(void)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetInputMode(CORE.Window.handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -1820,13 +1820,13 @@ void HideCursor(void)
 }
 
 // Check if cursor is not visible
-bool IsCursorHidden(void)
+bool Cursor_IsHidden(void)
 {
     return CORE.Input.Mouse.cursorHidden;
 }
 
 // Enables cursor (unlock cursor)
-void EnableCursor(void)
+void Cursor_Enable(void)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetInputMode(CORE.Window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -1839,7 +1839,7 @@ void EnableCursor(void)
 }
 
 // Disables cursor (lock cursor)
-void DisableCursor(void)
+void Cursor_Disable(void)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetInputMode(CORE.Window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -1852,7 +1852,7 @@ void DisableCursor(void)
 }
 
 // Check if cursor is on the current screen.
-bool IsCursorOnScreen(void)
+bool Cursor_IsOnScreen(void)
 {
     return CORE.Input.Mouse.cursorOnScreen;
 }
@@ -1870,22 +1870,12 @@ void Buffer_Init(void)
     // WARNING: Previously to BeginDrawing() other render textures drawing could happen,
     // consequently the measure for update vs draw is not accurate (only the total frame time is accurate)
 
-    CORE.Time.current = Time_Get();      // Number of elapsed seconds since InitTimer()
-    CORE.Time.update = CORE.Time.current - CORE.Time.previous;
-    CORE.Time.previous = CORE.Time.current;
-
     rlLoadIdentity();                   // Reset current matrix (modelview)
     rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling
 
     //rlTranslatef(0.375, 0.375, 0);    // HACK to have 2D pixel-perfect drawing on OpenGL 1.1
                                         // NOTE: Not required with OpenGL 3.3+
 }
-
-//// End canvas drawing and swap buffers (double buffering)
-//void EndDrawing(void)
-//{
-//    rlDrawRenderBatchActive();      // Update and draw internal render batch
-//}
 
 // Initialize 2D mode with custom camera (2D)
 void BeginMode2D(Camera2D camera)
@@ -1988,7 +1978,7 @@ void BeginScissorMode(int x, int y, int width, int height)
 
     if ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0)
     {
-        Vector2 scale = GetWindowScaleDPI();
+        Vector2 scale = Window_GetDPI();
 
         rlScissor((int)(x*scale.x), (int)(CORE.Window.currentFbo.height - (y + height)*scale.y), (int)(width*scale.x), (int)(height*scale.y));
     }
@@ -2004,102 +1994,6 @@ void EndScissorMode(void)
     rlDrawRenderBatchActive();      // Update and draw internal render batch
     rlDisableScissorTest();
 }
-//
-//// Begin VR drawing configuration
-//void BeginVrStereoMode(VrStereoConfig config)
-//{
-//    rlEnableStereoRender();
-//
-//    // Set stereo render matrices
-//    rlSetMatrixProjectionStereo(config.projection[0], config.projection[1]);
-//    rlSetMatrixViewOffsetStereo(config.viewOffset[0], config.viewOffset[1]);
-//}
-//
-//// End VR drawing process (and desktop mirror)
-//void EndVrStereoMode(void)
-//{
-//    rlDisableStereoRender();
-//}
-//
-//// Load VR stereo config for VR simulator device parameters
-//VrStereoConfig LoadVrStereoConfig(VrDeviceInfo device)
-//{
-//    VrStereoConfig config = { 0 };
-//
-//    if ((rlGetVersion() == OPENGL_33) || (rlGetVersion() == OPENGL_ES_20))
-//    {
-//        // Compute aspect ratio
-//        float aspect = ((float)device.hResolution*0.5f)/(float)device.vResolution;
-//
-//        // Compute lens parameters
-//        float lensShift = (device.hScreenSize*0.25f - device.lensSeparationDistance*0.5f)/device.hScreenSize;
-//        config.leftLensCenter[0] = 0.25f + lensShift;
-//        config.leftLensCenter[1] = 0.5f;
-//        config.rightLensCenter[0] = 0.75f - lensShift;
-//        config.rightLensCenter[1] = 0.5f;
-//        config.leftScreenCenter[0] = 0.25f;
-//        config.leftScreenCenter[1] = 0.5f;
-//        config.rightScreenCenter[0] = 0.75f;
-//        config.rightScreenCenter[1] = 0.5f;
-//
-//        // Compute distortion scale parameters
-//        // NOTE: To get lens max radius, lensShift must be normalized to [-1..1]
-//        float lensRadius = fabsf(-1.0f - 4.0f*lensShift);
-//        float lensRadiusSq = lensRadius*lensRadius;
-//        float distortionScale = device.lensDistortionValues[0] +
-//                                device.lensDistortionValues[1]*lensRadiusSq +
-//                                device.lensDistortionValues[2]*lensRadiusSq*lensRadiusSq +
-//                                device.lensDistortionValues[3]*lensRadiusSq*lensRadiusSq*lensRadiusSq;
-//
-//        float normScreenWidth = 0.5f;
-//        float normScreenHeight = 1.0f;
-//        config.scaleIn[0] = 2.0f/normScreenWidth;
-//        config.scaleIn[1] = 2.0f/normScreenHeight/aspect;
-//        config.scale[0] = normScreenWidth*0.5f/distortionScale;
-//        config.scale[1] = normScreenHeight*0.5f*aspect/distortionScale;
-//
-//        // Fovy is normally computed with: 2*atan2f(device.vScreenSize, 2*device.eyeToScreenDistance)
-//        // ...but with lens distortion it is increased (see Oculus SDK Documentation)
-//        //float fovy = 2.0f*atan2f(device.vScreenSize*0.5f*distortionScale, device.eyeToScreenDistance);     // Really need distortionScale?
-//        float fovy = 2.0f*(float)atan2f(device.vScreenSize*0.5f, device.eyeToScreenDistance);
-//
-//        // Compute camera projection matrices
-//        float projOffset = 4.0f*lensShift;      // Scaled to projection space coordinates [-1..1]
-//        Matrix proj = MatrixPerspective(fovy, aspect, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-//
-//        config.projection[0] = MatrixMultiply(proj, MatrixTranslate(projOffset, 0.0f, 0.0f));
-//        config.projection[1] = MatrixMultiply(proj, MatrixTranslate(-projOffset, 0.0f, 0.0f));
-//
-//        // Compute camera transformation matrices
-//        // NOTE: Camera movement might seem more natural if we model the head.
-//        // Our axis of rotation is the base of our head, so we might want to add
-//        // some y (base of head to eye level) and -z (center of head to eye protrusion) to the camera positions.
-//        config.viewOffset[0] = MatrixTranslate(-device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
-//        config.viewOffset[1] = MatrixTranslate(device.interpupillaryDistance*0.5f, 0.075f, 0.045f);
-//
-//        // Compute eyes Viewports
-//        /*
-//        config.eyeViewportRight[0] = 0;
-//        config.eyeViewportRight[1] = 0;
-//        config.eyeViewportRight[2] = device.hResolution/2;
-//        config.eyeViewportRight[3] = device.vResolution;
-//
-//        config.eyeViewportLeft[0] = device.hResolution/2;
-//        config.eyeViewportLeft[1] = 0;
-//        config.eyeViewportLeft[2] = device.hResolution/2;
-//        config.eyeViewportLeft[3] = device.vResolution;
-//        */
-//    }
-//    else TRACELOG(LOG_WARNING, "RLGL: VR Simulator not supported on OpenGL 1.1");
-//
-//    return config;
-//}
-//
-//// Unload VR stereo config properties
-//void UnloadVrStereoConfig(VrStereoConfig config)
-//{
-//    //...
-//}
 
 // Load shader from files and bind default locations
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
@@ -2229,8 +2123,8 @@ Ray GetMouseRay(Vector2 mouse, Camera camera)
 
     // Calculate normalized device coordinates
     // NOTE: y value is negative
-    float x = (2.0f*mouse.x)/(float)GetScreenWidth() - 1.0f;
-    float y = 1.0f - (2.0f*mouse.y)/(float)GetScreenHeight();
+    float x = (2.0f*mouse.x)/(float)Window_GetWidth() - 1.0f;
+    float y = 1.0f - (2.0f*mouse.y)/(float)Window_GetHeight();
     float z = 1.0f;
 
     // Store values in a vector
@@ -2244,7 +2138,7 @@ Ray GetMouseRay(Vector2 mouse, Camera camera)
     if (camera.projection == CAMERA_PERSPECTIVE)
     {
         // Calculate projection matrix from perspective
-        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)GetScreenWidth()/(double)GetScreenHeight()), RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)Window_GetWidth()/(double)Window_GetHeight()), RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
     }
     else if (camera.projection == CAMERA_ORTHOGRAPHIC)
     {
@@ -2314,7 +2208,7 @@ Matrix GetCameraMatrix2D(Camera2D camera)
 // Get the screen space position from a 3d world space position
 Vector2 GetWorldToScreen(Vector3 position, Camera camera)
 {
-    Vector2 screenPosition = GetWorldToScreenEx(position, camera, GetScreenWidth(), GetScreenHeight());
+    Vector2 screenPosition = GetWorldToScreenEx(position, camera, Window_GetWidth(), Window_GetHeight());
 
     return screenPosition;
 }
@@ -2383,39 +2277,32 @@ Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
 
 // Get current FPS
 // NOTE: We calculate an average framerate
-int GetFPS(void)
+float Time_GetFPS(void)
 {
-    int fps = 0;
+    float fps = 0;
 
-#if !defined(SUPPORT_CUSTOM_FRAME_CONTROL)
-    #define FPS_CAPTURE_FRAMES_COUNT    30      // 30 captures
-    #define FPS_AVERAGE_TIME_SECONDS   0.5f     // 500 millisecondes
-    #define FPS_STEP (FPS_AVERAGE_TIME_SECONDS/FPS_CAPTURE_FRAMES_COUNT)
+    #define FPS_CAPTURE_FRAMES_COUNT    60
 
     static int index = 0;
     static float history[FPS_CAPTURE_FRAMES_COUNT] = { 0 };
     static float average = 0, last = 0;
-    float fpsFrame = GetFrameTime();
+    float fpsFrame = Time_GetFrame();
 
     if (fpsFrame == 0) return 0;
 
-    if ((Time_Get() - last) > FPS_STEP)
-    {
         last = (float)Time_Get();
         index = (index + 1)%FPS_CAPTURE_FRAMES_COUNT;
         average -= history[index];
         history[index] = fpsFrame/FPS_CAPTURE_FRAMES_COUNT;
         average += history[index];
-    }
 
-    fps = (int)roundf(1.0f/average);
-#endif
+    fps = 1.0f/average;
 
     return fps;
 }
 
 // Get time in seconds for last frame drawn (delta time)
-float GetFrameTime(void)
+float Time_GetFrame(void)
 {
     return (float)CORE.Time.frame;
 }
@@ -2472,7 +2359,6 @@ void Time_Sleep(float ms)
 
     // Partial busy wait loop (only a fraction of the total wait time)
     while ((currentTime - previousTime) < busyWait/1000.0f) currentTime = Time_Get();
-#endif
 }
 
 void Time_SoftSleep(float ms)
@@ -2508,35 +2394,17 @@ void Time_SoftSleep(float ms)
 
 void Time_Wait(float targetFPS)
 {
-//    CORE.Time.current = Time_Get();
-//    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
-//    CORE.Time.previous = CORE.Time.current;
-//    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
-//    if (CORE.Time.frame <targetFPS){
-//        Time_Sleep((float)(targetFPS - CORE.Time.frame)*1000.0f);
-//        CORE.Time.current = Time_Get();
-//        double waitTime = CORE.Time.current - CORE.Time.previous;
-//        CORE.Time.previous = CORE.Time.current;
-//        CORE.Time.frame += waitTime;
-//    }
-    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
-
     if(targetFPS<=0)return;
     if(targetFPS>32767)return;
     static double extratime=0;
-    double previoustime=Time_Get();
+    double previoustime=CORE.Time.previous;
     double targetwaittime=1.0f/targetFPS;
     // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
-    if(extratime>targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
+    if(extratime<0-targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
     double wait=(targetwaittime+extratime)*1000.0f;
     Time_Sleep(wait);
     double currenttime=Time_Get();
     extratime=previoustime+targetwaittime+extratime-currenttime;
-
-    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
-    CORE.Time.current = currenttime;
-    CORE.Time.previous = currenttime;
-    CORE.Time.frame += wait;
 }
 
 void Time_SoftWait(float targetFPS)
@@ -2552,34 +2420,28 @@ void Time_SoftWait(float targetFPS)
 //        CORE.Time.previous = CORE.Time.current;
 //        CORE.Time.frame += waitTime;
 //    }
-    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
 
     if(targetFPS<=0)return;
     if(targetFPS>32767)return;
     static double extratime=0;
-    double previoustime=Time_Get();
+    double previoustime=CORE.Time.previous;
     double targetwaittime=1.0f/targetFPS;
     // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
-    if(extratime>targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
+    if(extratime<0-targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
     double wait=(targetwaittime+extratime)*1000.0f;
     Time_SoftSleep(wait);
     double currenttime=Time_Get();
     extratime=previoustime+targetwaittime+extratime-currenttime;
-
-    CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
-    CORE.Time.current = currenttime;
-    CORE.Time.previous = currenttime;
-    CORE.Time.frame += wait;
 }
 
 // Setup window configuration flags (view FLAGS)
 // NOTE: This function is expected to be called before window creation,
 // because it setups some flags for the window creation process.
-// To configure window states after creation, just use SetWindowState()
-void SetConfigFlags(unsigned int flags)
+// To configure window states after creation, just use Window_SetFlags()
+void Window_PresetFlags(unsigned int flags)
 {
     // Selected flags are set but not evaluated at this point,
-    // flag evaluation happens at InitWindow() or SetWindowState()
+    // flag evaluation happens at Window_Init() or Window_SetFlags()
     CORE.Window.flags |= flags;
 }
 
@@ -2953,204 +2815,6 @@ unsigned char *DecompressData(unsigned char *compData, int compDataLength, int *
     return data;
 }
 
-// Encode data to Base64 string
-char *EncodeDataBase64(const unsigned char *data, int dataLength, int *outputLength)
-{
-    static const unsigned char base64encodeTable[] = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
-    };
-
-    static const int modTable[] = { 0, 2, 1 };
-
-    *outputLength = 4*((dataLength + 2)/3);
-
-    char *encodedData = RL_MALLOC(*outputLength);
-
-    if (encodedData == NULL) return NULL;
-
-    for (int i = 0, j = 0; i < dataLength;)
-    {
-        unsigned int octetA = (i < dataLength)? (unsigned char)data[i++] : 0;
-        unsigned int octetB = (i < dataLength)? (unsigned char)data[i++] : 0;
-        unsigned int octetC = (i < dataLength)? (unsigned char)data[i++] : 0;
-
-        unsigned int triple = (octetA << 0x10) + (octetB << 0x08) + octetC;
-
-        encodedData[j++] = base64encodeTable[(triple >> 3*6) & 0x3F];
-        encodedData[j++] = base64encodeTable[(triple >> 2*6) & 0x3F];
-        encodedData[j++] = base64encodeTable[(triple >> 1*6) & 0x3F];
-        encodedData[j++] = base64encodeTable[(triple >> 0*6) & 0x3F];
-    }
-
-    for (int i = 0; i < modTable[dataLength%3]; i++) encodedData[*outputLength - 1 - i] = '=';
-
-    return encodedData;
-}
-
-// Decode Base64 string data
-unsigned char *DecodeDataBase64(unsigned char *data, int *outputLength)
-{
-    static const unsigned char base64decodeTable[] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 62, 0, 0, 0, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-        11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 0, 0, 0, 0, 0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-        37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
-    };
-
-    // Get output size of Base64 input data
-    int outLength = 0;
-    for (int i = 0; data[4*i] != 0; i++)
-    {
-        if (data[4*i + 3] == '=')
-        {
-            if (data[4*i + 2] == '=') outLength += 1;
-            else outLength += 2;
-        }
-        else outLength += 3;
-    }
-
-    // Allocate memory to store decoded Base64 data
-    unsigned char *decodedData = (unsigned char *)RL_MALLOC(outLength);
-
-    for (int i = 0; i < outLength/3; i++)
-    {
-        unsigned char a = base64decodeTable[(int)data[4*i]];
-        unsigned char b = base64decodeTable[(int)data[4*i + 1]];
-        unsigned char c = base64decodeTable[(int)data[4*i + 2]];
-        unsigned char d = base64decodeTable[(int)data[4*i + 3]];
-
-        decodedData[3*i] = (a << 2) | (b >> 4);
-        decodedData[3*i + 1] = (b << 4) | (c >> 2);
-        decodedData[3*i + 2] = (c << 6) | d;
-    }
-
-    if (outLength%3 == 1)
-    {
-        int n = outLength/3;
-        unsigned char a = base64decodeTable[(int)data[4*n]];
-        unsigned char b = base64decodeTable[(int)data[4*n + 1]];
-        decodedData[outLength - 1] = (a << 2) | (b >> 4);
-    }
-    else if (outLength%3 == 2)
-    {
-        int n = outLength/3;
-        unsigned char a = base64decodeTable[(int)data[4*n]];
-        unsigned char b = base64decodeTable[(int)data[4*n + 1]];
-        unsigned char c = base64decodeTable[(int)data[4*n + 2]];
-        decodedData[outLength - 2] = (a << 2) | (b >> 4);
-        decodedData[outLength - 1] = (b << 4) | (c >> 2);
-    }
-
-    *outputLength = outLength;
-    return decodedData;
-}
-
-// Save integer value to storage file (to defined position)
-// NOTE: Storage positions is directly related to file memory layout (4 bytes each integer)
-bool SaveStorageValue(unsigned int position, int value)
-{
-    bool success = false;
-
-#if defined(SUPPORT_DATA_STORAGE)
-    char path[512] = { 0 };
-    strcpy(path, TextFormat("%s/%s", CORE.Storage.basePath, STORAGE_DATA_FILE));
-
-    unsigned int dataSize = 0;
-    unsigned int newDataSize = 0;
-    unsigned char *fileData = LoadFileData(path, &dataSize);
-    unsigned char *newFileData = NULL;
-
-    if (fileData != NULL)
-    {
-        if (dataSize <= (position*sizeof(int)))
-        {
-            // Increase data size up to position and store value
-            newDataSize = (position + 1)*sizeof(int);
-            newFileData = (unsigned char *)RL_REALLOC(fileData, newDataSize);
-
-            if (newFileData != NULL)
-            {
-                // RL_REALLOC succeded
-                int *dataPtr = (int *)newFileData;
-                dataPtr[position] = value;
-            }
-            else
-            {
-                // RL_REALLOC failed
-                TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to realloc data (%u), position in bytes (%u) bigger than actual file size", path, dataSize, position*sizeof(int));
-
-                // We store the old size of the file
-                newFileData = fileData;
-                newDataSize = dataSize;
-            }
-        }
-        else
-        {
-            // Store the old size of the file
-            newFileData = fileData;
-            newDataSize = dataSize;
-
-            // Replace value on selected position
-            int *dataPtr = (int *)newFileData;
-            dataPtr[position] = value;
-        }
-
-        success = SaveFileData(path, newFileData, newDataSize);
-        RL_FREE(newFileData);
-
-        TRACELOG(LOG_INFO, "FILEIO: [%s] Saved storage value: %i", path, value);
-    }
-    else
-    {
-        TRACELOG(LOG_INFO, "FILEIO: [%s] File created successfully", path);
-
-        dataSize = (position + 1)*sizeof(int);
-        fileData = (unsigned char *)RL_MALLOC(dataSize);
-        int *dataPtr = (int *)fileData;
-        dataPtr[position] = value;
-
-        success = SaveFileData(path, fileData, dataSize);
-        UnloadFileData(fileData);
-
-        TRACELOG(LOG_INFO, "FILEIO: [%s] Saved storage value: %i", path, value);
-    }
-#endif
-
-    return success;
-}
-
-// Load integer value from storage file (from defined position)
-// NOTE: If requested position could not be found, value 0 is returned
-int LoadStorageValue(unsigned int position)
-{
-    int value = 0;
-
-#if defined(SUPPORT_DATA_STORAGE)
-    char path[512] = { 0 };
-    strcpy(path, TextFormat("%s/%s", CORE.Storage.basePath, STORAGE_DATA_FILE));
-
-    unsigned int dataSize = 0;
-    unsigned char *fileData = LoadFileData(path, &dataSize);
-
-    if (fileData != NULL)
-    {
-        if (dataSize < (position*4)) TRACELOG(LOG_WARNING, "FILEIO: [%s] Failed to find storage position: %i", path, position);
-        else
-        {
-            int *dataPtr = (int *)fileData;
-            value = dataPtr[position];
-        }
-
-        UnloadFileData(fileData);
-
-        TRACELOG(LOG_INFO, "FILEIO: [%s] Loaded storage value: %i", path, value);
-    }
-#endif
-    return value;
-}
-
 // Open URL with default system browser (if available)
 // NOTE: This function is only safe to use if you control the URL given.
 // A user could craft a malicious string performing another action.
@@ -3279,7 +2943,7 @@ void Key_SetExitHotkey(int key)
 // NOTE: Gamepad support not implemented in emscripten GLFW3 (PLATFORM_WEB)
 
 // Check if a gamepad is available
-bool IsGamepadAvailable(int gamepad)
+bool Gamepad_IsAvailable(int gamepad)
 {
     bool result = false;
 
@@ -3289,7 +2953,7 @@ bool IsGamepadAvailable(int gamepad)
 }
 
 // Get gamepad internal name id
-const char *GetGamepadName(int gamepad)
+const char *Gamepad_GetName(int gamepad)
 {
 #if defined(PLATFORM_DESKTOP)
     if (CORE.Input.Gamepad.ready[gamepad]) return glfwGetJoystickName(gamepad);
@@ -3306,7 +2970,7 @@ const char *GetGamepadName(int gamepad)
 }
 
 // Get gamepad axis count
-int GetGamepadAxisCount(int gamepad)
+int Gamepad_CountAxis(int gamepad)
 {
 #if defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
     int axisCount = 0;
@@ -3318,7 +2982,7 @@ int GetGamepadAxisCount(int gamepad)
 }
 
 // Get axis movement vector for a gamepad
-float GetGamepadAxisMovement(int gamepad, int axis)
+float Gamepad_GetAxisMovment(int gamepad, int axis)
 {
     float value = 0;
 
@@ -3329,7 +2993,7 @@ float GetGamepadAxisMovement(int gamepad, int axis)
 }
 
 // Check if a gamepad button has been pressed once
-bool IsGamepadButtonPressed(int gamepad, int button)
+bool Gamepad_IsPressed(int gamepad, int button)
 {
     bool pressed = false;
 
@@ -3340,7 +3004,7 @@ bool IsGamepadButtonPressed(int gamepad, int button)
 }
 
 // Check if a gamepad button is being pressed
-bool IsGamepadButtonDown(int gamepad, int button)
+bool Gamepad_IsDown(int gamepad, int button)
 {
     bool result = false;
 
@@ -3351,7 +3015,7 @@ bool IsGamepadButtonDown(int gamepad, int button)
 }
 
 // Check if a gamepad button has NOT been pressed once
-bool IsGamepadButtonReleased(int gamepad, int button)
+bool Gamepad_IsReleased(int gamepad, int button)
 {
     bool released = false;
 
@@ -3362,7 +3026,7 @@ bool IsGamepadButtonReleased(int gamepad, int button)
 }
 
 // Check if a gamepad button is NOT being pressed
-bool IsGamepadButtonUp(int gamepad, int button)
+bool Gamepad_IsUp(int gamepad, int button)
 {
     bool result = false;
 
@@ -3373,13 +3037,13 @@ bool IsGamepadButtonUp(int gamepad, int button)
 }
 
 // Get the last gamepad button pressed
-int GetGamepadButtonPressed(void)
+int Gamepad_GetPressed(void)
 {
     return CORE.Input.Gamepad.lastButtonPressed;
 }
 
 // Set internal gamepad mappings
-int SetGamepadMappings(const char *mappings)
+int Gamepad_SetMappings(const char *mappings)
 {
     int result = 0;
 
@@ -3391,7 +3055,7 @@ int SetGamepadMappings(const char *mappings)
 }
 
 // Check if a mouse button has been pressed once
-bool IsMouseButtonPressed(int button)
+bool Mouse_IsPressed(int button)
 {
     bool pressed = false;
 
@@ -3404,7 +3068,7 @@ bool IsMouseButtonPressed(int button)
 }
 
 // Check if a mouse button is being pressed
-bool IsMouseButtonDown(int button)
+bool Mouse_IsDown(int button)
 {
     bool down = false;
 
@@ -3417,7 +3081,7 @@ bool IsMouseButtonDown(int button)
 }
 
 // Check if a mouse button has been released once
-bool IsMouseButtonReleased(int button)
+bool Mouse_IsReleased(int button)
 {
     bool released = false;
 
@@ -3430,13 +3094,13 @@ bool IsMouseButtonReleased(int button)
 }
 
 // Check if a mouse button is NOT being pressed
-bool IsMouseButtonUp(int button)
+bool Mouse_IsUp(int button)
 {
-    return !IsMouseButtonDown(button);
+    return !Mouse_IsDown(button);
 }
 
 // Get mouse position X
-int GetMouseX(void)
+int Mouse_GetX(void)
 {
 #if defined(PLATFORM_ANDROID)
     return (int)CORE.Input.Touch.position[0].x;
@@ -3446,7 +3110,7 @@ int GetMouseX(void)
 }
 
 // Get mouse position Y
-int GetMouseY(void)
+int Mouse_GetY(void)
 {
 #if defined(PLATFORM_ANDROID)
     return (int)CORE.Input.Touch.position[0].y;
@@ -3456,7 +3120,7 @@ int GetMouseY(void)
 }
 
 // Get mouse position XY
-Vector2 GetMousePosition(void)
+Vector2 Mouse_GetPos(void)
 {
     Vector2 position = { 0 };
 
@@ -3471,7 +3135,7 @@ Vector2 GetMousePosition(void)
 }
 
 // Get mouse delta between frames
-Vector2 GetMouseDelta(void)
+Vector2 Mouse_GetDelta(void)
 {
     Vector2 delta = {0};
 
@@ -3482,7 +3146,7 @@ Vector2 GetMouseDelta(void)
 }
 
 // Set mouse position XY
-void SetMousePosition(int x, int y)
+void Mouse_SetPos(int x, int y)
 {
     CORE.Input.Mouse.currentPosition = (Vector2){ (float)x, (float)y };
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
@@ -3493,20 +3157,20 @@ void SetMousePosition(int x, int y)
 
 // Set mouse offset
 // NOTE: Useful when rendering to different size targets
-void SetMouseOffset(int offsetX, int offsetY)
+void Mouse_SetOffset(int offsetX, int offsetY)
 {
     CORE.Input.Mouse.offset = (Vector2){ (float)offsetX, (float)offsetY };
 }
 
 // Set mouse scaling
 // NOTE: Useful when rendering to different size targets
-void SetMouseScale(float scaleX, float scaleY)
+void Mouse_SetScale (float scaleX, float scaleY)
 {
     CORE.Input.Mouse.scale = (Vector2){ scaleX, scaleY };
 }
 
 // Get mouse wheel movement Y
-float GetMouseWheelMove(void)
+float Mouse_GetWheelDelta(void)
 {
 #if defined(PLATFORM_ANDROID)
     return 0.0f;
@@ -3520,7 +3184,7 @@ float GetMouseWheelMove(void)
 
 // Set mouse cursor
 // NOTE: This is a no-op on platforms other than PLATFORM_DESKTOP
-void SetMouseCursor(int cursor)
+void Mouse_SetCursor(int cursor)
 {
 #if defined(PLATFORM_DESKTOP)
     CORE.Input.Mouse.cursor = cursor;
@@ -3534,28 +3198,28 @@ void SetMouseCursor(int cursor)
 }
 
 // Get touch position X for touch point 0 (relative to screen size)
-int GetTouchX(void)
+int Touch_GetX(void)
 {
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_WEB)
     return (int)CORE.Input.Touch.position[0].x;
 #else   // PLATFORM_DESKTOP, PLATFORM_RPI, PLATFORM_DRM
-    return GetMouseX();
+    return Mouse_GetX();
 #endif
 }
 
 // Get touch position Y for touch point 0 (relative to screen size)
-int GetTouchY(void)
+int Touch_GetY(void)
 {
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_WEB)
     return (int)CORE.Input.Touch.position[0].y;
 #else   // PLATFORM_DESKTOP, PLATFORM_RPI, PLATFORM_DRM
-    return GetMouseY();
+    return Mouse_GetY();
 #endif
 }
 
 // Get touch position XY for a touch point index (relative to screen size)
 // TODO: Touch position should be scaled depending on display size and render size
-Vector2 GetTouchPosition(int index)
+Vector2 Touch_GetPos(int index)
 {
     Vector2 position = { -1.0f, -1.0f };
 
@@ -3563,7 +3227,7 @@ Vector2 GetTouchPosition(int index)
     // TODO: GLFW does not support multi-touch input just yet
     // https://www.codeproject.com/Articles/668404/Programming-for-Multi-Touch
     // https://docs.microsoft.com/en-us/windows/win32/wintouch/getting-started-with-multi-touch-messages
-    if (index == 0) position = GetMousePosition();
+    if (index == 0) position = Mouse_GetPos();
 #endif
 #if defined(PLATFORM_ANDROID)
     if (index < MAX_TOUCH_POINTS) position = CORE.Input.Touch.position[index];
@@ -3589,7 +3253,7 @@ Vector2 GetTouchPosition(int index)
 }
 
 // Get touch point identifier for given index
-int GetTouchPointId(int index)
+int Touch_GetID(int index)
 {
     int id = -1;
 
@@ -3599,7 +3263,7 @@ int GetTouchPointId(int index)
 }
 
 // Get number of touch points
-int GetTouchPointCount(void)
+int Touch_Count(void)
 {
     return CORE.Input.Touch.pointCount;
 }
@@ -3908,7 +3572,7 @@ static bool InitGraphicsDevice(int width, int height)
         CORE.Window.screenScale = MatrixScale((float)fbWidth/CORE.Window.screen.width, (float)fbHeight/CORE.Window.screen.height, 1.0f);
 
         // Mouse input scaling for the new screen size
-        SetMouseScale((float)CORE.Window.screen.width/fbWidth, (float)CORE.Window.screen.height/fbHeight);
+        Mouse_SetScale((float)CORE.Window.screen.width/fbWidth, (float)CORE.Window.screen.height/fbHeight);
     #endif
     }
 #endif
@@ -4360,7 +4024,7 @@ static bool InitGraphicsDevice(int width, int height)
     CORE.Window.ready = true;
 #endif
 
-    if ((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) > 0) MinimizeWindow();
+    if ((CORE.Window.flags & FLAG_WINDOW_MINIMIZED) > 0) Window_Minimize();
 
     return true;
 }
@@ -5108,7 +4772,6 @@ void Events_EndLoop(void){
 
         if (((gifFrameCounter/15)%2) == 1)
         {
-            DrawCircle(30, CORE.Window.screen.height - 20, 10, MAROON);
             DrawText("EVENTS RECORDING", 50, CORE.Window.screen.height - 25, 10, RED);
         }
 
@@ -5120,7 +4783,6 @@ void Events_EndLoop(void){
 
         if (((gifFrameCounter/15)%2) == 1)
         {
-            DrawCircle(30, CORE.Window.screen.height - 20, 10, LIME);
             DrawText("EVENTS PLAYING", 50, CORE.Window.screen.height - 25, 10, GREEN);
         }
 
@@ -5139,6 +4801,9 @@ void Events_EndLoop(void){
     }
 #endif
 
+    CORE.Time.current=Time_Get();
+    CORE.Time.frame=CORE.Time.current-CORE.Time.previous;
+    CORE.Time.previous=CORE.Time.current;
     CORE.Time.frameCounter++;
 }
 
@@ -5202,7 +4867,7 @@ static void WindowSizeCallback(GLFWwindow *window, int width, int height)
 #else
     if ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0)
     {
-        Vector2 windowScaleDPI = GetWindowScaleDPI();
+        Vector2 windowScaleDPI = Window_GetDPI();
 
         CORE.Window.screen.width = (unsigned int)(width/windowScaleDPI.x);
         CORE.Window.screen.height = (unsigned int)(height/windowScaleDPI.y);
@@ -5323,8 +4988,8 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
     gestureEvent.position[0] = GetMousePosition();
 
     // Normalize gestureEvent.position[0] for CORE.Window.screen.width and CORE.Window.screen.height
-    gestureEvent.position[0].x /= (float)GetScreenWidth();
-    gestureEvent.position[0].y /= (float)GetScreenHeight();
+    gestureEvent.position[0].x /= (float)Window_GetWidth();
+    gestureEvent.position[0].y /= (float)Window_GetHeight();
 
     // Gesture data is sent to gestures system for processing
     ProcessGestureEvent(gestureEvent);
@@ -5354,8 +5019,8 @@ static void MouseCursorPosCallback(GLFWwindow *window, double x, double y)
     gestureEvent.position[0] = CORE.Input.Touch.position[0];
 
     // Normalize gestureEvent.position[0] for CORE.Window.screen.width and CORE.Window.screen.height
-    gestureEvent.position[0].x /= (float)GetScreenWidth();
-    gestureEvent.position[0].y /= (float)GetScreenHeight();
+    gestureEvent.position[0].x /= (float)Window_GetWidth();
+    gestureEvent.position[0].y /= (float)Window_GetHeight();
 
     // Gesture data is sent to gestures system for processing
     ProcessGestureEvent(gestureEvent);
@@ -5590,8 +5255,8 @@ static int32_t AndroidInputCallback(struct android_app *app, AInputEvent *event)
         CORE.Input.Touch.position[i] = (Vector2){ AMotionEvent_getX(event, i), AMotionEvent_getY(event, i) };
 
         // Normalize CORE.Input.Touch.position[x] for screenWidth and screenHeight
-        CORE.Input.Touch.position[i].x /= (float)GetScreenWidth();
-        CORE.Input.Touch.position[i].y /= (float)GetScreenHeight();
+        CORE.Input.Touch.position[i].x /= (float)Window_GetWidth();
+        CORE.Input.Touch.position[i].y /= (float)Window_GetHeight();
     }
 
     int32_t action = AMotionEvent_getAction(event);
@@ -5655,8 +5320,8 @@ static EM_BOOL EmscriptenTouchCallback(int eventType, const EmscriptenTouchEvent
         CORE.Input.Touch.position[i] = (Vector2){ touchEvent->touches[i].targetX, touchEvent->touches[i].targetY };
 
         // Normalize gestureEvent.position[x] for CORE.Window.screen.width and CORE.Window.screen.height
-        CORE.Input.Touch.position[i].x *= ((float)GetScreenWidth()/(float)canvasWidth);
-        CORE.Input.Touch.position[i].y *= ((float)GetScreenHeight()/(float)canvasHeight);
+        CORE.Input.Touch.position[i].x *= ((float)Window_GetWidth()/(float)canvasWidth);
+        CORE.Input.Touch.position[i].y *= ((float)Window_GetHeight()/(float)canvasHeight);
 
         if (eventType == EMSCRIPTEN_EVENT_TOUCHSTART) CORE.Input.Touch.currentTouchState[i] = 1;
         else if (eventType == EMSCRIPTEN_EVENT_TOUCHEND) CORE.Input.Touch.currentTouchState[i] = 0;
@@ -6876,8 +6541,8 @@ static void PlayAutomationEvent(unsigned int frame)
 
                 // Window events
                 case WINDOW_CLOSE: CORE.Window.shouldClose = true; break;
-                case WINDOW_MAXIMIZE: MaximizeWindow(); break;
-                case WINDOW_MINIMIZE: MinimizeWindow(); break;
+                case WINDOW_MAXIMIZE: Window_Maximize(); break;
+                case WINDOW_MINIMIZE: Window_Minimize(); break;
                 case WINDOW_RESIZE: Window_SetSize(events[i].params[0], events[i].params[1]); break;
 
                 // Custom events
