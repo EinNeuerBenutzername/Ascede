@@ -72,7 +72,7 @@
 #include <stdlib.h>             // Required for: malloc(), free()
 #include <string.h>             // Required for: strlen() [Used in ImageTextEx()]
 #include <math.h>               // Required for: fabsf()
-#include <stdio.h>              // Required for: sprintf() [Used in ExportImageAsCode()]
+#include <stdio.h>              // Required for: sprintf() [Used in Image_ExportCode()]
 
 // Support only desired texture formats on stb_image
 #if !defined(SUPPORT_FILEFORMAT_BMP)
@@ -185,14 +185,14 @@ static Image LoadPVR(const unsigned char *fileData, unsigned int fileSize);   //
 static Image LoadASTC(const unsigned char *fileData, unsigned int fileSize);  // Load ASTC file data
 #endif
 
-static Vector4 *LoadImageDataNormalized(Image image);       // Load pixel data from image as Vector4 array (float normalized)
+static Vector4 *Image_LoadDataNormalized(Image image);       // Load pixel data from image as Vector4 array (float normalized)
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition
 //----------------------------------------------------------------------------------
 
 // Load image from file into CPU memory (RAM)
-Image LoadImage(const char *fileName)
+Image Image_Load(const char *fileName)
 {
     Image image = { 0 };
 
@@ -212,7 +212,7 @@ Image LoadImage(const char *fileName)
     unsigned char *fileData = LoadFileData(fileName, &fileSize);
 
     // Loading image from memory data
-    if (fileData != NULL) image = LoadImageFromMemory(GetFileExtension(fileName), fileData, fileSize);
+    if (fileData != NULL) image = Image_LoadFromMemory(GetFileExtension(fileName), fileData, fileSize);
 
     RL_FREE(fileData);
 
@@ -220,7 +220,7 @@ Image LoadImage(const char *fileName)
 }
 
 // Load an image from RAW file data
-Image LoadImageRaw(const char *fileName, int width, int height, int format, int headerSize)
+Image Image_LoadRaw(const char *fileName, int width, int height, int format, int headerSize)
 {
     Image image = { 0 };
 
@@ -252,7 +252,7 @@ Image LoadImageRaw(const char *fileName, int width, int height, int format, int 
 //  - Number of frames is returned through 'frames' parameter
 //  - All frames are returned in RGBA format
 //  - Frames delay data is discarded
-Image LoadImageAnim(const char *fileName, int *frames)
+Image Image_LoadAnim(const char *fileName, int *frames)
 {
     Image image = { 0 };
     int frameCount = 1;
@@ -279,7 +279,7 @@ Image LoadImageAnim(const char *fileName, int *frames)
 #else
     if (false) { }
 #endif
-    else image = LoadImage(fileName);
+    else image = Image_Load(fileName);
 
     // TODO: Support APNG animated images
 
@@ -288,7 +288,7 @@ Image LoadImageAnim(const char *fileName, int *frames)
 }
 
 // Load image from memory buffer, fileType refers to extension: i.e. ".png"
-Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize)
+Image Image_LoadFromMemory(const char *fileType, const unsigned char *fileData, int dataSize)
 {
     Image image = { 0 };
 
@@ -358,7 +358,7 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
             else
             {
                 TRACELOG(LOG_WARNING, "IMAGE: HDR file format not supported");
-                UnloadImage(image);
+                Image_Free(image);
             }
         }
 #endif
@@ -389,7 +389,7 @@ Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, i
 
 // Load image from GPU texture data
 // NOTE: Compressed texture formats not supported
-Image LoadImageFromTexture(Texture2D texture)
+Image Image_LoadFromTexture(Texture2D texture)
 {
     Image image = { 0 };
 
@@ -420,7 +420,7 @@ Image LoadImageFromTexture(Texture2D texture)
 }
 
 // Load image from screen buffer and (screenshot)
-Image LoadImageFromScreen(void)
+Image Image_Screenshot(void)
 {
     Image image = { 0 };
 
@@ -434,14 +434,14 @@ Image LoadImageFromScreen(void)
 }
 
 // Unload image from CPU memory (RAM)
-void UnloadImage(Image image)
+void Image_Free(Image image)
 {
     RL_FREE(image.data);
 }
 
 // Export image data to file
 // NOTE: File format depends on fileName extension
-bool ExportImage(Image image, const char *fileName)
+bool Image_Export(Image image, const char *fileName)
 {
     int success = 0;
 
@@ -501,7 +501,7 @@ bool ExportImage(Image image, const char *fileName)
 }
 
 // Export image as code file (.h) defining an array of bytes
-bool ExportImageAsCode(Image image, const char *fileName)
+bool Image_ExportCode(Image image, const char *fileName)
 {
     bool success = false;
 
@@ -561,7 +561,7 @@ bool ExportImageAsCode(Image image, const char *fileName)
 // Image generation functions
 //------------------------------------------------------------------------------------
 // Generate image: plain color
-Image GenImageColor(int width, int height, Color color)
+Image Image_Gen(int width, int height, Color color)
 {
     Color *pixels = (Color *)RL_CALLOC(width*height, sizeof(Color));
 
@@ -577,214 +577,6 @@ Image GenImageColor(int width, int height, Color color)
 
     return image;
 }
-
-#if defined(SUPPORT_IMAGE_GENERATION)
-// Generate image: vertical gradient
-Image GenImageGradientV(int width, int height, Color top, Color bottom)
-{
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-
-    for (int j = 0; j < height; j++)
-    {
-        float factor = (float)j/(float)height;
-        for (int i = 0; i < width; i++)
-        {
-            pixels[j*width + i].r = (int)((float)bottom.r*factor + (float)top.r*(1.f - factor));
-            pixels[j*width + i].g = (int)((float)bottom.g*factor + (float)top.g*(1.f - factor));
-            pixels[j*width + i].b = (int)((float)bottom.b*factor + (float)top.b*(1.f - factor));
-            pixels[j*width + i].a = (int)((float)bottom.a*factor + (float)top.a*(1.f - factor));
-        }
-    }
-
-    Image image = {
-        .data = pixels,
-        .width = width,
-        .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
-    };
-
-    return image;
-}
-
-// Generate image: horizontal gradient
-Image GenImageGradientH(int width, int height, Color left, Color right)
-{
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-
-    for (int i = 0; i < width; i++)
-    {
-        float factor = (float)i/(float)width;
-        for (int j = 0; j < height; j++)
-        {
-            pixels[j*width + i].r = (int)((float)right.r*factor + (float)left.r*(1.f - factor));
-            pixels[j*width + i].g = (int)((float)right.g*factor + (float)left.g*(1.f - factor));
-            pixels[j*width + i].b = (int)((float)right.b*factor + (float)left.b*(1.f - factor));
-            pixels[j*width + i].a = (int)((float)right.a*factor + (float)left.a*(1.f - factor));
-        }
-    }
-
-    Image image = {
-        .data = pixels,
-        .width = width,
-        .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
-    };
-
-    return image;
-}
-
-// Generate image: radial gradient
-Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer)
-{
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-    float radius = (width < height)? (float)width/2.0f : (float)height/2.0f;
-
-    float centerX = (float)width/2.0f;
-    float centerY = (float)height/2.0f;
-
-    for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            float dist = hypotf((float)x - centerX, (float)y - centerY);
-            float factor = (dist - radius*density)/(radius*(1.0f - density));
-
-            factor = (float)fmax(factor, 0.0f);
-            factor = (float)fmin(factor, 1.f); // dist can be bigger than radius so we have to check
-
-            pixels[y*width + x].r = (int)((float)outer.r*factor + (float)inner.r*(1.0f - factor));
-            pixels[y*width + x].g = (int)((float)outer.g*factor + (float)inner.g*(1.0f - factor));
-            pixels[y*width + x].b = (int)((float)outer.b*factor + (float)inner.b*(1.0f - factor));
-            pixels[y*width + x].a = (int)((float)outer.a*factor + (float)inner.a*(1.0f - factor));
-        }
-    }
-
-    Image image = {
-        .data = pixels,
-        .width = width,
-        .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
-    };
-
-    return image;
-}
-
-// Generate image: checked
-Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2)
-{
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-
-    for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            if ((x/checksX + y/checksY)%2 == 0) pixels[y*width + x] = col1;
-            else pixels[y*width + x] = col2;
-        }
-    }
-
-    Image image = {
-        .data = pixels,
-        .width = width,
-        .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
-    };
-
-    return image;
-}
-
-// Generate image: white noise
-Image GenImageWhiteNoise(int width, int height, float factor)
-{
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-
-    for (int i = 0; i < width*height; i++)
-    {
-        if (GetRandomValue(0, 99) < (int)(factor*100.0f)) pixels[i] = WHITE;
-        else pixels[i] = BLACK;
-    }
-
-    Image image = {
-        .data = pixels,
-        .width = width,
-        .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
-    };
-
-    return image;
-}
-
-// Generate image: cellular algorithm. Bigger tileSize means bigger cells
-Image GenImageCellular(int width, int height, int tileSize)
-{
-    Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-
-    int seedsPerRow = width/tileSize;
-    int seedsPerCol = height/tileSize;
-    int seedCount = seedsPerRow*seedsPerCol;
-
-    Vector2 *seeds = (Vector2 *)RL_MALLOC(seedCount*sizeof(Vector2));
-
-    for (int i = 0; i < seedCount; i++)
-    {
-        int y = (i/seedsPerRow)*tileSize + GetRandomValue(0, tileSize - 1);
-        int x = (i%seedsPerRow)*tileSize + GetRandomValue(0, tileSize - 1);
-        seeds[i] = (Vector2){ (float)x, (float)y};
-    }
-
-    for (int y = 0; y < height; y++)
-    {
-        int tileY = y/tileSize;
-
-        for (int x = 0; x < width; x++)
-        {
-            int tileX = x/tileSize;
-
-            float minDistance = (float)strtod("Inf", NULL);
-
-            // Check all adjacent tiles
-            for (int i = -1; i < 2; i++)
-            {
-                if ((tileX + i < 0) || (tileX + i >= seedsPerRow)) continue;
-
-                for (int j = -1; j < 2; j++)
-                {
-                    if ((tileY + j < 0) || (tileY + j >= seedsPerCol)) continue;
-
-                    Vector2 neighborSeed = seeds[(tileY + j)*seedsPerRow + tileX + i];
-
-                    float dist = (float)hypot(x - (int)neighborSeed.x, y - (int)neighborSeed.y);
-                    minDistance = (float)fmin(minDistance, dist);
-                }
-            }
-
-            // I made this up but it seems to give good results at all tile sizes
-            int intensity = (int)(minDistance*256.0f/tileSize);
-            if (intensity > 255) intensity = 255;
-
-            pixels[y*width + x] = (Color){ intensity, intensity, intensity, 255 };
-        }
-    }
-
-    RL_FREE(seeds);
-
-    Image image = {
-        .data = pixels,
-        .width = width,
-        .height = height,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-        .mipmaps = 1
-    };
-
-    return image;
-}
-#endif      // SUPPORT_IMAGE_GENERATION
-
 //------------------------------------------------------------------------------------
 // Image manipulation functions
 //------------------------------------------------------------------------------------
@@ -908,7 +700,7 @@ void ImageFormat(Image *image, int newFormat)
     {
         if ((image->format < PIXELFORMAT_COMPRESSED_DXT1_RGB) && (newFormat < PIXELFORMAT_COMPRESSED_DXT1_RGB))
         {
-            Vector4 *pixels = LoadImageDataNormalized(*image);     // Supports 8 to 32 bit per channel
+            Vector4 *pixels = Image_LoadDataNormalized(*image);     // Supports 8 to 32 bit per channel
 
             RL_FREE(image->data);      // WARNING! We loose mipmaps data --> Regenerated at the end...
             image->data = NULL;
@@ -1115,7 +907,7 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
     Vector2 imSize = MeasureTextEx(font, text, (float)font.baseSize, spacing);
 
     // Create image to store text
-    Image imText = GenImageColor((int)imSize.x, (int)imSize.y, BLANK);
+    Image imText = Image_Gen((int)imSize.x, (int)imSize.y, BLANK);
 
     for (int i = 0; i < size; i++)
     {
@@ -1315,7 +1107,7 @@ void ImageAlphaMask(Image *image, Image alphaMask)
             }
         }
 
-        UnloadImage(mask);
+        Image_Free(mask);
     }
 }
 
@@ -1565,7 +1357,7 @@ void ImageMipmaps(Image *image)
             mipSize = GetPixelDataSize(mipWidth, mipHeight, image->format);
         }
 
-        UnloadImage(imCopy);
+        Image_Free(imCopy);
     }
     else TRACELOG(LOG_WARNING, "IMAGE: Mipmaps already available");
 }
@@ -2143,7 +1935,7 @@ Color *LoadImageColors(Image image)
 }
 
 // Load colors palette from image as a Color array (RGBA - 32bit)
-// NOTE: Memory allocated should be freed using UnloadImagePalette()
+// NOTE: Memory allocated should be freed using Image_FreePalette()
 Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount)
 {
     #define COLOR_EQUAL(col1, col2) ((col1.r == col2.r)&&(col1.g == col2.g)&&(col1.b == col2.b)&&(col1.a == col2.a))
@@ -2204,7 +1996,7 @@ void UnloadImageColors(Color *colors)
     RL_FREE(colors);
 }
 
-// Unload colors palette loaded with LoadImagePalette()
+// Unload colors palette loaded with Image_LoadPalette()
 void UnloadImagePalette(Color *colors)
 {
     RL_FREE(colors);
@@ -2763,12 +2555,12 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color 
             pDstBase += strideDst;
         }
 
-        if (useSrcMod) UnloadImage(srcMod);     // Unload source modified image
+        if (useSrcMod) Image_Free(srcMod);     // Unload source modified image
     }
 }
 
 // Draw text (default font) within an image (destination)
-void ImageDrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color)
+void ImageText_Draw(Image *dst, const char *text, int posX, int posY, int fontSize, Color color)
 {
     Vector2 position = { (float)posX, (float)posY };
 
@@ -2786,23 +2578,23 @@ void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, 
 
     ImageDraw(dst, imText, srcRec, dstRec, WHITE);
 
-    UnloadImage(imText);
+    Image_Free(imText);
 }
 
 //------------------------------------------------------------------------------------
 // Texture loading functions
 //------------------------------------------------------------------------------------
 // Load texture from file into GPU memory (VRAM)
-Texture2D LoadTexture(const char *fileName)
+Texture2D Texture_Load(const char *fileName)
 {
     Texture2D texture = { 0 };
 
-    Image image = LoadImage(fileName);
+    Image image = Image_Load(fileName);
 
     if (image.data != NULL)
     {
-        texture = LoadTextureFromImage(image);
-        UnloadImage(image);
+        texture = Texture_LoadFromImage(image);
+        Image_Free(image);
     }
 
     return texture;
@@ -2810,7 +2602,7 @@ Texture2D LoadTexture(const char *fileName)
 
 // Load a texture from image data
 // NOTE: image is not unloaded, it must be done manually
-Texture2D LoadTextureFromImage(Image image)
+Texture2D Texture_LoadFromImage(Image image)
 {
     Texture2D texture = { 0 };
 
@@ -2828,91 +2620,9 @@ Texture2D LoadTextureFromImage(Image image)
     return texture;
 }
 
-// Load cubemap from image, multiple image cubemap layouts supported
-TextureCubemap LoadTextureCubemap(Image image, int layout)
-{
-    TextureCubemap cubemap = { 0 };
-
-    if (layout == CUBEMAP_LAYOUT_AUTO_DETECT)      // Try to automatically guess layout type
-    {
-        // Check image width/height to determine the type of cubemap provided
-        if (image.width > image.height)
-        {
-            if ((image.width/6) == image.height) { layout = CUBEMAP_LAYOUT_LINE_HORIZONTAL; cubemap.width = image.width/6; }
-            else if ((image.width/4) == (image.height/3)) { layout = CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE; cubemap.width = image.width/4; }
-            else if (image.width >= (int)((float)image.height*1.85f)) { layout = CUBEMAP_LAYOUT_PANORAMA; cubemap.width = image.width/4; }
-        }
-        else if (image.height > image.width)
-        {
-            if ((image.height/6) == image.width) { layout = CUBEMAP_LAYOUT_LINE_VERTICAL; cubemap.width = image.height/6; }
-            else if ((image.width/3) == (image.height/4)) { layout = CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR; cubemap.width = image.width/3; }
-        }
-
-        cubemap.height = cubemap.width;
-    }
-
-    if (layout != CUBEMAP_LAYOUT_AUTO_DETECT)
-    {
-        int size = cubemap.width;
-
-        Image faces = { 0 };                // Vertical column image
-        Rectangle faceRecs[6] = { 0 };      // Face source rectangles
-        for (int i = 0; i < 6; i++) faceRecs[i] = (Rectangle){ 0, 0, (float)size, (float)size };
-
-        if (layout == CUBEMAP_LAYOUT_LINE_VERTICAL)
-        {
-            faces = image;
-            for (int i = 0; i < 6; i++) faceRecs[i].y = (float)size*i;
-        }
-        else if (layout == CUBEMAP_LAYOUT_PANORAMA)
-        {
-            // TODO: Convert panorama image to square faces...
-            // Ref: https://github.com/denivip/panorama/blob/master/panorama.cpp
-        }
-        else
-        {
-            if (layout == CUBEMAP_LAYOUT_LINE_HORIZONTAL) for (int i = 0; i < 6; i++) faceRecs[i].x = (float)size*i;
-            else if (layout == CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR)
-            {
-                faceRecs[0].x = (float)size; faceRecs[0].y = (float)size;
-                faceRecs[1].x = (float)size; faceRecs[1].y = (float)size*3;
-                faceRecs[2].x = (float)size; faceRecs[2].y = 0;
-                faceRecs[3].x = (float)size; faceRecs[3].y = (float)size*2;
-                faceRecs[4].x = 0; faceRecs[4].y = (float)size;
-                faceRecs[5].x = (float)size*2; faceRecs[5].y = (float)size;
-            }
-            else if (layout == CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE)
-            {
-                faceRecs[0].x = (float)size*2; faceRecs[0].y = (float)size;
-                faceRecs[1].x = 0; faceRecs[1].y = (float)size;
-                faceRecs[2].x = (float)size; faceRecs[2].y = 0;
-                faceRecs[3].x = (float)size; faceRecs[3].y = (float)size*2;
-                faceRecs[4].x = (float)size; faceRecs[4].y = (float)size;
-                faceRecs[5].x = (float)size*3; faceRecs[5].y = (float)size;
-            }
-
-            // Convert image data to 6 faces in a vertical column, that's the optimum layout for loading
-            faces = GenImageColor(size, size*6, MAGENTA);
-            ImageFormat(&faces, image.format);
-
-            // NOTE: Image formating does not work with compressed textures
-        }
-
-        for (int i = 0; i < 6; i++) ImageDraw(&faces, image, faceRecs[i], (Rectangle){ 0, (float)size*i, (float)size, (float)size }, WHITE);
-
-        cubemap.id = rlLoadTextureCubemap(faces.data, size, faces.format);
-        if (cubemap.id == 0) TRACELOG(LOG_WARNING, "IMAGE: Failed to load cubemap image");
-
-        UnloadImage(faces);
-    }
-    else TRACELOG(LOG_WARNING, "IMAGE: Failed to detect cubemap image layout");
-
-    return cubemap;
-}
-
 // Load texture for rendering (framebuffer)
 // NOTE: Render texture is loaded by default with RGBA color attachment and depth RenderBuffer
-RenderTexture2D LoadRenderTexture(int width, int height)
+RenderTexture2D RenderTexture_Load(int width, int height)
 {
     RenderTexture2D target = { 0 };
 
@@ -2951,7 +2661,7 @@ RenderTexture2D LoadRenderTexture(int width, int height)
 }
 
 // Unload texture from GPU memory (VRAM)
-void UnloadTexture(Texture2D texture)
+void Texture_Free(Texture2D texture)
 {
     if (texture.id > 0)
     {
@@ -2962,7 +2672,7 @@ void UnloadTexture(Texture2D texture)
 }
 
 // Unload render texture from GPU memory (VRAM)
-void UnloadRenderTexture(RenderTexture2D target)
+void RenderTexture_Free(RenderTexture2D target)
 {
     if (target.id > 0)
     {
@@ -2975,25 +2685,11 @@ void UnloadRenderTexture(RenderTexture2D target)
     }
 }
 
-// Update GPU texture with new data
-// NOTE: pixels data must match texture.format
-void UpdateTexture(Texture2D texture, const void *pixels)
-{
-    rlUpdateTexture(texture.id, 0, 0, texture.width, texture.height, texture.format, pixels);
-}
-
-// Update GPU texture rectangle with new data
-// NOTE: pixels data must match texture.format
-void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels)
-{
-    rlUpdateTexture(texture.id, (int)rec.x, (int)rec.y, (int)rec.width, (int)rec.height, texture.format, pixels);
-}
-
 //------------------------------------------------------------------------------------
 // Texture configuration functions
 //------------------------------------------------------------------------------------
 // Generate GPU mipmaps for a texture
-void GenTextureMipmaps(Texture2D *texture)
+void Texture_GenMipmaps(Texture2D *texture)
 {
     // NOTE: NPOT textures support check inside function
     // On WebGL (OpenGL ES 2.0) NPOT textures support is limited
@@ -3099,7 +2795,7 @@ void Texture_SetWrap(Texture2D texture, int wrap)
 // Texture drawing functions
 //------------------------------------------------------------------------------------
 // Draw a Texture2D
-void DrawTexture(Texture2D texture, int posX, int posY, Color tint)
+void Texture_Draw(Texture2D texture, int posX, int posY, Color tint)
 {
     DrawTextureEx(texture, (Vector2){ (float)posX, (float)posY }, 0.0f, 1.0f, tint);
 }
@@ -3544,39 +3240,6 @@ void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest,
 
         rlSetTexture(0);
     }
-}
-
-// Draw textured polygon, defined by vertex and texturecoordinates
-// NOTE: Polygon center must have straight line path to all points
-// without crossing perimeter, points must be in anticlockwise order
-void DrawTexturePoly(Texture2D texture, Vector2 center, Vector2 *points, Vector2 *texcoords, int pointCount, Color tint)
-{
-    rlCheckRenderBatchLimit((pointCount - 1)*4);
-
-    rlSetTexture(texture.id);
-
-    // Texturing is only supported on QUADs
-    rlBegin(RL_QUADS);
-
-        rlColor4ub(tint.r, tint.g, tint.b, tint.a);
-
-        for (int i = 0; i < pointCount - 1; i++)
-        {
-            rlTexCoord2f(0.5f, 0.5f);
-            rlVertex2f(center.x, center.y);
-
-            rlTexCoord2f(texcoords[i].x, texcoords[i].y);
-            rlVertex2f(points[i].x + center.x, points[i].y + center.y);
-
-            rlTexCoord2f(texcoords[i + 1].x, texcoords[i + 1].y);
-            rlVertex2f(points[i + 1].x + center.x, points[i + 1].y + center.y);
-
-            rlTexCoord2f(texcoords[i + 1].x, texcoords[i + 1].y);
-            rlVertex2f(points[i + 1].x + center.x, points[i + 1].y + center.y);
-        }
-    rlEnd();
-
-    rlSetTexture(0);
 }
 
 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
@@ -4652,7 +4315,7 @@ static Image LoadASTC(const unsigned char *fileData, unsigned int fileSize)
 #endif
 
 // Get pixel data from image as Vector4 array (float normalized)
-static Vector4 *LoadImageDataNormalized(Image image)
+static Vector4 *Image_LoadDataNormalized(Image image)
 {
     Vector4 *pixels = (Vector4 *)RL_MALLOC(image.width*image.height*sizeof(Vector4));
 

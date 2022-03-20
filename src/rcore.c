@@ -1877,31 +1877,8 @@ void Buffer_Init(void)
                                         // NOTE: Not required with OpenGL 3.3+
 }
 
-// Initialize 2D mode with custom camera (2D)
-void BeginMode2D(Camera2D camera)
-{
-    rlDrawRenderBatchActive();      // Update and draw internal render batch
-
-    rlLoadIdentity();               // Reset current matrix (modelview)
-
-    // Apply 2d camera transformation to modelview
-    rlMultMatrixf(MatrixToFloat(GetCameraMatrix2D(camera)));
-
-    // Apply screen scaling if required
-    rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale));
-}
-
-// Ends 2D mode with custom camera
-void EndMode2D(void)
-{
-    rlDrawRenderBatchActive();      // Update and draw internal render batch
-
-    rlLoadIdentity();               // Reset current matrix (modelview)
-    rlMultMatrixf(MatrixToFloat(CORE.Window.screenScale)); // Apply screen scaling if required
-}
-
 // Initializes render texture for drawing
-void BeginTextureMode(RenderTexture2D target)
+void RenderTexture_Init(RenderTexture2D target)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1929,7 +1906,7 @@ void BeginTextureMode(RenderTexture2D target)
 }
 
 // Ends drawing to render texture
-void EndTextureMode(void)
+void RenderTexture_Update(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -2116,172 +2093,13 @@ void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
     //rlDisableShader();
 }
 
-// Get a ray trace from mouse position
-Ray GetMouseRay(Vector2 mouse, Camera camera)
-{
-    Ray ray = { 0 };
-
-    // Calculate normalized device coordinates
-    // NOTE: y value is negative
-    float x = (2.0f*mouse.x)/(float)Window_GetWidth() - 1.0f;
-    float y = 1.0f - (2.0f*mouse.y)/(float)Window_GetHeight();
-    float z = 1.0f;
-
-    // Store values in a vector
-    Vector3 deviceCoords = { x, y, z };
-
-    // Calculate view matrix from camera look at
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
-
-    Matrix matProj = MatrixIdentity();
-
-    if (camera.projection == CAMERA_PERSPECTIVE)
-    {
-        // Calculate projection matrix from perspective
-        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)Window_GetWidth()/(double)Window_GetHeight()), RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-    }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
-    {
-        float aspect = (float)CORE.Window.screen.width/(float)CORE.Window.screen.height;
-        double top = camera.fovy/2.0;
-        double right = top*aspect;
-
-        // Calculate projection matrix from orthographic
-        matProj = MatrixOrtho(-right, right, -top, top, 0.01, 1000.0);
-    }
-
-    // Unproject far/near points
-    Vector3 nearPoint = Vector3Unproject((Vector3){ deviceCoords.x, deviceCoords.y, 0.0f }, matProj, matView);
-    Vector3 farPoint = Vector3Unproject((Vector3){ deviceCoords.x, deviceCoords.y, 1.0f }, matProj, matView);
-
-    // Unproject the mouse cursor in the near plane.
-    // We need this as the source position because orthographic projects, compared to perspect doesn't have a
-    // convergence point, meaning that the "eye" of the camera is more like a plane than a point.
-    Vector3 cameraPlanePointerPos = Vector3Unproject((Vector3){ deviceCoords.x, deviceCoords.y, -1.0f }, matProj, matView);
-
-    // Calculate normalized direction vector
-    Vector3 direction = Vector3Normalize(Vector3Subtract(farPoint, nearPoint));
-
-    if (camera.projection == CAMERA_PERSPECTIVE) ray.position = camera.position;
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC) ray.position = cameraPlanePointerPos;
-
-    // Apply calculated vectors to ray
-    ray.direction = direction;
-
-    return ray;
-}
-
-// Get transform matrix for camera
-Matrix GetCameraMatrix(Camera camera)
-{
-    return MatrixLookAt(camera.position, camera.target, camera.up);
-}
-
-// Get camera 2d transform matrix
-Matrix GetCameraMatrix2D(Camera2D camera)
-{
-    Matrix matTransform = { 0 };
-    // The camera in world-space is set by
-    //   1. Move it to target
-    //   2. Rotate by -rotation and scale by (1/zoom)
-    //      When setting higher scale, it's more intuitive for the world to become bigger (= camera become smaller),
-    //      not for the camera getting bigger, hence the invert. Same deal with rotation.
-    //   3. Move it by (-offset);
-    //      Offset defines target transform relative to screen, but since we're effectively "moving" screen (camera)
-    //      we need to do it into opposite direction (inverse transform)
-
-    // Having camera transform in world-space, inverse of it gives the modelview transform.
-    // Since (A*B*C)' = C'*B'*A', the modelview is
-    //   1. Move to offset
-    //   2. Rotate and Scale
-    //   3. Move by -target
-    Matrix matOrigin = MatrixTranslate(-camera.target.x, -camera.target.y, 0.0f);
-    Matrix matRotation = MatrixRotate((Vector3){ 0.0f, 0.0f, 1.0f }, camera.rotation*DEG2RAD);
-    Matrix matScale = MatrixScale(camera.zoom, camera.zoom, 1.0f);
-    Matrix matTranslation = MatrixTranslate(camera.offset.x, camera.offset.y, 0.0f);
-
-    matTransform = MatrixMultiply(MatrixMultiply(matOrigin, MatrixMultiply(matScale, matRotation)), matTranslation);
-
-    return matTransform;
-}
-
-// Get the screen space position from a 3d world space position
-Vector2 GetWorldToScreen(Vector3 position, Camera camera)
-{
-    Vector2 screenPosition = GetWorldToScreenEx(position, camera, Window_GetWidth(), Window_GetHeight());
-
-    return screenPosition;
-}
-
-// Get size position for a 3d world space position (useful for texture drawing)
-Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height)
-{
-    // Calculate projection matrix (from perspective instead of frustum
-    Matrix matProj = MatrixIdentity();
-
-    if (camera.projection == CAMERA_PERSPECTIVE)
-    {
-        // Calculate projection matrix from perspective
-        matProj = MatrixPerspective(camera.fovy*DEG2RAD, ((double)width/(double)height), RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-    }
-    else if (camera.projection == CAMERA_ORTHOGRAPHIC)
-    {
-        float aspect = (float)CORE.Window.screen.width/(float)CORE.Window.screen.height;
-        double top = camera.fovy/2.0;
-        double right = top*aspect;
-
-        // Calculate projection matrix from orthographic
-        matProj = MatrixOrtho(-right, right, -top, top, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
-    }
-
-    // Calculate view matrix from camera look at (and transpose it)
-    Matrix matView = MatrixLookAt(camera.position, camera.target, camera.up);
-
-    // TODO: Why not use Vector3Transform(Vector3 v, Matrix mat)?
-
-    // Convert world position vector to quaternion
-    Quaternion worldPos = { position.x, position.y, position.z, 1.0f };
-
-    // Transform world position to view
-    worldPos = QuaternionTransform(worldPos, matView);
-
-    // Transform result to projection (clip space position)
-    worldPos = QuaternionTransform(worldPos, matProj);
-
-    // Calculate normalized device coordinates (inverted y)
-    Vector3 ndcPos = { worldPos.x/worldPos.w, -worldPos.y/worldPos.w, worldPos.z/worldPos.w };
-
-    // Calculate 2d screen position vector
-    Vector2 screenPosition = { (ndcPos.x + 1.0f)/2.0f*(float)width, (ndcPos.y + 1.0f)/2.0f*(float)height };
-
-    return screenPosition;
-}
-
-// Get the screen space position for a 2d camera world space position
-Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera)
-{
-    Matrix matCamera = GetCameraMatrix2D(camera);
-    Vector3 transform = Vector3Transform((Vector3){ position.x, position.y, 0 }, matCamera);
-
-    return (Vector2){ transform.x, transform.y };
-}
-
-// Get the world space position for a 2d camera screen space position
-Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
-{
-    Matrix invMatCamera = MatrixInvert(GetCameraMatrix2D(camera));
-    Vector3 transform = Vector3Transform((Vector3){ position.x, position.y, 0 }, invMatCamera);
-
-    return (Vector2){ transform.x, transform.y };
-}
-
 // Get current FPS
 // NOTE: We calculate an average framerate
 float Time_GetFPS(void)
 {
     float fps = 0;
 
-    #define FPS_CAPTURE_FRAMES_COUNT    60
+    #define FPS_CAPTURE_FRAMES_COUNT    30
 
     static int index = 0;
     static float history[FPS_CAPTURE_FRAMES_COUNT] = { 0 };
@@ -2399,9 +2217,10 @@ void Time_Wait(float targetFPS)
     static double extratime=0;
     double previoustime=CORE.Time.previous;
     double targetwaittime=1.0f/targetFPS;
+    double waittime=targetwaittime-Time_Get()+previoustime;
     // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
     if(extratime<0-targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
-    double wait=(targetwaittime+extratime)*1000.0f;
+    double wait=(waittime+extratime)*1000.0f;
     Time_Sleep(wait);
     double currenttime=Time_Get();
     extratime=previoustime+targetwaittime+extratime-currenttime;
@@ -2426,9 +2245,10 @@ void Time_SoftWait(float targetFPS)
     static double extratime=0;
     double previoustime=CORE.Time.previous;
     double targetwaittime=1.0f/targetFPS;
+    double waittime=targetwaittime-Time_Get()+previoustime;
     // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
     if(extratime<0-targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
-    double wait=(targetwaittime+extratime)*1000.0f;
+    double wait=(waittime+extratime)*1000.0f;
     Time_SoftSleep(wait);
     double currenttime=Time_Get();
     extratime=previoustime+targetwaittime+extratime-currenttime;
@@ -2771,48 +2591,6 @@ long GetFileModTime(const char *fileName)
     }
 
     return 0;
-}
-
-// Compress data (DEFLATE algorythm)
-unsigned char *CompressData(unsigned char *data, int dataLength, int *compDataLength)
-{
-    #define COMPRESSION_QUALITY_DEFLATE  8
-
-    unsigned char *compData = NULL;
-
-#if defined(SUPPORT_COMPRESSION_API)
-    // Compress data and generate a valid DEFLATE stream
-    struct sdefl sdefl = { 0 };
-    int bounds = sdefl_bound(dataLength);
-    compData = (unsigned char *)RL_CALLOC(bounds, 1);
-    *compDataLength = sdeflate(&sdefl, compData, data, dataLength, COMPRESSION_QUALITY_DEFLATE);   // Compression level 8, same as stbwi
-
-    TraceLog(LOG_INFO, "SYSTEM: Compress data: Original size: %i -> Comp. size: %i", dataLength, *compDataLength);
-#endif
-
-    return compData;
-}
-
-// Decompress data (DEFLATE algorythm)
-unsigned char *DecompressData(unsigned char *compData, int compDataLength, int *dataLength)
-{
-    unsigned char *data = NULL;
-
-#if defined(SUPPORT_COMPRESSION_API)
-    // Decompress data from a valid DEFLATE stream
-    data = RL_CALLOC(MAX_DECOMPRESSION_SIZE*1024*1024, 1);
-    int length = sinflate(data, MAX_DECOMPRESSION_SIZE, compData, compDataLength);
-    unsigned char *temp = RL_REALLOC(data, length);
-
-    if (temp != NULL) data = temp;
-    else TRACELOG(LOG_WARNING, "SYSTEM: Failed to re-allocate required decompression memory");
-
-    *dataLength = length;
-
-    TraceLog(LOG_INFO, "SYSTEM: Decompress data: Comp. size: %i -> Original size: %i", compDataLength, *dataLength);
-#endif
-
-    return data;
 }
 
 // Open URL with default system browser (if available)
@@ -4754,16 +4532,6 @@ void Events_Wait(void)
 
 // End event loop
 void Events_EndLoop(void){
-
-#if defined(SUPPORT_MOUSE_CURSOR_POINT)
-    // Draw a small rectangle on mouse position for user reference
-    if (!CORE.Input.Mouse.cursorHidden)
-    {
-        DrawRectangle(CORE.Input.Mouse.currentPosition.x, CORE.Input.Mouse.currentPosition.y, 3, 3, MAROON);
-        rlDrawRenderBatchActive();  // Update and draw internal render batch
-    }
-#endif
-
 #if defined(SUPPORT_EVENTS_AUTOMATION)
     // Draw record/play indicator
     if (eventsRecording)
@@ -4772,7 +4540,7 @@ void Events_EndLoop(void){
 
         if (((gifFrameCounter/15)%2) == 1)
         {
-            DrawText("EVENTS RECORDING", 50, CORE.Window.screen.height - 25, 10, RED);
+            Text_Draw("EVENTS RECORDING", 50, CORE.Window.screen.height - 25, 10, RED);
         }
 
         rlDrawRenderBatchActive();  // Update and draw internal render batch
@@ -4783,7 +4551,7 @@ void Events_EndLoop(void){
 
         if (((gifFrameCounter/15)%2) == 1)
         {
-            DrawText("EVENTS PLAYING", 50, CORE.Window.screen.height - 25, 10, GREEN);
+            Text_Draw("EVENTS PLAYING", 50, CORE.Window.screen.height - 25, 10, GREEN);
         }
 
         rlDrawRenderBatchActive();  // Update and draw internal render batch
@@ -5121,7 +4889,7 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                             // TODO: Unload old asset if required
 
                             // Load texture again to pointed texture
-                            (*textureAsset + i) = LoadTexture(assetPath[i]);
+                            (*textureAsset + i) = Texture_Load(assetPath[i]);
                         }
                     }
                     */

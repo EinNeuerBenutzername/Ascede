@@ -38,7 +38,7 @@
 //#define SUPPORT_MOUSE_CURSOR_POINT   1
 // Setting a higher resolution can improve the accuracy of time-out intervals in wait functions.
 // However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
-#define SUPPORT_WINMM_HIGHRES_TIMER 1
+//#define SUPPORT_WINMM_HIGHRES_TIMER 1
 // Use busy wait loop for timing sync, if not defined, a high-resolution timer is setup and used
 //#define SUPPORT_BUSY_WAIT_LOOP      1
 // Use a partial-busy wait loop, in this case frame sleeps for most of the time, but then runs a busy loop at the end for accuracy
@@ -144,8 +144,6 @@
 
 // Support image export functionality (.png, .bmp, .tga, .jpg)
 #define SUPPORT_IMAGE_EXPORT        1
-// Support procedural image generation functionality (gradient, spot, perlin-noise, cellular)
-//#define SUPPORT_IMAGE_GENERATION    1
 // Support multiple image editing functions to scale, adjust colors, flip, draw on images, crop...
 // If not defined, still some functions are supported: ImageFormat(), ImageCrop(), ImageToPOT()
 #define SUPPORT_IMAGE_MANIPULATION  1

@@ -12,8 +12,8 @@
 *       supported by default, to remove support, just comment unrequired #define in this module
 *
 *   #define SUPPORT_DEFAULT_FONT
-*       Load default raylib font on initialization to be used by DrawText() and MeasureText().
-*       If no default font loaded, DrawTextEx() and MeasureTextEx() are required.
+*       Load default raylib font on initialization to be used by Text_Draw() and MeasureText().
+*       If no default font loaded, Text_DrawEx() and MeasureTextEx() are required.
 *
 *   #define TEXTSPLIT_MAX_TEXT_BUFFER_LENGTH
 *       TextSplit() function static buffer max size
@@ -56,7 +56,7 @@
 #endif
 
 #include "utils.h"          // Required for: LoadFileText()
-#include "rlgl.h"           // OpenGL abstraction layer to OpenGL 1.1, 2.1, 3.3+ or ES2 -> Only DrawTextPro()
+#include "rlgl.h"           // OpenGL abstraction layer to OpenGL 1.1, 2.1, 3.3+ or ES2 -> Only Text_DrawPro()
 
 #include <stdlib.h>         // Required for: malloc(), free()
 #include <stdio.h>          // Required for: vsprintf()
@@ -220,7 +220,7 @@ extern void LoadFontDefault(void)
         counter++;
     }
 
-    defaultFont.texture = LoadTextureFromImage(imFont);
+    defaultFont.texture = Texture_LoadFromImage(imFont);
 
     // Reconstruct charSet using charsWidth[], charsHeight, charsDivisor, glyphCount
     //------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ extern void LoadFontDefault(void)
         defaultFont.glyphs[i].image = ImageFromImage(imFont, defaultFont.recs[i]);
     }
 
-    UnloadImage(imFont);
+    Image_Free(imFont);
 
     defaultFont.baseSize = (int)defaultFont.recs[0].height;
 
@@ -275,8 +275,8 @@ extern void LoadFontDefault(void)
 // Unload raylib default font
 extern void UnloadFontDefault(void)
 {
-    for (int i = 0; i < defaultFont.glyphCount; i++) UnloadImage(defaultFont.glyphs[i].image);
-    UnloadTexture(defaultFont.texture);
+    for (int i = 0; i < defaultFont.glyphCount; i++) Image_Free(defaultFont.glyphs[i].image);
+    Texture_Free(defaultFont.texture);
     RL_FREE(defaultFont.glyphs);
     RL_FREE(defaultFont.recs);
 }
@@ -321,9 +321,9 @@ Font Font_Load(const char *fileName)
     else
 #endif
     {
-        Image image = LoadImage(fileName);
+        Image image = Image_Load(fileName);
         if (image.data != NULL) font = LoadFontFromImage(image, MAGENTA, FONT_TTF_DEFAULT_FIRST_CHAR);
-        UnloadImage(image);
+        Image_Free(image);
     }
 
     if (font.texture.id == 0)
@@ -452,7 +452,7 @@ Font LoadFontFromImage(Image image, Color key, int firstChar)
     };
 
     // Set font with all data parsed from image
-    font.texture = LoadTextureFromImage(fontClear); // Convert processed image to OpenGL texture
+    font.texture = Texture_LoadFromImage(fontClear); // Convert processed image to OpenGL texture
     font.glyphCount = index;
     font.glyphPadding = 0;
 
@@ -477,7 +477,7 @@ Font LoadFontFromImage(Image image, Color key, int firstChar)
         font.glyphs[i].image = ImageFromImage(fontClear, tempCharRecs[i]);
     }
 
-    UnloadImage(fontClear);     // Unload processed image once converted to texture
+    Image_Free(fontClear);     // Unload processed image once converted to texture
 
     font.baseSize = (int)font.recs[0].height;
 
@@ -506,16 +506,16 @@ Font LoadFontFromMemory(const char *fileType, const unsigned char *fileData, int
             font.glyphPadding = FONT_TTF_DEFAULT_CHARS_PADDING;
 
             Image atlas = GenImageFontAtlas(font.glyphs, &font.recs, font.glyphCount, font.baseSize, font.glyphPadding, 0);
-            font.texture = LoadTextureFromImage(atlas);
+            font.texture = Texture_LoadFromImage(atlas);
 
-            // Update glyphs[i].image to use alpha, required to be used on ImageDrawText()
+            // Update glyphs[i].image to use alpha, required to be used on ImageText_Draw()
             for (int i = 0; i < font.glyphCount; i++)
             {
-                UnloadImage(font.glyphs[i].image);
+                Image_Free(font.glyphs[i].image);
                 font.glyphs[i].image = ImageFromImage(atlas, font.recs[i]);
             }
 
-            UnloadImage(atlas);
+            Image_Free(atlas);
 
             // TRACELOG(LOG_INFO, "FONT: Font loaded successfully (%i glyphs)", font.glyphCount);
         }
@@ -799,7 +799,7 @@ Image GenImageFontAtlas(const GlyphInfo *chars, Rectangle **charRecs, int glyphC
 // Unload font glyphs info data (RAM)
 void UnloadFontData(GlyphInfo *glyphs, int glyphCount)
 {
-    for (int i = 0; i < glyphCount; i++) UnloadImage(glyphs[i].image);
+    for (int i = 0; i < glyphCount; i++) Image_Free(glyphs[i].image);
 
     RL_FREE(glyphs);
 }
@@ -811,7 +811,7 @@ void UnloadFont(Font font)
     if (font.texture.id != GetFontDefault().texture.id)
     {
         UnloadFontData(font.glyphs, font.glyphCount);
-        UnloadTexture(font.texture);
+        Texture_Free(font.texture);
         RL_FREE(font.recs);
 
         TRACELOGD("FONT: Unloaded font data from RAM and VRAM");
@@ -821,7 +821,7 @@ void UnloadFont(Font font)
 // Draw text (using default font)
 // NOTE: fontSize work like in any drawing program but if fontSize is lower than font-base-size, then font-base-size is used
 // NOTE: chars spacing is proportional to fontSize
-void DrawText(const char *text, int posX, int posY, int fontSize, Color color)
+void Text_Draw(const char *text, int posX, int posY, int fontSize, Color color)
 {
     // Check if default font has been loaded
     if (GetFontDefault().texture.id != 0)
@@ -832,13 +832,13 @@ void DrawText(const char *text, int posX, int posY, int fontSize, Color color)
         if (fontSize < defaultFontSize) fontSize = defaultFontSize;
         int spacing = fontSize/defaultFontSize;
 
-        DrawTextEx(GetFontDefault(), text, position, (float)fontSize, (float)spacing, color);
+        Text_DrawEx(GetFontDefault(), text, position, (float)fontSize, (float)spacing, color);
     }
 }
 
 // Draw text using Font
 // NOTE: chars spacing is NOT proportional to fontSize
-void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
+void Text_DrawEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
 {
     if (font.texture.id == 0) font = GetFontDefault();  // Security check in case of not valid font
 
@@ -871,7 +871,7 @@ void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, f
         {
             if ((codepoint != ' ') && (codepoint != '\t'))
             {
-                DrawTextCodepoint(font, codepoint, (Vector2){ position.x + textOffsetX, position.y + textOffsetY }, fontSize, tint);
+                Text_DrawCodepoint(font, codepoint, (Vector2){ position.x + textOffsetX, position.y + textOffsetY }, fontSize, tint);
             }
 
             if (font.glyphs[index].advanceX == 0) textOffsetX += ((float)font.recs[index].width*scaleFactor + spacing);
@@ -883,7 +883,7 @@ void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, f
 }
 
 // Draw text using Font and pro parameters (rotation)
-void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint)
+void Text_DrawPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint)
 {
     rlPushMatrix();
 
@@ -891,13 +891,13 @@ void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, 
         rlRotatef(rotation, 0.0f, 0.0f, 1.0f);
         rlTranslatef(-origin.x, -origin.y, 0.0f);
 
-        DrawTextEx(font, text, (Vector2){ 0.0f, 0.0f }, fontSize, spacing, tint);
+        Text_DrawEx(font, text, (Vector2){ 0.0f, 0.0f }, fontSize, spacing, tint);
 
     rlPopMatrix();
 }
 
 // Draw one character (codepoint)
-void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint)
+void Text_DrawCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint)
 {
     // Character index position in sprite font
     // NOTE: In case a codepoint is not available in the font, index returned points to '?'
@@ -1311,7 +1311,7 @@ static Font LoadBMFont(const char *fileName)
 
     TRACELOGD("    > Image loading path: %s", imPath);
 
-    Image imFont = LoadImage(imPath);
+    Image imFont = Image_Load(imPath);
 
     if (imFont.format == PIXELFORMAT_UNCOMPRESSED_GRAYSCALE)
     {
@@ -1330,11 +1330,11 @@ static Font LoadBMFont(const char *fileName)
             ((unsigned char *)(imFontAlpha.data))[p + 1] = ((unsigned char *)imFont.data)[i];
         }
 
-        UnloadImage(imFont);
+        Image_Free(imFont);
         imFont = imFontAlpha;
     }
 
-    font.texture = LoadTextureFromImage(imFont);
+    font.texture = Texture_LoadFromImage(imFont);
 
     if (lastSlash != NULL) RL_FREE(imPath);
 
@@ -1367,7 +1367,7 @@ static Font LoadBMFont(const char *fileName)
         font.glyphs[i].image = ImageFromImage(imFont, font.recs[i]);
     }
 
-    UnloadImage(imFont);
+    Image_Free(imFont);
     UnloadFileText(fileText);
 
     if (font.texture.id == 0)

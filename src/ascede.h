@@ -42,9 +42,6 @@
 *       [rtextures] stb_image_resize (Sean Barret) for image resizing algorithms
 *       [rtext] stb_truetype (Sean Barret) for ttf fonts loading
 *       [rtext] stb_rect_pack (Sean Barret) for rectangles packing
-*       [rmodels] par_shapes (Philip Rideout) for parametric 3d shapes generation
-*       [rmodels] tinyobj_loader_c (Syoyo Fujita) for models loading (OBJ, MTL)
-*       [rmodels] cgltf (Johannes Kuhlmann) for models loading (glTF)
 *       [raudio] dr_wav (David Reid) for WAV audio file loading
 *       [raudio] dr_flac (David Reid) for FLAC audio file loading
 *       [raudio] dr_mp3 (David Reid) for MP3 audio file loading
@@ -267,9 +264,6 @@ typedef struct Texture {
 // Texture2D, same as Texture
 typedef Texture Texture2D;
 
-// TextureCubemap, same as Texture
-typedef Texture TextureCubemap;
-
 // RenderTexture, fbo for texture rendering
 typedef struct RenderTexture {
     unsigned int id;        // OpenGL framebuffer object id
@@ -309,50 +303,6 @@ typedef struct Font {
     GlyphInfo *glyphs;      // Glyphs info data
 } Font;
 
-// Camera, defines position/orientation in 3d space
-typedef struct Camera3D {
-    Vector3 position;       // Camera position
-    Vector3 target;         // Camera target it looks-at
-    Vector3 up;             // Camera up vector (rotation over its axis)
-    float fovy;             // Camera field-of-view apperture in Y (degrees) in perspective, used as near plane width in orthographic
-    int projection;         // Camera projection: CAMERA_PERSPECTIVE or CAMERA_ORTHOGRAPHIC
-} Camera3D;
-
-typedef Camera3D Camera;    // Camera type fallback, defaults to Camera3D
-
-// Camera2D, defines position/orientation in 2d space
-typedef struct Camera2D {
-    Vector2 offset;         // Camera offset (displacement from target)
-    Vector2 target;         // Camera target (rotation and zoom origin)
-    float rotation;         // Camera rotation in degrees
-    float zoom;             // Camera zoom (scaling), should be 1.0f by default
-} Camera2D;
-
-// Mesh, vertex data and vao/vbo
-typedef struct Mesh {
-    int vertexCount;        // Number of vertices stored in arrays
-    int triangleCount;      // Number of triangles stored (indexed or not)
-
-    // Vertex attributes data
-    float *vertices;        // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
-    float *texcoords;       // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
-    float *texcoords2;      // Vertex second texture coordinates (useful for lightmaps) (shader-location = 5)
-    float *normals;         // Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
-    float *tangents;        // Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
-    unsigned char *colors;      // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
-    unsigned short *indices;    // Vertex indices (in case vertex data comes indexed)
-
-    // Animation vertex data
-    float *animVertices;    // Animated vertex positions (after bones transformations)
-    float *animNormals;     // Animated normals (after bones transformations)
-    unsigned char *boneIds; // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
-    float *boneWeights;     // Vertex bone weight, up to 4 bones influence by vertex (skinning)
-
-    // OpenGL identifiers
-    unsigned int vaoId;     // OpenGL Vertex Array Object id
-    unsigned int *vboId;    // OpenGL Vertex Buffer Objects id (default vertex data)
-} Mesh;
-
 // Shader
 typedef struct Shader {
     unsigned int id;        // Shader program id
@@ -379,56 +329,6 @@ typedef struct Transform {
     Quaternion rotation;    // Rotation
     Vector3 scale;          // Scale
 } Transform;
-
-// Bone, skeletal animation bone
-typedef struct BoneInfo {
-    char name[32];          // Bone name
-    int parent;             // Bone parent
-} BoneInfo;
-
-// Model, meshes, materials and animation data
-typedef struct Model {
-    Matrix transform;       // Local transform matrix
-
-    int meshCount;          // Number of meshes
-    int materialCount;      // Number of materials
-    Mesh *meshes;           // Meshes array
-    Material *materials;    // Materials array
-    int *meshMaterial;      // Mesh material number
-
-    // Animation data
-    int boneCount;          // Number of bones
-    BoneInfo *bones;        // Bones information (skeleton)
-    Transform *bindPose;    // Bones base transformation (pose)
-} Model;
-
-// ModelAnimation
-typedef struct ModelAnimation {
-    int boneCount;          // Number of bones
-    int frameCount;         // Number of animation frames
-    BoneInfo *bones;        // Bones information (skeleton)
-    Transform **framePoses; // Poses array by frame
-} ModelAnimation;
-
-// Ray, ray for raycasting
-typedef struct Ray {
-    Vector3 position;       // Ray position (origin)
-    Vector3 direction;      // Ray direction
-} Ray;
-
-// RayCollision, ray hit information
-typedef struct RayCollision {
-    bool hit;               // Did the ray hit something?
-    float distance;         // Distance to nearest hit
-    Vector3 point;          // Point of nearest hit
-    Vector3 normal;         // Surface normal of hit
-} RayCollision;
-
-// BoundingBox
-typedef struct BoundingBox {
-    Vector3 min;            // Minimum vertex box-corner
-    Vector3 max;            // Maximum vertex box-corner
-} BoundingBox;
 
 // Wave, audio wave data
 typedef struct Wave {
@@ -465,32 +365,6 @@ typedef struct Music {
     int ctxType;                // Type of music context (audio filetype)
     void *ctxData;              // Audio context data, depends on type
 } Music;
-
-// VrDeviceInfo, Head-Mounted-Display device parameters
-typedef struct VrDeviceInfo {
-    int hResolution;                // Horizontal resolution in pixels
-    int vResolution;                // Vertical resolution in pixels
-    float hScreenSize;              // Horizontal size in meters
-    float vScreenSize;              // Vertical size in meters
-    float vScreenCenter;            // Screen center in meters
-    float eyeToScreenDistance;      // Distance between eye and display in meters
-    float lensSeparationDistance;   // Lens separation distance in meters
-    float interpupillaryDistance;   // IPD (distance between pupils) in meters
-    float lensDistortionValues[4];  // Lens distortion constant parameters
-    float chromaAbCorrection[4];    // Chromatic aberration correction parameters
-} VrDeviceInfo;
-
-// VrStereoConfig, VR stereo rendering configuration for simulator
-typedef struct VrStereoConfig {
-    Matrix projection[2];           // VR projection matrices (per eye)
-    Matrix viewOffset[2];           // VR view offset matrices (per eye)
-    float leftLensCenter[2];        // VR left lens center
-    float rightLensCenter[2];       // VR right lens center
-    float leftScreenCenter[2];      // VR left screen center
-    float rightScreenCenter[2];     // VR right screen center
-    float scale[2];                 // VR distortion scale
-    float scaleIn[2];               // VR distortion scale in
-} VrStereoConfig;
 
 //----------------------------------------------------------------------------------
 // Enumerators Definition
@@ -982,11 +856,8 @@ ASCAPI bool Cursor_IsOnScreen(void);                                // Check if 
 ASCAPI void Buffer_Init(void);                                    // Setup canvas (framebuffer) to start drawing
 ASCAPI void Buffer_Clear(Color color);                          // Set background color (framebuffer clear color)
 ASCAPI void Buffer_Update(void);                                // Swap back buffer with front buffer (screen drawing)
-//RLAPI void EndDrawing(void);                                      // End canvas drawing and swap buffers (double buffering)
-RLAPI void BeginMode2D(Camera2D camera);                          // Begin 2D mode with custom camera (2D)
-RLAPI void EndMode2D(void);                                       // Ends 2D mode with custom camera
-RLAPI void BeginTextureMode(RenderTexture2D target);              // Begin drawing to render texture
-RLAPI void EndTextureMode(void);                                  // Ends drawing to render texture
+ASCAPI void RenderTexture_Init(RenderTexture2D target);              // Begin drawing to render texture
+ASCAPI void RenderTexture_Update(void);                                  // Ends drawing to render texture
 RLAPI void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
 RLAPI void EndShaderMode(void);                                   // End custom shader drawing (use default shader)
 RLAPI void BeginBlendMode(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
@@ -1005,15 +876,6 @@ RLAPI void SetShaderValueV(Shader shader, int locIndex, const void *value, int u
 RLAPI void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);         // Set shader uniform value (matrix 4x4)
 RLAPI void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
 RLAPI void UnloadShader(Shader shader);                                    // Unload shader from GPU memory (VRAM)
-
-// Screen-space-related functions
-RLAPI Ray GetMouseRay(Vector2 mousePosition, Camera camera);      // Get a ray trace from mouse position
-RLAPI Matrix GetCameraMatrix(Camera camera);                      // Get camera transform matrix (view matrix)
-RLAPI Matrix GetCameraMatrix2D(Camera2D camera);                  // Get camera 2d transform matrix
-RLAPI Vector2 GetWorldToScreen(Vector3 position, Camera camera);  // Get the screen space position for a 3d world space position
-RLAPI Vector2 GetWorldToScreenEx(Vector3 position, Camera camera, int width, int height); // Get size position for a 3d world space position
-RLAPI Vector2 GetWorldToScreen2D(Vector2 position, Camera2D camera); // Get the screen space position for a 2d camera world space position
-RLAPI Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera); // Get the world space position for a 2d camera screen space position
 
 // Misc. functions
 ASCAPI int RNG_Gen(int min, int max);                       // Get a random value between min and max (both included)
@@ -1059,10 +921,6 @@ RLAPI bool IsFileDropped(void);                                   // Check if a 
 RLAPI char **GetDroppedFiles(int *count);                         // Get dropped files names (memory should be freed)
 RLAPI void ClearDroppedFiles(void);                               // Clear dropped files paths buffer (free memory)
 RLAPI long GetFileModTime(const char *fileName);                  // Get file modification time (last write time)
-
-// Compression/Encoding functionality
-RLAPI unsigned char *CompressData(unsigned char *data, int dataLength, int *compDataLength);        // Compress data (DEFLATE algorithm)
-RLAPI unsigned char *DecompressData(unsigned char *compData, int compDataLength, int *dataLength);  // Decompress data (DEFLATE algorithm)
 
 RLAPI void OpenURL(const char *url);                              // Open URL with default system browser (if available)
 
@@ -1131,24 +989,18 @@ RLAPI void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color c
 RLAPI void DrawLineBezierQuad(Vector2 startPos, Vector2 endPos, Vector2 controlPos, float thick, Color color); // Draw line using quadratic bezier curves with a control point
 RLAPI void DrawLineBezierCubic(Vector2 startPos, Vector2 endPos, Vector2 startControlPos, Vector2 endControlPos, float thick, Color color); // Draw line using cubic bezier curves with 2 control points
 RLAPI void DrawLineStrip(Vector2 *points, int pointCount, Color color);                                  // Draw lines sequence
-RLAPI void DrawRectangle(int posX, int posY, int width, int height, Color color);                        // Draw a color-filled rectangle
-RLAPI void DrawRectangleV(Vector2 position, Vector2 size, Color color);                                  // Draw a color-filled rectangle (Vector version)
-RLAPI void DrawRectangleRec(Rectangle rec, Color color);                                                 // Draw a color-filled rectangle
+ASCAPI void Shape_DrawRec(int posX, int posY, int width, int height, Color color);                        // Draw a color-filled rectangle
+ASCAPI void Shape_DrawRecV(Vector2 position, Vector2 size, Color color);                                  // Draw a color-filled rectangle (Vector version)
+ASCAPI void Shape_DrawRecRec(Rectangle rec, Color color);                                                 // Draw a color-filled rectangle
 RLAPI void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color);                 // Draw a color-filled rectangle with pro parameters
 RLAPI void DrawRectangleGradientV(int posX, int posY, int width, int height, Color color1, Color color2);// Draw a vertical-gradient-filled rectangle
 RLAPI void DrawRectangleGradientH(int posX, int posY, int width, int height, Color color1, Color color2);// Draw a horizontal-gradient-filled rectangle
 RLAPI void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4);       // Draw a gradient-filled rectangle with custom vertex colors
-RLAPI void DrawRectangleLines(int posX, int posY, int width, int height, Color color);                   // Draw rectangle outline
-RLAPI void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);                            // Draw rectangle outline with extended parameters
 RLAPI void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color);              // Draw rectangle with rounded edges
-RLAPI void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, float lineThick, Color color); // Draw rectangle with rounded edges outline
 RLAPI void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);                                // Draw a color-filled triangle (vertex in counter-clockwise order!)
-RLAPI void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color);                           // Draw triangle outline (vertex in counter-clockwise order!)
 RLAPI void DrawTriangleFan(Vector2 *points, int pointCount, Color color);                                // Draw a triangle fan defined by points (first vertex is the center)
 RLAPI void DrawTriangleStrip(Vector2 *points, int pointCount, Color color);                              // Draw a triangle strip defined by points
 RLAPI void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);               // Draw a regular polygon (Vector version)
-RLAPI void DrawPolyLines(Vector2 center, int sides, float radius, float rotation, Color color);          // Draw a polygon outline of n sides
-RLAPI void DrawPolyLinesEx(Vector2 center, int sides, float radius, float rotation, float lineThick, Color color); // Draw a polygon outline of n sides with extended parameters
 
 // Basic shapes collision detection functions
 RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2);                                           // Check collision between two rectangles
@@ -1167,24 +1019,16 @@ RLAPI Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);                
 
 // Image loading functions
 // NOTE: This functions do not require GPU access
-RLAPI Image LoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
-RLAPI Image LoadImageRaw(const char *fileName, int width, int height, int format, int headerSize);       // Load image from RAW file data
-RLAPI Image LoadImageAnim(const char *fileName, int *frames);                                            // Load image sequence from file (frames appended to image.data)
-RLAPI Image LoadImageFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
-RLAPI Image LoadImageFromTexture(Texture2D texture);                                                     // Load image from GPU texture data
-RLAPI Image LoadImageFromScreen(void);                                                                   // Load image from screen buffer and (screenshot)
-RLAPI void UnloadImage(Image image);                                                                     // Unload image from CPU memory (RAM)
-RLAPI bool ExportImage(Image image, const char *fileName);                                               // Export image data to file, returns true on success
-RLAPI bool ExportImageAsCode(Image image, const char *fileName);                                         // Export image as code file defining an array of bytes, returns true on success
-
-// Image generation functions
-RLAPI Image GenImageColor(int width, int height, Color color);                                           // Generate image: plain color
-RLAPI Image GenImageGradientV(int width, int height, Color top, Color bottom);                           // Generate image: vertical gradient
-RLAPI Image GenImageGradientH(int width, int height, Color left, Color right);                           // Generate image: horizontal gradient
-RLAPI Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer);      // Generate image: radial gradient
-RLAPI Image GenImageChecked(int width, int height, int checksX, int checksY, Color col1, Color col2);    // Generate image: checked
-RLAPI Image GenImageWhiteNoise(int width, int height, float factor);                                     // Generate image: white noise
-RLAPI Image GenImageCellular(int width, int height, int tileSize);                                       // Generate image: cellular algorithm, bigger tileSize means bigger cells
+ASCAPI Image Image_Load(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
+ASCAPI Image Image_LoadRaw(const char *fileName, int width, int height, int format, int headerSize);       // Load image from RAW file data
+ASCAPI Image Image_LoadAnim(const char *fileName, int *frames);                                            // Load image sequence from file (frames appended to image.data)
+ASCAPI Image Image_LoadFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
+ASCAPI Image Image_LoadFromTexture(Texture2D texture);                                                     // Load image from GPU texture data
+ASCAPI Image Image_Screenshot(void);                                                                   // Load image from screen buffer and (screenshot)
+ASCAPI void Image_Free(Image image);                                                                     // Unload image from CPU memory (RAM)
+ASCAPI bool Image_Export(Image image, const char *fileName);                                               // Export image data to file, returns true on success
+ASCAPI bool Image_ExportCode(Image image, const char *fileName);                                         // Export image as code file defining an array of bytes, returns true on success
+ASCAPI Image Image_Gen(int width, int height, Color color);                                           // Generate image: plain color
 
 // Image manipulation functions
 RLAPI Image ImageCopy(Image image);                                                                      // Create an image duplicate (useful for transformations)
@@ -1216,7 +1060,7 @@ RLAPI void ImageColorReplace(Image *image, Color color, Color replace);         
 RLAPI Color *LoadImageColors(Image image);                                                               // Load color data from image as a Color array (RGBA - 32bit)
 RLAPI Color *LoadImagePalette(Image image, int maxPaletteSize, int *colorCount);                         // Load colors palette from image as a Color array (RGBA - 32bit)
 RLAPI void UnloadImageColors(Color *colors);                                                             // Unload color data loaded with LoadImageColors()
-RLAPI void UnloadImagePalette(Color *colors);                                                            // Unload colors palette loaded with LoadImagePalette()
+RLAPI void UnloadImagePalette(Color *colors);                                                            // Unload colors palette loaded with Image_LoadPalette()
 RLAPI Rectangle GetImageAlphaBorder(Image image, float threshold);                                       // Get image alpha border rectangle
 RLAPI Color GetImageColor(Image image, int x, int y);                                                    // Get image pixel color at (x, y) position
 
@@ -1234,27 +1078,24 @@ RLAPI void ImageDrawRectangleV(Image *dst, Vector2 position, Vector2 size, Color
 RLAPI void ImageDrawRectangleRec(Image *dst, Rectangle rec, Color color);                                // Draw rectangle within an image
 RLAPI void ImageDrawRectangleLines(Image *dst, Rectangle rec, int thick, Color color);                   // Draw rectangle lines within an image
 RLAPI void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint);             // Draw a source image within a destination image (tint applied to source)
-RLAPI void ImageDrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color);   // Draw text (using default font) within an image (destination)
+RLAPI void ImageText_Draw(Image *dst, const char *text, int posX, int posY, int fontSize, Color color);   // Draw text (using default font) within an image (destination)
 RLAPI void ImageDrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint); // Draw text (custom sprite font) within an image (destination)
 
 // Texture loading functions
 // NOTE: These functions require GPU access
-RLAPI Texture2D LoadTexture(const char *fileName);                                                       // Load texture from file into GPU memory (VRAM)
-RLAPI Texture2D LoadTextureFromImage(Image image);                                                       // Load texture from image data
-RLAPI TextureCubemap LoadTextureCubemap(Image image, int layout);                                        // Load cubemap from image, multiple image cubemap layouts supported
-RLAPI RenderTexture2D LoadRenderTexture(int width, int height);                                          // Load texture for rendering (framebuffer)
-RLAPI void UnloadTexture(Texture2D texture);                                                             // Unload texture from GPU memory (VRAM)
-RLAPI void UnloadRenderTexture(RenderTexture2D target);                                                  // Unload render texture from GPU memory (VRAM)
-RLAPI void UpdateTexture(Texture2D texture, const void *pixels);                                         // Update GPU texture with new data
-RLAPI void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
+ASCAPI Texture2D Texture_Load(const char *fileName);                                                       // Load texture from file into GPU memory (VRAM)
+ASCAPI Texture2D Texture_LoadFromImage(Image image);                                                       // Load texture from image data
+ASCAPI RenderTexture2D RenderTexture_Load(int width, int height);                                          // Load texture for rendering (framebuffer)
+ASCAPI void Texture_Free(Texture2D texture);                                                             // Unload texture from GPU memory (VRAM)
+ASCAPI void RenderTexture_Free(RenderTexture2D target);                                                  // Unload render texture from GPU memory (VRAM)
 
 // Texture configuration functions
-RLAPI void GenTextureMipmaps(Texture2D *texture);                                                        // Generate GPU mipmaps for a texture
+ASCAPI void Texture_GenMipmaps(Texture2D *texture);                                                        // Generate GPU mipmaps for a texture
 ASCAPI void Texture_SetFilter(Texture2D texture, int filter);                                              // Set texture scaling filter mode
 ASCAPI void Texture_SetWrap(Texture2D texture, int wrap);                                                  // Set texture wrapping mode
 
 // Texture drawing functions
-RLAPI void DrawTexture(Texture2D texture, int posX, int posY, Color tint);                               // Draw a Texture2D
+ASCAPI void Texture_Draw(Texture2D texture, int posX, int posY, Color tint);                               // Draw a Texture2D
 RLAPI void DrawTextureV(Texture2D texture, Vector2 position, Color tint);                                // Draw a Texture2D with position defined as Vector2
 RLAPI void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);  // Draw a Texture2D with extended parameters
 RLAPI void DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint);            // Draw a part of a texture defined by a rectangle
@@ -1262,7 +1103,6 @@ RLAPI void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Re
 RLAPI void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint);      // Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
 RLAPI void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);           // Draw a part of a texture defined by a rectangle with 'pro' parameters
 RLAPI void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint);   // Draws a texture (or part of it) that stretches or shrinks nicely
-RLAPI void DrawTexturePoly(Texture2D texture, Vector2 center, Vector2 *points, Vector2 *texcoords, int pointCount, Color tint);      // Draw a textured polygon
 
 // Color/pixel related functions
 RLAPI Color Fade(Color color, float alpha);                                 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
@@ -1294,10 +1134,10 @@ RLAPI void UnloadFontData(GlyphInfo *chars, int glyphCount);                    
 RLAPI void UnloadFont(Font font);                                                           // Unload Font from GPU memory (VRAM)
 
 // Text drawing functions
-RLAPI void DrawText(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
-RLAPI void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);    // Draw text using font and additional parameters
-RLAPI void DrawTextPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
-RLAPI void DrawTextCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint);   // Draw one character (codepoint)
+ASCAPI void Text_Draw(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
+ASCAPI void Text_DrawEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);    // Draw text using font and additional parameters
+ASCAPI void Text_DrawPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint); // Draw text using Font and pro parameters (rotation)
+ASCAPI void Text_DrawCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint);   // Draw one character (codepoint)
 
 // Text font info functions
 RLAPI int MeasureText(const char *text, int fontSize);                                      // Measure string width for default font
@@ -1305,14 +1145,6 @@ RLAPI Vector2 MeasureTextEx(Font font, const char *text, float fontSize, float s
 RLAPI int GetGlyphIndex(Font font, int codepoint);                                          // Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
 RLAPI GlyphInfo GetGlyphInfo(Font font, int codepoint);                                     // Get glyph font info data for a codepoint (unicode character), fallback to '?' if not found
 RLAPI Rectangle GetGlyphAtlasRec(Font font, int codepoint);                                 // Get glyph rectangle in font atlas for a codepoint (unicode character), fallback to '?' if not found
-
-// Text codepoints management functions (unicode characters)
-RLAPI int *LoadCodepoints(const char *text, int *count);              // Load all codepoints from a UTF-8 text string, codepoints count returned by parameter
-RLAPI void UnloadCodepoints(int *codepoints);                         // Unload codepoints data from memory
-RLAPI int GetCodepointCount(const char *text);                        // Get total number of codepoints in a UTF-8 encoded string
-RLAPI int GetCodepoint(const char *text, int *bytesProcessed);        // Get next codepoint in a UTF-8 encoded string, 0x3f('?') is returned on failure
-RLAPI const char *CodepointToUTF8(int codepoint, int *byteSize);      // Encode one codepoint into UTF-8 byte array (array length returned as parameter)
-RLAPI char *TextCodepointsToUTF8(int *codepoints, int length);        // Encode text as codepoints array into UTF-8 text string (WARNING: memory must be freed!)
 
 // Text strings management functions (no UTF-8 strings, only byte chars)
 // NOTE: Some strings allocate memory internally for returned strings, just be careful!

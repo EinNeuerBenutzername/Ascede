@@ -45,6 +45,21 @@
 					<Add library="bin/Release/libascede.a" />
 					<Add library="../win32_lib/libgdi32.a" />
 					<Add library="../win32_lib/libopengl32.a" />
+				</Linker>
+			</Target>
+			<Target title="DLL">
+				<Option output="bin/Release/ascede" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Release" />
+				<Option object_output="obj/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="../win32_lib/libgdi32.a" />
+					<Add library="../win32_lib/libopengl32.a" />
 					<Add library="../win32_lib/libwinmm.a" />
 				</Linker>
 			</Target>
@@ -68,45 +83,54 @@
 		<Unit filename="config.h">
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="raymath.h" />
 		<Unit filename="rcore.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="rglfw.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="rlgl.h">
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="rshapes.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="rtext.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="rtextures.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="utils.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Unit filename="utils.h">
 			<Option target="Debug" />
 			<Option target="Release" />
+			<Option target="DLL" />
 		</Unit>
 		<Extensions />
 	</Project>

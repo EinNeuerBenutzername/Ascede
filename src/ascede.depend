@@ -27,7 +27,7 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1647741127 g:\-guten\prog\c\proj\ascede\src\config.h
+1647761273 g:\-guten\prog\c\proj\ascede\src\config.h
 
 1647697203 g:\-guten\prog\c\proj\ascede\src\utils.h
 	<stdio.h>
@@ -208,7 +208,7 @@
 	<wchar.h>
 	<errno.h>
 
-1647740407 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
+1647760664 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -720,14 +720,14 @@
 	<unistd.h>
 	<math.h>
 
-1647742940 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
+1647747611 source:g:\-guten\prog\c\proj\ascede\src\rshapes.c
 	"ascede.h"
 	"config.h"
 	"rlgl.h"
 	<math.h>
 	<float.h>
 
-1647741121 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
+1647759770 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -758,7 +758,7 @@
 	<string.h>
 	<string.h>
 
-1647739074 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
+1647760372 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -1683,7 +1683,7 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1647742918 g:\-guten\prog\c\proj\ascede\src\ascede.h
+1647761511 g:\-guten\prog\c\proj\ascede\src\ascede.h
 	<stdarg.h>
 	<stddef.h>
 	<stdbool.h>
@@ -1701,11 +1701,12 @@
 	<EGL/egl.h>
 	<GL/osmesa.h>
 
-1647741172 source:g:\-guten\prog\c\proj\ascede\covergen.c
+1647760310 source:g:\-guten\prog\c\proj\ascede\covergen.c
 	"src/ascede.h"
 	<stddef.h>
 	<stdio.h>
 	<string.h>
+	<math.h>
 
 1643071532 g:\-guten\prog\c\proj\ascede\src\external\mtwister.h
 	<inttypes.h>
