@@ -15,20 +15,21 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
 
 ## Status
 
-#### Major updates
+#### Major goals
 
 - [x] removed 3D support
   - this includes every single function in `model` and `mesh` modules and several other functions like `BeginMode3D()` and `EndMode3D()`.
-- [x] removed camera support
+- [x] remove camera support
 - [x] killed snapshot and screen recording
-- [ ] remove text manipulation
-  - some strings allocate memory internally for returned strings. just why...
+- [x] remove text manipulation
+  -  these functions remain: `TextIsEqual()`, `TextLength()`, `TextFormat()` and `TextToLower()`.
+  - functions for UTF-8 and Unicode conversion are removed as well.
 - [x] remake timing & frame control
 - [ ] **rearrange API**
   - [x] **window** & **monitor**, **cursor**
   - [x] **mouse**, **touch**, **gamepad**, **keys**
   - [x] **time**, **events**
-  - [ ] buffer, textures
+  - [ ] buffer, textures, **rendertextures**
   - [ ] draw modes, shaders
   - [ ] filesystem, data
   - [ ] shapes, colors
@@ -36,9 +37,14 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
   - [ ] image
   - [ ] audio
 - [ ] improve audio precision
+- [ ] improve FPS controls
+  - currently it shows the totally accurate FPS, but the number is totally unstable.
+  - there should be a way to stabilize the number.
 - [ ] add instancing
+- [ ] further improve memory controls and prevent leakage
+  - I honestly don't think that Ray's done a good job on that. Raylib is just filled with dangerous functions that might cause memory leakage.
 
-#### Minor updates
+#### Minor goals
 
 - [x] removed string manipulation support
 - [x] removed bad RNG
@@ -46,7 +52,11 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
 - [x] removed VR support
 - [x] removed value storage
 - [x] removed all functions drawing circular shapes
-- [ ] **change the default font**
+  - this is because raylib draws circles by drawing 36 triangles, which is extremely slow.
+  - on my PC, raylib draws 50k bunnies in the `bunnymark` example but could only draw ~2.6k circles per frame (all 60 FPS). Not very performant.
+- [x] removed all functions drawing outlines of shapes
+  - I find them just ugly.
+- [ ] change the default font
 
 #### Specific function changes
 
@@ -64,16 +74,23 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
 
 
 - [x] killed timing controls in `BeginDrawing()`, which I didn't notice before. Why are they just everywhere?
+- [x] removed `LoadTextureCubemap()`.
+- [x] removed `UpdateTexture()` and `UpdateTextureRec`.
+- [x] removed `DrawTexturePoly()`.
+- [ ] these functions are removed to prevent memory leak:
+  - `CompressData()`, `DecompressData()`
 
 ...
 
-#### Very Problematic
+#### Problematic / worth noticing
 
-- [ ] Timing functions, esp. `Time_Sleep()`, extremely lack precision.
+- [ ] timing functions, especially `Time_Sleep()`, lack precision on Windows.
+  - this is probably because raylib's FPS control function in `EndDrawing()` just claims that it had slept for the required period of time while it actually hadn't.
+- [ ] `Texture_LoadFromImage()`
 
 ## API
 
-#### v0.4.5.3 Cheatsheet
+#### v0.5.6.6 Cheatsheet
 
 ```c
 ASCAPI void Buffer_Init();
@@ -100,6 +117,7 @@ ASCAPI void Cursor_Disable(void);
 // Lock cursor
 ASCAPI bool Cursor_IsOnScreen(void);
 // Check if cursor is on screen
+
 
 ASCAPI void Events_Poll();
 // Poll events
@@ -133,6 +151,27 @@ ASCAPI bool Gamepad_IsUp(int gamepad, int button);
 // Check if a gamepad button is not being pressed
 ASCAPI int Gamepad_GetPressed(void);
 // Get the last gamepad button pressed
+
+ASCAPI Image Image_Load(const char *fileName);
+// Load image from file into RAM
+ASCAPI Image Image_LoadRaw(const char *fileName, int width, int height, int format, int headerSize);
+// Load image from RAW file data
+ASCAPI Image Image_LoadAnim(const char *fileName, int *frames); 
+// Load image sequence from file (frames appended to image.data)
+ASCAPI Image Image_LoadFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);
+// Load image from memory buffer, fileType refers to extension: i.e. '.png'
+ASCAPI Image Image_LoadFromTexture(Texture2D texture);
+// Load image from GPU texture data
+ASCAPI Image Image_Gen(int width, int height, Color color);
+// Generate an image with plain colors
+ASCAPI void Image_Free(Image image);
+// Unload image from RAM
+ASCAPI Image Image_Screenshot(void);
+// Load an image from current framebuffer
+ASCAPI bool Image_Export(Image image, const char *fileName);
+// Export image data to file
+ASCAPI bool Image_ExportCode(Image image, const char *fileName);
+// Export image as code file defining an array of bytes, returns true on success
 
 ASCAPI bool Key_IsPressed(int key);
 // Check if a key has been pressed
@@ -195,6 +234,15 @@ ASCAPI float Mouse_GetWheelDelta(void);
 ASCAPI void Mouse_SetCursor(void);
 // Set mouse cursor
 
+ASCAPI RenderTexture2D RenderTexture_Load(int width, int height);
+// Create a render texture (framebuffer)
+ASCAPI void RenderTexture_Free(RenderTexture2D target);
+// Unload render texture
+ASCAPI void RenderTexture_Init(RenterTexture2D target);
+// Begin drawing to render texture
+ASCAPI void RenderTexture_Update(void);
+// End drawing current render texture
+
 ASCAPI int RNG_Gen(int min, int max);
 // Get a random value in range [min, max]
 ASCAPI void RNG_Init(unsigned int seed);
@@ -204,10 +252,39 @@ ASCAPI void RNG_SetState(int state);
 ASCAPI void RNG_GetState(void);
 // Get the current state of the RNG
 
+ASCAPI void Shape_DrawRec(int posX, int posY, int width, int height, Color color);
+// Draw a color-filled rectangle
+ASCAPI void Shape_DrawRecV(Vector2 position, Vector2 size, Color color);
+// Draw a color-filled rectangle with vectorized parameters
+ASCAPI void Shape_DrawRecRec(Rectangle rec, Color color);
+// Draw a color-filld rectangle
+
+ASCAPI void Text_Draw(const char *text, int posX, int posY, int fontSize, Color color);
+// Draw text with default font
+ASCAPI void Text_DrawEx(Font font, const char *text, Vector2 position, float fontsize, float spacing, Color tint);
+// Draw text with custom font and extended parameters
+ASCAPI void Text_DrawPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint);
+// Draw text with even more parameters
+ASCAPI void Text_DrawCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint);
+// Draw one character (codepoint)
+
+ASCAPI Texture2D Texture_Load(const char *fileName);
+// Load a texture from file
+ASCAPI Texture2D Texture_LoadFromImage(Image image);
+// Load a texture from an image
+ASCAPI void Texture_Free(Texture2D texture);
+// Unload texture from GPU
+ASCAPI void Texture_Update(Texture2D texture, const void *pixels);
+// Update texture with new data
 ASCAPI void Texture_SetFilter(Texture2D texture, int filter);
 // Set texture filter, e.g. TEXTURE_FILTER_POINT, TEXTURE_FILTER_BILINEAR
 ASCAPI void Texture_SetWrap(Texture2D texture, int wrap);
 // Set texture wrap, e.g. TEXTURE_WRAP_REPEAT, TEXTURE_WRAP_CLAMP
+ASCAPI void Texture_GenMipmaps(Texture2D *texture);
+// Generate GPU mipmaps for the texture
+ASCAPI void Texture_Draw(Texture2D texture, int posX, int posY, Color tint);
+// Draw a Texture2D. When the tint parameter is WHITE, it does not change the texture's colors.
+
 
 ASCAPI float Time_GetFPS(void);
 // Get current FPS
@@ -218,7 +295,7 @@ ASCAPI double Time_Get();
 ASCAPI void Time_Sleep(float ms);
 // Halt the program for several milliseconds
 ASCAPI void Time_SoftSleep(float ms);
-// Worse precision but less cpu usage
+// Not very good precision but much less cpu usage
 ASCAPI void Time_Wait(float targetFPS);
 // Call this at the end of a loop
 ASCAPI void Time_SoftWait(float targetFPS);
@@ -313,6 +390,45 @@ int main(){
     }
     return 0;
 }
+```
+
+#### Notes
+
+```c
+// A Texture2D is the same as a Texture.
+typedef Texture Texture2D;
+
+// A RenderTexture2D consists of two textures.
+typedef struct RenderTexture {
+    unsigned int id;        // OpenGL framebuffer object id
+    Texture texture;        // Color buffer attachment texture
+    Texture depth;          // Depth buffer attachment texture
+} RenderTexture;
+
+// To use a RenderTexture2D
+Window_Init(400, 300);
+RenderTexture2D rtx = RenderTexture_Load(400, 300); // Create the rendertexture
+// Then, in each loop:
+RenderTexture_Init(rtx); // Start drawing on rtx
+    // Draw something...
+RenderTexture_Update(); // Update current render texture
+Texture_Draw(rtx.texture, 0, 0, WHITE); // Draw this render texture on screen
+
+// If you want to scale or rotate your texture, consider setting its filters to TEXTURE_FILTER_BILINEAR or TEXTURE_FILTER_TRILINEAR to avoid bleeding edges.
+Image img = LoadImage("bunny.png");
+Texture2D texture = Texture_LoadFromImage(img);
+Texture_SetFilter(texture, TEXTURE_FILTER_BILINEAR);
+
+// Ascede uses double-buffering, so if the framebuffer is only updated once, this function would produce a blank image of the current, unupdated framebuffer. To avoid that, either at least update the framebuffer twice before using this function or use this function before Buffer_Update().
+Image_Screenshot()
+    
+// FPS controls
+// The Events_Poll() or Events_Wait() functions should always be used first in a loop, and the Events_Endloop() is required to end a loop.
+Events_Poll();
+Events_Wait();
+Events_EndLoop();
+// With Events_Wait(), it's not very necessary to use Time_*() functions. But with Events_Poll(), Time_Wait() and similar functions are required to lower CPU usage. Time_SoftWait() has even lower CPU usage.
+Time_SoftWait(60); // Target FPS: 60
 ```
 
 ## Related projects
