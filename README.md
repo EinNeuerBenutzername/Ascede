@@ -13,19 +13,21 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
 - Ascede's target platforms are desktop platforms, mainly Windows. It would rarely be tested on Linux and MacOS.
 - I won't accept collaborations and pull requests because that would complicate my work.
 
+If you find these clauses acceptable, you may start using Ascede. Please remember to check the "**Important notes for novice users**" below. It introduces several probably crucial tips and tricks in Ascede.
+
 ## Status
 
 #### Major goals
 
-- [x] removed 3D support
-  - this includes every single function in `model` and `mesh` modules and several other functions like `BeginMode3D()` and `EndMode3D()`.
-- [x] remove camera support
-- [x] killed snapshot and screen recording
-- [x] remove text manipulation
-  -  these functions remain: `TextIsEqual()`, `TextLength()`, `TextFormat()` and `TextToLower()`.
-  - functions for UTF-8 and Unicode conversion are removed as well.
-- [x] remake timing & frame control
-- [ ] **rearrange API**
+- [x] Removed 3D support
+  - This includes every single function in `model` and `mesh` modules and several other functions like `BeginMode3D()` and `EndMode3D()`.
+- [x] Remove camera support
+- [x] Killed snapshot and screen recording
+- [x] Remove text manipulation
+  -  These functions remain: `TextIsEqual()`, `TextLength()`, `TextFormat()` and `TextToLower()`.
+  - Functions for UTF-8 and Unicode conversion are removed as well.
+- [x] Remake timing & frame control
+- [ ] **Rearrange API**
   - [x] **window** & **monitor**, **cursor**
   - [x] **mouse**, **touch**, **gamepad**, **keys**
   - [x] **time**, **events**
@@ -36,36 +38,37 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
   - [ ] text, font
   - [ ] image
   - [ ] audio
-- [ ] improve audio precision
-- [ ] improve FPS controls
+- [x] Improve FPS controls (done at school, not tested)
   - currently it shows the totally accurate FPS, but the number is totally unstable.
   - there should be a way to stabilize the number.
-- [ ] add instancing
-- [ ] further improve memory controls and prevent leakage
-  - I honestly don't think that Ray's done a good job on that. Raylib is just filled with dangerous functions that might cause memory leakage.
+- [ ] Add instancing
+- [ ] Further improve memory controls and prevent leakage
+  - [ ] I honestly don't think that Ray's done a good job on that. Raylib is just filled with dangerous functions that might cause memory leakage.
+- [ ] Improve audio precision
+- [ ] Add audio channeling
 
 #### Minor goals
 
-- [x] removed string manipulation support
-- [x] removed bad RNG
+- [x] Removed string manipulation support
+- [x] Removed bad RNG
   - `GetCurrentMonitor()` is required in `ToggleFullscreen()`
-- [x] removed VR support
-- [x] removed value storage
-- [x] removed all functions drawing circular shapes
+- [x] Removed VR support
+- [x] Removed value storage
+- [x] Removed all functions drawing circular shapes
   - this is because raylib draws circles by drawing 36 triangles, which is extremely slow.
   - on my PC, raylib draws 50k bunnies in the `bunnymark` example but could only draw ~2.6k circles per frame (all 60 FPS). Not very performant.
-- [x] removed all functions drawing outlines of shapes
+- [x] Removed all functions drawing outlines of shapes
   - I find them just ugly.
-- [ ] change the default font
+- [ ] Change the default font
 
 #### Specific function changes
 
-- [x] removed `EndDrawing()`
+- [x] Removed `EndDrawing()`
 
   - `Buffer_Update()` does the "end drawing" part and the `Events_EndLoop` does the rest.
   - I hate this design.
 
-- [x] removed the following lines from `WindowShouldClose()`
+- [x] Removed the following lines from `WindowShouldClose()`
 
   ```C
       // While window minimized, stop loop execution
@@ -73,24 +76,33 @@ What I'm doing here is basically cutting out some parts of raylib to enhance my 
   ```
 
 
-- [x] killed timing controls in `BeginDrawing()`, which I didn't notice before. Why are they just everywhere?
-- [x] removed `LoadTextureCubemap()`.
-- [x] removed `UpdateTexture()` and `UpdateTextureRec`.
-- [x] removed `DrawTexturePoly()`.
-- [ ] these functions are removed to prevent memory leak:
+- [x] Killed timing controls in `BeginDrawing()`, which I didn't notice before. Why are they just everywhere?
+- [x] Removed `LoadTextureCubemap()`.
+- [x] Removed `UpdateTexture()` and `UpdateTextureRec`.
+- [x] Removed `DrawTexturePoly()`.
+- [x] These functions are removed to prevent memory leak:
+  
   - `CompressData()`, `DecompressData()`
+- [x] In `InitGraphicsDevice()`, commented this line:
+  ```C
+      const int fps = (CORE.Time.target > 0) ? (1.0/CORE.Time.target) : 60;
+  ```
+  - I don't actually know what this does.
 
 ...
 
 #### Problematic / worth noticing
 
-- [ ] timing functions, especially `Time_Sleep()`, lack precision on Windows.
-  - this is probably because raylib's FPS control function in `EndDrawing()` just claims that it had slept for the required period of time while it actually hadn't.
+- [x] Timing functions, especially `Time_Sleep()`, lack precision on Windows.
+  - This is probably because raylib's FPS control function in `EndDrawing()` just claims that it had slept for the required period of time while it actually hadn't.
+  - To solve the problem, I introduced two functions: `Time_GetFPS()`, which is only an indicator of whether the program is running without latency, and `Time_GetRealFPS()`, a function that returns the actual FPS.
+  - Usually, we don't need to know whether the program is running on 60.00 FPS or 60.12 FPS. Ascede uses a tolerant FPS controlling mechanic that adjusts sleeping time after each loop, so the overall FPS should be accurate as long as there aren't lags.
+  - In development, I strongly recommend using `Time_GetFPS()` instead of `Time_GetRealFPS()`.
 - [ ] `Texture_LoadFromImage()`
 
 ## API
 
-#### v0.5.6.6 Cheatsheet
+#### v0.6.6.9 Cheatsheet
 
 ```c
 ASCAPI void Buffer_Init();
@@ -124,7 +136,7 @@ ASCAPI void Events_Poll();
 ASCAPI void Events_Wait();
 // Wait for events
 ASCAPI void Events_EndLoop();
-// End the loop
+// End the loop and do clean-ups
 
 ASCAPI Font Font_Load(const char *fileName);
 // Load a font from file into VRAM
@@ -290,16 +302,16 @@ ASCAPI float Time_GetFPS(void);
 // Get current FPS
 ASCAPI float Time_GetFrame(void);
 // Get time in seconds for the last frame drawn
+ASCAPI float Time_GetRealFPS(void);
+// Get real current FPS
+ASCAPI float Time_GetRealFrame(void);
+// Get accurate time in seconds for the last frame drawn
 ASCAPI double Time_Get();
 // Get elapsed time in seconds
 ASCAPI void Time_Sleep(float ms);
 // Halt the program for several milliseconds
-ASCAPI void Time_SoftSleep(float ms);
-// Not very good precision but much less cpu usage
 ASCAPI void Time_Wait(float targetFPS);
 // Call this at the end of a loop
-ASCAPI void Time_SoftWait(float targetFPS);
-// Time_Wait() that calls Time_SoftSleep() instead of Time_Sleep()
 
 ASCAPI void Touch_GetX(void);
 // Get touch position for touch point 0 or mouse position on desktop, relative to screen size
@@ -380,32 +392,38 @@ int main(){
     Key_SetExitHotkey(KEY_ESCAPE);      // the program exits when the key is pressed
     while(!Window_ShouldClose()){
         Events_Poll();                  // poll input events at the start of a loop
-    
+        // Main loop starts
         Buffer_Init();                  // ready to start drawing
         Buffer_Clear(WHITE);            // clear background with the color white
         Buffer_Update();                // end drawing
-    
-        Time_SoftWait(60);              // the target fps is 60
+        // <ain loop ends
+        Time_Wait(60);                  // the target fps is 60
         Events_EndLoop();               // do the cleanups
     }
     return 0;
 }
 ```
 
-#### Notes
+#### Important notes for novice users
 
-```c
+###### Texture2D and RenderTexture2D
+```C
 // A Texture2D is the same as a Texture.
 typedef Texture Texture2D;
+```
 
+```C
 // A RenderTexture2D consists of two textures.
 typedef struct RenderTexture {
     unsigned int id;        // OpenGL framebuffer object id
     Texture texture;        // Color buffer attachment texture
     Texture depth;          // Depth buffer attachment texture
 } RenderTexture;
+```
 
+```C
 // To use a RenderTexture2D
+
 Window_Init(400, 300);
 RenderTexture2D rtx = RenderTexture_Load(400, 300); // Create the rendertexture
 // Then, in each loop:
@@ -413,22 +431,54 @@ RenderTexture_Init(rtx); // Start drawing on rtx
     // Draw something...
 RenderTexture_Update(); // Update current render texture
 Texture_Draw(rtx.texture, 0, 0, WHITE); // Draw this render texture on screen
+```
 
+```C
 // If you want to scale or rotate your texture, consider setting its filters to TEXTURE_FILTER_BILINEAR or TEXTURE_FILTER_TRILINEAR to avoid bleeding edges.
 Image img = LoadImage("bunny.png");
 Texture2D texture = Texture_LoadFromImage(img);
 Texture_SetFilter(texture, TEXTURE_FILTER_BILINEAR);
+```
+
+```C
+// Screenshots
 
 // Ascede uses double-buffering, so if the framebuffer is only updated once, this function would produce a blank image of the current, unupdated framebuffer. To avoid that, either at least update the framebuffer twice before using this function or use this function before Buffer_Update().
 Image_Screenshot()
-    
+```
+
+###### Timing and FPS controls
+
+```C
 // FPS controls
+
 // The Events_Poll() or Events_Wait() functions should always be used first in a loop, and the Events_Endloop() is required to end a loop.
-Events_Poll();
-Events_Wait();
-Events_EndLoop();
-// With Events_Wait(), it's not very necessary to use Time_*() functions. But with Events_Poll(), Time_Wait() and similar functions are required to lower CPU usage. Time_SoftWait() has even lower CPU usage.
-Time_SoftWait(60); // Target FPS: 60
+while(!Window_ShouldClose()){
+    Events_Wait();
+    // the main loop here...
+    Events_EndLoop();
+}
+
+// With Events_Wait(), it's not very necessary to use Time_*() functions. But with Events_Poll(), Time_Wait() is required to lower CPU usage.
+while(!Window_ShouldClose()){
+    Events_Poll();
+    // the main loop here...
+    Time_Wait(60); // Target FPS: 60
+    Events_EndLoop();
+}
+```
+
+```C
+// FPS statistics
+
+// These are not actual FPS and frame time, but indicators of wheter the game is working properly. They are calculated ONLY in Time_Wait().
+Time_GetFPS();
+Time_GetFrame();
+// If there isn't a Time_Wait() in your loop, please consider adding one. These functions would return the same values as their "real" alternatives when the loop is without Time_Wait() functions.
+
+// These functions below return actual FPS statistics. They are calculated in Events_Endloop() and are totally accurate.
+Time_GetRealFPS();
+Time_GetRealFrame();
 ```
 
 ## Related projects
