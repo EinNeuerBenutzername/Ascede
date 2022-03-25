@@ -836,13 +836,13 @@ ASCAPI void Events_Wait(void);                                 // Register all i
 ASCAPI void Events_EndLoop(void);
 
 // Timing-related functions
-ASCAPI float Time_GetFPS(void);                                           // Get current FPS
-ASCAPI float Time_GetFrame(void);                                   // Get time in seconds for last frame drawn (delta time)
+ASCAPI float Time_GetFPS(void);
+ASCAPI float Time_GetFrame(void);
+ASCAPI float Time_GetRealFPS(void);                                           // Get current FPS
+ASCAPI float Time_GetRealFrame(void);                                   // Get time in seconds for last frame drawn (delta time)
 ASCAPI double Time_Get(void);                                      // Get elapsed time in seconds since InitWindow()
-ASCAPI void Time_Sleep(float ms);                                  // Precise sleep
-ASCAPI void Time_SoftSleep(float ms);
+ASCAPI void Time_Sleep(float ms);
 ASCAPI void Time_Wait(float targetFPS);
-ASCAPI void Time_SoftWait(float targetFPS);
 
 // Cursor-related functions
 ASCAPI void Cursor_Show(void);                                      // Shows cursor

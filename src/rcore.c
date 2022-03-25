@@ -125,15 +125,6 @@
     #include "rgestures.h"           // Gestures detection functionality
 #endif
 
-#if defined(SUPPORT_COMPRESSION_API)
-    #define SINFL_IMPLEMENTATION
-    #define SINFL_NO_SIMD
-    #include "external/sinfl.h"     // Deflate (RFC 1951) decompressor
-
-    #define SDEFL_IMPLEMENTATION
-    #include "external/sdefl.h"     // Deflate (RFC 1951) compressor
-#endif
-
 #if (defined(__linux__) || defined(PLATFORM_WEB)) && _POSIX_C_SOURCE < 199309L
     #undef _POSIX_C_SOURCE
     #define _POSIX_C_SOURCE 199309L // Required for: CLOCK_MONOTONIC if compiled with c99 without gnu ext.
@@ -450,7 +441,11 @@ typedef struct CoreData {
         double update;                      // Time measure for frame update
         double draw;                        // Time measure for frame draw
         double frame;                       // Time measure for one frame
-        double target;                      // Desired time for one frame, if 0 not applied
+        double realframe;
+        float fps;
+        float realfps;
+        bool unreal;
+//        double target;                      // Desired time for one frame, if 0 not applied
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
         unsigned long long base;            // Base time measure for hi-res timer
 #endif
@@ -2097,32 +2092,26 @@ void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
 // NOTE: We calculate an average framerate
 float Time_GetFPS(void)
 {
-    float fps = 0;
-
-    #define FPS_CAPTURE_FRAMES_COUNT    30
-
-    static int index = 0;
-    static float history[FPS_CAPTURE_FRAMES_COUNT] = { 0 };
-    static float average = 0, last = 0;
-    float fpsFrame = Time_GetFrame();
-
-    if (fpsFrame == 0) return 0;
-
-        last = (float)Time_Get();
-        index = (index + 1)%FPS_CAPTURE_FRAMES_COUNT;
-        average -= history[index];
-        history[index] = fpsFrame/FPS_CAPTURE_FRAMES_COUNT;
-        average += history[index];
-
-    fps = 1.0f/average;
-
-    return fps;
+    return CORE.Time.fps;
 }
 
 // Get time in seconds for last frame drawn (delta time)
 float Time_GetFrame(void)
 {
     return (float)CORE.Time.frame;
+}
+
+// Get current FPS
+// NOTE: We calculate an average framerate
+float Time_GetRealFPS(void)
+{
+    return CORE.Time.realfps;
+}
+
+// Get time in seconds for last frame drawn (delta time)
+float Time_GetRealFrame(void)
+{
+    return (float)CORE.Time.realframe;
 }
 
 // Get elapsed time measure in seconds since InitTimer()
@@ -2150,45 +2139,7 @@ double Time_Get(void)
 // Ref: http://www.geisswerks.com/ryan/FAQS/timing.html --> All about timming on Win32!
 void Time_Sleep(float ms)
 {
-    if(ms<0)return;
-    double busyWait = ms*0.05;     // NOTE: We are using a busy wait of 5% of the time
-    ms -= (float)busyWait;
-
-    // System halt functions
-    #if defined(_WIN32)
-        Sleep((unsigned int)ms);
-    #endif
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__EMSCRIPTEN__)
-        struct timespec req = { 0 };
-        time_t sec = (int)(ms/1000.0f);
-        ms -= (sec*1000);
-        req.tv_sec = sec;
-        req.tv_nsec = ms*1000000L;
-
-        // NOTE: Use nanosleep() on Unix platforms... usleep() it's deprecated.
-        while (nanosleep(&req, &req) == -1) continue;
-    #endif
-    #if defined(__APPLE__)
-        usleep(ms*1000.0f);
-    #endif
-
-    double previousTime = Time_Get();
-    double currentTime = 0.0;
-
-    // Partial busy wait loop (only a fraction of the total wait time)
-    while ((currentTime - previousTime) < busyWait/1000.0f) currentTime = Time_Get();
-}
-
-void Time_SoftSleep(float ms)
-{
     if(ms<=0)return;
-    static double extratime=0;
-    double previoustime=Time_Get();
-    double targetwaittime=ms;
-    // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
-    if(extratime>targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
-    double wait=(targetwaittime+extratime)*1000.0f;
-
     #if defined(_WIN32)
         Sleep((unsigned int)ms);
     #endif
@@ -2205,28 +2156,9 @@ void Time_SoftSleep(float ms)
     #if defined(__APPLE__)
         usleep(ms*1000.0f);
     #endif
-
-    double currenttime=Time_Get();
-    extratime=previoustime+targetwaittime+extratime-currenttime;
 }
 
 void Time_Wait(float targetFPS)
-{
-    if(targetFPS<=0)return;
-    if(targetFPS>32767)return;
-    static double extratime=0;
-    double previoustime=CORE.Time.previous;
-    double targetwaittime=1.0f/targetFPS;
-    double waittime=targetwaittime-Time_Get()+previoustime;
-    // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
-    if(extratime<0-targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
-    double wait=(waittime+extratime)*1000.0f;
-    Time_Sleep(wait);
-    double currenttime=Time_Get();
-    extratime=previoustime+targetwaittime+extratime-currenttime;
-}
-
-void Time_SoftWait(float targetFPS)
 {
 //    CORE.Time.current = Time_Get();
 //    CORE.Time.draw = CORE.Time.current - CORE.Time.previous;
@@ -2246,12 +2178,19 @@ void Time_SoftWait(float targetFPS)
     double previoustime=CORE.Time.previous;
     double targetwaittime=1.0f/targetFPS;
     double waittime=targetwaittime-Time_Get()+previoustime;
+    double curframetime=Time_Get()-previoustime;
     // If fps drops for more than 5 frames AND more than 100 milliseconds, it forgets the gap.
     if(extratime<0-targetwaittime*5.0f&&extratime<-0.1f)extratime=0;
+    if(extratime>targetwaittime*5.0f&&extratime>0.1f)extratime=0;
     double wait=(waittime+extratime)*1000.0f;
-    Time_SoftSleep(wait);
+    Time_Sleep(wait);
     double currenttime=Time_Get();
     extratime=previoustime+targetwaittime+extratime-currenttime;
+
+    if(curframetime<targetwaittime){
+        CORE.Time.unreal=true;
+        CORE.Time.frame=targetwaittime;
+    }else CORE.Time.unreal=false;
 }
 
 // Setup window configuration flags (view FLAGS)
@@ -3484,7 +3423,7 @@ static bool InitGraphicsDevice(int width, int height)
     }
 
     const bool allowInterlaced = CORE.Window.flags & FLAG_INTERLACED_HINT;
-    const int fps = (CORE.Time.target > 0) ? (1.0/CORE.Time.target) : 60;
+//    const int fps = (CORE.Time.target > 0) ? (1.0/CORE.Time.target) : 60;
     // try to find an exact matching mode
     CORE.Window.modeIndex = FindExactConnectorMode(CORE.Window.connector, CORE.Window.screen.width, CORE.Window.screen.height, fps, allowInterlaced);
     // if nothing found, try to find a nearly matching mode
@@ -4570,9 +4509,40 @@ void Events_EndLoop(void){
 #endif
 
     CORE.Time.current=Time_Get();
-    CORE.Time.frame=CORE.Time.current-CORE.Time.previous;
+    CORE.Time.realframe=CORE.Time.current-CORE.Time.previous;
     CORE.Time.previous=CORE.Time.current;
     CORE.Time.frameCounter++;
+
+    // FPS calculation at the end of each loop
+    #define FPS_CAPTURE_FRAMES_COUNT    30
+    static int realIndex = 0;
+    static float realHistory[FPS_CAPTURE_FRAMES_COUNT] = { 0 };
+    static float realAverage = 0;
+    float fpsRealFrame = CORE.Time.realframe;
+    if (!fpsRealFrame == 0){
+        realIndex = (realIndex + 1)%FPS_CAPTURE_FRAMES_COUNT;
+        realAverage -= realHistory[realIndex];
+        realHistory[realIndex] = fpsRealFrame/(float)FPS_CAPTURE_FRAMES_COUNT;
+        realAverage += realHistory[realIndex];
+        CORE.Time.realfps = 1.0f/realAverage;
+    }else CORE.Time.realfps=0;
+
+    if(!CORE.Time.unreal){
+        CORE.Time.frame=CORE.Time.realframe;
+    }
+    CORE.Time.unreal=false;
+
+    static int index = 0;
+    static float history[FPS_CAPTURE_FRAMES_COUNT] = { 0 };
+    static float average = 0;
+    float fpsFrame = CORE.Time.frame;
+    if (fpsFrame != 0){
+        index = (index + 1)%FPS_CAPTURE_FRAMES_COUNT;
+        average -= history[index];
+        history[index] = fpsFrame/(float)FPS_CAPTURE_FRAMES_COUNT;
+        average += history[index];
+        CORE.Time.fps = 1.0f/average;
+    }else CORE.Time.fps=0;
 }
 
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
