@@ -21,31 +21,31 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 - [x] Removed 3D support
   - This includes every single function in `model` and `mesh` modules and several other functions like `BeginMode3D()` and `EndMode3D()`.
-- [x] Remove camera support
+- [x] Removed camera support
 - [x] Killed snapshot and screen recording
-- [x] Remove text manipulation
+- [x] Removed text manipulation
   -  These functions remain: `TextIsEqual()`, `TextLength()`, `TextFormat()` and `TextToLower()`.
   - Functions for UTF-8 and Unicode conversion are removed as well.
 - [x] Remake timing & frame control
 - [ ] **Rearrange API**
-  - [x] **window** & **monitor**, **cursor**
+  - [x] **window**, **monitor**, **cursor**
   - [x] **mouse**, **touch**, **gamepad**, **keys**
   - [x] **time**, **events**
-  - [ ] buffer, textures, **rendertextures**
-  - [ ] draw modes, shaders
-  - [ ] filesystem, data
-  - [ ] shapes, colors
+  - [x] **buffer**, **texture**, **rendertexture**, **shader**
+  - [ ] files, filesystems
+  - [ ] shape, **color**, image
   - [ ] text, font
-  - [ ] image
   - [ ] audio
-- [x] Improve FPS controls (done at school, not tested)
+- [x] Improve FPS controls
   - currently it shows the totally accurate FPS, but the number is totally unstable.
   - there should be a way to stabilize the number.
 - [ ] Add instancing
 - [ ] Further improve memory controls and prevent leakage
-  - [ ] I honestly don't think that Ray's done a good job on that. Raylib is just filled with dangerous functions that might cause memory leakage.
 - [ ] Improve audio precision
 - [ ] Add audio channeling
+- [ ] Make minimal binary size on Windows less than 750kB
+  - Current minimal size: 785.5kB (Codeblocks 20.03 / GCC 8.1)
+  - -static-libgcc -static-libstdc++ -m32 -flto -Os -s
 
 #### Minor goals
 
@@ -58,7 +58,8 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
   - this is because raylib draws circles by drawing 36 triangles, which is extremely slow.
   - on my PC, raylib draws 50k bunnies in the `bunnymark` example but could only draw ~2.6k circles per frame (all 60 FPS). Not very performant.
 - [x] Removed all functions drawing outlines of shapes
-  - I find them just ugly.
+  - [x] I find them just ugly.
+- [x] Removed collision detection functions
 - [ ] Change the default font
 
 #### Specific function changes
@@ -77,17 +78,32 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 
 - [x] Killed timing controls in `BeginDrawing()`, which I didn't notice before. Why are they just everywhere?
+
 - [x] Removed `LoadTextureCubemap()`.
+
 - [x] Removed `UpdateTexture()` and `UpdateTextureRec`.
+
 - [x] Removed `DrawTexturePoly()`.
+
 - [x] These functions are removed to prevent memory leak:
   
   - `CompressData()`, `DecompressData()`
+  
 - [x] In `InitGraphicsDevice()`, commented this line:
   ```C
       const int fps = (CORE.Time.target > 0) ? (1.0/CORE.Time.target) : 60;
   ```
   - I don't actually know what this does.
+
+- [x] Removed `DrawTextureQuad()`, `DrawTextureTiled()` and `DrawTextureNPatch()`.
+
+- [x] Removed `DrawRectangleGradientV()`, `DrawRectangleGradientH()`, `DrawRectangleGradientEx()` and `DrawRectangleRounded()`. 
+
+- [x] Extracted `ImageTextEx()`, `ImageResize()`, `ImageResizeNN()` and `ImageResizeCanvas()` from `#ifdef SUPPORT_IMAGE_MANIPULATION`. Thus `stb_image_resize.h` is included anyway.
+
+- [x] Removed `ColorToInt()`, `ColorNormalize()`, `ColorFromNormalized()`, `ColorToHSV()`, `ColorFromHSV()`, `ColorAlpha()` and `GetColor()`.
+
+- [x] Removed `OpenURL()`.
 
 ...
 
@@ -102,20 +118,39 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 ## API
 
-#### v0.6.6.9 Cheatsheet
+#### v0.6.7.14 Cheatsheet
 
 ```c
-ASCAPI void Buffer_Init();
+ASCAPI void Buffer_Begin(void);
 // Setup framebuffer to start drawing
 ASCAPI void Buffer_Clear(Color color);
 // Clear framebuffer with a background color
-ASCAPI void Buffer_Update();
+ASCAPI void Buffer_Update(void);
 // End drawing and swap screen buffer
+ASCAPI void Buffer_BeginBlend(int mode);
+// Begin blending mode (alpha, additive, multiplied, subtract, custom)
+ASCAPI void Buffer_UpdateBlend(void);
+// End blending mode (reset to default: alpha blending)
+ASCAPI void Buffer_BeginScissor(int x, int y, int width, int height);
+// Begin scissor mode (define screen area for following drawing)
+ASCAPI void Buffer_EndScissor(void);
+// End scissor mode
 
 ASCAPI const char * Clipboard_Get(void);
 // Get clipboard text content
 ASCAPI void Clipboard_Set(const char *text);
 // Set clipboard text content
+
+ASCAPI Color Color_Fade(Color color, float alpha);
+// Get color with alpha applied, alpha goes from 0.0f to 1.0f
+ASCAPI Color Color_AlphaBlend(Color dst, Color src, Color tint);
+// Get src alpha-blended into dst color with tint
+ASCAPI Color Color_GetPixel(void *srcPtr, int format);
+// Get Color from a source pixel pointer of certain format
+ASCAPI void Color_SetPixel(void *dstPtr, Color color, int format);
+// Set color formatted into destination pixel pointer
+ASCAPI void Color_GetPixelDataSize(int width, int height, int format);
+// Get pixel data size in bytes for certain format
 
 ASCAPI void Cursor_Show(void);
 // Show cursor
@@ -142,6 +177,7 @@ ASCAPI Font Font_Load(const char *fileName);
 // Load a font from file into VRAM
 ASCAPI Font Font_LoadEx(const char *fileName, int fontSize, int *fontChars, int glyphCount);
 // Load a font from file with extended parameters
+
 
 ASCAPI bool Gamepad_IsAvailable(int gamepad);
 // Check if a gamepad is available
@@ -170,7 +206,7 @@ ASCAPI Image Image_LoadRaw(const char *fileName, int width, int height, int form
 // Load image from RAW file data
 ASCAPI Image Image_LoadAnim(const char *fileName, int *frames); 
 // Load image sequence from file (frames appended to image.data)
-ASCAPI Image Image_LoadFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);
+ASCAPI Image Image_LoadMem(const char *fileType, const unsigned char *fileData, int dataSize);
 // Load image from memory buffer, fileType refers to extension: i.e. '.png'
 ASCAPI Image Image_LoadFromTexture(Texture2D texture);
 // Load image from GPU texture data
@@ -250,11 +286,13 @@ ASCAPI RenderTexture2D RenderTexture_Load(int width, int height);
 // Create a render texture (framebuffer)
 ASCAPI void RenderTexture_Free(RenderTexture2D target);
 // Unload render texture
-ASCAPI void RenderTexture_Init(RenterTexture2D target);
+ASCAPI void RenderTexture_Begin(RenterTexture2D target);
 // Begin drawing to render texture
 ASCAPI void RenderTexture_Update(void);
 // End drawing current render texture
 
+ASCAPI double RNG_GenD(void);
+// Get a random double in range [0,1]
 ASCAPI int RNG_Gen(int min, int max);
 // Get a random value in range [min, max]
 ASCAPI void RNG_Init(unsigned int seed);
@@ -264,6 +302,22 @@ ASCAPI void RNG_SetState(int state);
 ASCAPI void RNG_GetState(void);
 // Get the current state of the RNG
 
+ASCAPI Shader Shader_Load(const char *vsFileName, const char *fsFileName);
+// Load shader from files and bind default locations
+ASCAPI Shader Shader_LoadData(const char *vsCode, const char *fsCode);
+// Load shader from code strings and bind default locations
+ASCAPI void Shader_Free(Shader shader);
+// Free shader from VRAM
+ASCAPI void Shader_Begin(Shader shader);
+// Begin custom shader drawing
+ASCAPI void Shader_Update(void)
+// End custom shader mode (returns to default shader)
+ASCAPI int Shader_GetLoc(Shader shader, const char *uniformName);
+// Get shader uniform location
+ASCAPI int Shader_GetLocAttrib(Shader shader, const char *attribName);
+
+ASCAPI void Shape_SetTexture(Texture2D texture, Rectangle source);
+// Set texture and rectangle to be used on shapes drawing
 ASCAPI void Shape_DrawRec(int posX, int posY, int width, int height, Color color);
 // Draw a color-filled rectangle
 ASCAPI void Shape_DrawRecV(Vector2 position, Vector2 size, Color color);
@@ -296,7 +350,14 @@ ASCAPI void Texture_GenMipmaps(Texture2D *texture);
 // Generate GPU mipmaps for the texture
 ASCAPI void Texture_Draw(Texture2D texture, int posX, int posY, Color tint);
 // Draw a Texture2D. When the tint parameter is WHITE, it does not change the texture's colors.
-
+ASCAPI void Texture_DrawV(Texture2D texture, Vector2 position, Color tint);
+// Draw a Texture2D with vectorized position parameter.
+ASCAPI void Texture_DrawRec(Texture2D texture, Rectangle source, Vector2 position, Color tint);
+// Draw a part of a texture (defined by a rectangle)
+ASCAPI void Texture_DrawEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);
+// Draw a Texture2D with extended parameters
+ASCAPI void Texture_DrawPro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);
+// Draw a part of a texture (defined by a rectangle) with 'pro' parameters
 
 ASCAPI float Time_GetFPS(void);
 // Get current FPS
@@ -306,7 +367,7 @@ ASCAPI float Time_GetRealFPS(void);
 // Get real current FPS
 ASCAPI float Time_GetRealFrame(void);
 // Get accurate time in seconds for the last frame drawn
-ASCAPI double Time_Get();
+ASCAPI double Time_Get(void);
 // Get elapsed time in seconds
 ASCAPI void Time_Sleep(float ms);
 // Halt the program for several milliseconds
@@ -393,7 +454,7 @@ int main(){
     while(!Window_ShouldClose()){
         Events_Poll();                  // poll input events at the start of a loop
         // Main loop starts
-        Buffer_Init();                  // ready to start drawing
+        Buffer_Begin();                  // ready to start drawing
         Buffer_Clear(WHITE);            // clear background with the color white
         Buffer_Update();                // end drawing
         // <ain loop ends
@@ -423,11 +484,11 @@ typedef struct RenderTexture {
 
 ```C
 // To use a RenderTexture2D
-
 Window_Init(400, 300);
 RenderTexture2D rtx = RenderTexture_Load(400, 300); // Create the rendertexture
 // Then, in each loop:
-RenderTexture_Init(rtx); // Start drawing on rtx
+RenderTexture_Begin(rtx); // Start drawing on rtx
+Buffer_Clear(WHITE);
     // Draw something...
 RenderTexture_Update(); // Update current render texture
 Texture_Draw(rtx.texture, 0, 0, WHITE); // Draw this render texture on screen
