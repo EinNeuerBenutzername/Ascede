@@ -1,7 +1,5 @@
 # Ascede
 
-[TOC]
-
 ## General
 
 Ascede is a C99 2D framework, forked from the awesome game framework: [raylib](https://www.raylib.com). You can take a look if you don't know it yet.
