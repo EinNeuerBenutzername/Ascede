@@ -168,3 +168,13 @@
 // utils: Configuration values
 //------------------------------------------------------------------------------------
 #define MAX_TRACELOG_MSG_LENGTH          128    // Max length of one trace-log message
+
+//------------------------------------------------------------------------------------
+// Size minimalizer
+//------------------------------------------------------------------------------------
+//#undef SUPPORT_MONITOR_CONTROLS
+//#undef SUPPORT_GAMEPAD_CONTROLS
+//#undef SUPPORT_IMAGE_EXPORT
+//#undef SUPPORT_IMAGE_MANIPULATION
+//#undef SUPPORT_IMAGE_DRAWING
+//#undef SUPPORT_STANDARD_FILEIO

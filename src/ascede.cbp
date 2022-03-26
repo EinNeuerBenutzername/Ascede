@@ -26,10 +26,14 @@
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-Os" />
+					<Add option="-m32" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
 				</Linker>
 			</Target>
 			<Target title="Test">
@@ -38,29 +42,64 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-fomit-frame-pointer" />
 					<Add option="-Os" />
+					<Add option="-m32" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
 					<Add library="bin/Release/libascede.a" />
 					<Add library="../win32_lib/libgdi32.a" />
 					<Add library="../win32_lib/libopengl32.a" />
 				</Linker>
 			</Target>
 			<Target title="DLL">
-				<Option output="bin/Release/ascede" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="bin/Release" />
-				<Option object_output="obj/Release/" />
+				<Option output="bin/DLL/ascede" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/DLL" />
+				<Option object_output="obj/DLL/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Compiler>
+					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
+					<Add option="-fPIC" />
+					<Add option="-m32" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
 					<Add library="../win32_lib/libgdi32.a" />
 					<Add library="../win32_lib/libopengl32.a" />
-					<Add library="../win32_lib/libwinmm.a" />
+				</Linker>
+			</Target>
+			<Target title="Test_DLL">
+				<Option output="bin/DLL/ascede" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/DLL" />
+				<Option object_output="obj/DLL/" />
+				<Option external_deps="bin/DLL/ascede.dll;" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-flto" />
+					<Add option="-Os" />
+					<Add option="-m32" />
+				</Compiler>
+				<Linker>
+					<Add option="-flto" />
+					<Add option="-s" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
+					<Add library="bin/DLL/libascede.a" />
+					<Add library="../win32_lib/libgdi32.a" />
+					<Add library="../win32_lib/libopengl32.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -75,17 +114,45 @@
 			<Add option="-static" />
 			<Add option="-m32" />
 		</Linker>
-		<Unit filename="../scalaffra.c">
+		<Unit filename="../minimal.c">
 			<Option compilerVar="CC" />
 			<Option target="Test" />
+			<Option target="Test_DLL" />
 		</Unit>
 		<Unit filename="ascede.h" />
+		<Unit filename="ascmem.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="DLL" />
+		</Unit>
+		<Unit filename="ascmem.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="DLL" />
+		</Unit>
 		<Unit filename="config.h">
 			<Option target="Debug" />
 			<Option target="Release" />
 			<Option target="DLL" />
 		</Unit>
-		<Unit filename="raymath.h" />
+		<Unit filename="raudio.c">
+			<Option compilerVar="CC" />
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="DLL" />
+		</Unit>
+		<Unit filename="raudio.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="DLL" />
+		</Unit>
+		<Unit filename="raymath.h">
+			<Option target="Debug" />
+			<Option target="Release" />
+			<Option target="Test" />
+			<Option target="DLL" />
+		</Unit>
 		<Unit filename="rcore.c">
 			<Option compilerVar="CC" />
 			<Option target="Debug" />
