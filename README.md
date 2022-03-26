@@ -1,5 +1,7 @@
 # Ascede
 
+[TOC]
+
 ## General
 
 Ascede is a C99 2D framework, forked from the awesome game framework: [raylib](https://www.raylib.com). You can take a look if you don't know it yet.
@@ -19,91 +21,76 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 #### Major goals
 
-- [x] Removed 3D support
+- [x] 1. Removed 3D support
   - This includes every single function in `model` and `mesh` modules and several other functions like `BeginMode3D()` and `EndMode3D()`.
-- [x] Removed camera support
-- [x] Killed snapshot and screen recording
-- [x] Removed text manipulation
+- [x] 2. Removed camera support
+- [x] 3. Killed snapshot and screen recording
+- [x] 4. Removed text manipulation
   -  These functions remain: `TextIsEqual()`, `TextLength()`, `TextFormat()` and `TextToLower()`.
   - Functions for UTF-8 and Unicode conversion are removed as well.
-- [x] Remake timing & frame control
+- [x] 5. Remake timing & frame control
+- [x] 6. Improved FPS controls
+- [x] 7. Further improve memory controls and prevent leakage
 - [ ] **Rearrange API**
   - [x] **window**, **monitor**, **cursor**
   - [x] **mouse**, **touch**, **gamepad**, **keys**
   - [x] **time**, **events**
   - [x] **buffer**, **texture**, **rendertexture**, **shader**
   - [ ] files, filesystems
-  - [ ] shape, **color**, image
-  - [ ] text, font
-  - [ ] audio
-- [x] Improve FPS controls
-  - currently it shows the totally accurate FPS, but the number is totally unstable.
-  - there should be a way to stabilize the number.
+  - [x] **shape**, **color**, **image**
+  - [x] **text**, **font**
 - [ ] Add instancing
-- [ ] Further improve memory controls and prevent leakage
 - [ ] Improve audio precision
 - [ ] Add audio channeling
 - [ ] Make minimal binary size on Windows less than 750kB
-  - Current minimal size: 785.5kB (Codeblocks 20.03 / GCC 8.1)
+  - Current minimal size: 756.5kB (Codeblocks 20.03 / GCC 8.1)
   - -static-libgcc -static-libstdc++ -m32 -flto -Os -s
 
-#### Minor goals
+#### Minor adjustments
 
-- [x] Removed string manipulation support
-- [x] Removed bad RNG
-  - `GetCurrentMonitor()` is required in `ToggleFullscreen()`
-- [x] Removed VR support
-- [x] Removed value storage
-- [x] Removed all functions drawing circular shapes
+- [x] 1. Removed string manipulation support
+- [x] 2. Removed bad, `stdlib.h`-dependent RNG
+- [x] 3. Removed VR support
+- [x] 4. Removed value storage
+- [x] 5. Removed all functions drawing circular shapes
   - this is because raylib draws circles by drawing 36 triangles, which is extremely slow.
   - on my PC, raylib draws 50k bunnies in the `bunnymark` example but could only draw ~2.6k circles per frame (all 60 FPS). Not very performant.
-- [x] Removed all functions drawing outlines of shapes
-  - [x] I find them just ugly.
-- [x] Removed collision detection functions
+- [x] 6. Removed all functions drawing outlines of shapes
+  - I find them just ugly.
+- [x] 7. Removed collision detection functions
 - [ ] Change the default font
 
 #### Specific function changes
 
-- [x] Removed `EndDrawing()`
-
+- [x] 1. Removed `EndDrawing()`
   - `Buffer_Update()` does the "end drawing" part and the `Events_EndLoop` does the rest.
   - I hate this design.
-
-- [x] Removed the following lines from `WindowShouldClose()`
-
+- [x] 2. Removed the following lines from `WindowShouldClose()`
   ```C
       // While window minimized, stop loop execution
       while (IsWindowState(FLAG_WINDOW_MINIMIZED) && !IsWindowState(FLAG_WINDOW_ALWAYS_RUN)) glfwWaitEvents();
   ```
-
-
-- [x] Killed timing controls in `BeginDrawing()`, which I didn't notice before. Why are they just everywhere?
-
-- [x] Removed `LoadTextureCubemap()`.
-
-- [x] Removed `UpdateTexture()` and `UpdateTextureRec`.
-
-- [x] Removed `DrawTexturePoly()`.
-
-- [x] These functions are removed to prevent memory leak:
-  
+- [x] 3. Killed timing controls in `BeginDrawing()`, which I didn't notice before. Why are they just everywhere?
+- [x] 4. Removed `LoadTextureCubemap()`.
+- [x] 5. Removed `UpdateTexture()` and `UpdateTextureRec`.
+- [x] 6. Removed `DrawTexturePoly()`.
+- [x] 7. These functions are removed to prevent memory leak:
   - `CompressData()`, `DecompressData()`
-  
-- [x] In `InitGraphicsDevice()`, commented this line:
+- [x] 8. In `InitGraphicsDevice()`, commented this line:
   ```C
       const int fps = (CORE.Time.target > 0) ? (1.0/CORE.Time.target) : 60;
   ```
   - I don't actually know what this does.
-
-- [x] Removed `DrawTextureQuad()`, `DrawTextureTiled()` and `DrawTextureNPatch()`.
-
-- [x] Removed `DrawRectangleGradientV()`, `DrawRectangleGradientH()`, `DrawRectangleGradientEx()` and `DrawRectangleRounded()`. 
-
-- [x] Extracted `ImageTextEx()`, `ImageResize()`, `ImageResizeNN()` and `ImageResizeCanvas()` from `#ifdef SUPPORT_IMAGE_MANIPULATION`. Thus `stb_image_resize.h` is included anyway.
-
-- [x] Removed `ColorToInt()`, `ColorNormalize()`, `ColorFromNormalized()`, `ColorToHSV()`, `ColorFromHSV()`, `ColorAlpha()` and `GetColor()`.
-
-- [x] Removed `OpenURL()`.
+- [x] 9. Removed `DrawPixel()` and `DrawPixelV()`.
+  - In fact, these functions draw lines with a length of 1 pixel. Thus I don't find them necessary.
+- [x] 10. Removed `DrawLineBezier()`, `DrawLineBezierQuad()`, `DrawLineBezierCubic()`, `DrawLineStrip()` and`DrawTriangleFan()`.
+- [x] 11. Removed `DrawTextureQuad()`, `DrawTextureTiled()` and `DrawTextureNPatch()`.
+- [x] 12. Removed `DrawRectangleGradientV()`, `DrawRectangleGradientH()`, `DrawRectangleGradientEx()` and `DrawRectangleRounded()`. 
+- [x] 13. Extracted `ImageTextEx()`, `ImageResize()`, `ImageResizeNN()` and `ImageResizeCanvas()` from `#ifdef SUPPORT_IMAGE_MANIPULATION`. Thus `stb_image_resize.h` is included anyway.
+- [x] 14. Removed `ColorToInt()`, `ColorNormalize()`, `ColorFromNormalized()`, `ColorToHSV()`, `ColorFromHSV()`, `ColorAlpha()` and `GetColor()`.
+- [x] 15. Removed `OpenURL()`.
+- [x] 16. Made `LoadImageColors()`, `LoadImagePalette()`, `UnloadImageColors()`, ``UnloadImagePalette()`, `GetImageAlphaBorder()` and `GetImageColor()` static.
+- [x] 17. Made Glyph-related functions static.
 
 ...
 
@@ -112,13 +99,15 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 - [x] Timing functions, especially `Time_Sleep()`, lack precision on Windows.
   - This is probably because raylib's FPS control function in `EndDrawing()` just claims that it had slept for the required period of time while it actually hadn't.
   - To solve the problem, I introduced two functions: `Time_GetFPS()`, which is only an indicator of whether the program is running without latency, and `Time_GetRealFPS()`, a function that returns the actual FPS.
-  - Usually, we don't need to know whether the program is running on 60.00 FPS or 60.12 FPS. Ascede uses a tolerant FPS controlling mechanic that adjusts sleeping time after each loop, so the overall FPS should be accurate as long as there aren't lags.
+  - Usually, we don't need to know whether the program is running on 60.00 FPS or 60.12 FPS. Ascede uses a tolerant FPS controlling mechanic that adjusts sleeping time after each loop, so the overall FPS would be accurate as long as there aren't lags.
   - In development, I strongly recommend using `Time_GetFPS()` instead of `Time_GetRealFPS()`.
 - [ ] `Texture_LoadFromImage()`
 
 ## API
 
-#### v0.6.7.14 Cheatsheet
+#### v0.6.7.18 Cheatsheet
+
+###### Buffer
 
 ```c
 ASCAPI void Buffer_Begin(void);
@@ -135,12 +124,20 @@ ASCAPI void Buffer_BeginScissor(int x, int y, int width, int height);
 // Begin scissor mode (define screen area for following drawing)
 ASCAPI void Buffer_EndScissor(void);
 // End scissor mode
+```
 
+###### Clipboard
+
+```c
 ASCAPI const char * Clipboard_Get(void);
 // Get clipboard text content
 ASCAPI void Clipboard_Set(const char *text);
 // Set clipboard text content
+```
 
+###### Color
+
+```c
 ASCAPI Color Color_Fade(Color color, float alpha);
 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
 ASCAPI Color Color_AlphaBlend(Color dst, Color src, Color tint);
@@ -151,7 +148,11 @@ ASCAPI void Color_SetPixel(void *dstPtr, Color color, int format);
 // Set color formatted into destination pixel pointer
 ASCAPI void Color_GetPixelDataSize(int width, int height, int format);
 // Get pixel data size in bytes for certain format
+```
 
+###### Cursor
+
+```c
 ASCAPI void Cursor_Show(void);
 // Show cursor
 ASCAPI void Cursor_Hide(void);
@@ -164,21 +165,39 @@ ASCAPI void Cursor_Disable(void);
 // Lock cursor
 ASCAPI bool Cursor_IsOnScreen(void);
 // Check if cursor is on screen
+```
 
+###### Events
 
+```c
 ASCAPI void Events_Poll();
 // Poll events
 ASCAPI void Events_Wait();
 // Wait for events
 ASCAPI void Events_EndLoop();
 // End the loop and do clean-ups
+```
 
+###### Font
+
+```c
+ASCAPI Font Font_GetDefault(void);
+// Get the default font
 ASCAPI Font Font_Load(const char *fileName);
 // Load a font from file into VRAM
 ASCAPI Font Font_LoadEx(const char *fileName, int fontSize, int *fontChars, int glyphCount);
 // Load a font from file with extended parameters
+ASCAPI Font Font_LoadMem(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int glyphCount);
+// Load a font from memory, fileType is a string i.e. '.ttf'
+ASCAPI Font Font_LoadFromImage(Image image, Color key, int firstChar);
+// Load a font from an Image (XNA style)
+ASCAPI Font Font_Free(Font font);
+// Free font from VRAM
+```
 
+###### Gamepad
 
+```c
 ASCAPI bool Gamepad_IsAvailable(int gamepad);
 // Check if a gamepad is available
 ASCAPI const char *Gamepad_GetName(int gamepad);
@@ -199,7 +218,11 @@ ASCAPI bool Gamepad_IsUp(int gamepad, int button);
 // Check if a gamepad button is not being pressed
 ASCAPI int Gamepad_GetPressed(void);
 // Get the last gamepad button pressed
+```
 
+###### Image General
+
+```c
 ASCAPI Image Image_Load(const char *fileName);
 // Load image from file into RAM
 ASCAPI Image Image_LoadRaw(const char *fileName, int width, int height, int format, int headerSize);
@@ -217,10 +240,102 @@ ASCAPI void Image_Free(Image image);
 ASCAPI Image Image_Screenshot(void);
 // Load an image from current framebuffer
 ASCAPI bool Image_Export(Image image, const char *fileName);
-// Export image data to file
+// Export image data to file (.png, .bmp, .tga, .jpg)
 ASCAPI bool Image_ExportCode(Image image, const char *fileName);
 // Export image as code file defining an array of bytes, returns true on success
+```
 
+###### Image Manipulation
+
+```c
+ASCAPI Image Image_Copy(Image image);
+// Create a duplicate for an image
+ASCAPI Image Image_FromImage(Image image, Rectangle rec);
+// Create an image from another image piece
+ASCAPI Image Image_FromText(const char *text, int fontSize, Color color);
+// Create an image from default text
+ASCAPI Image Image_FromTextEx(Font font, const char *text, float fontSize, float spacing, Color tint);
+// Create an image from text
+ASCAPI void Image_SetFormat(Image *image, int newFormat);
+// Convert image format
+ASCAPI void Image_ToPOT(Image *image, Color fill);
+// Convert image to power-of-two
+ASCAPI void Image_Crop(Image *image, Rectangle crop);
+// Crop an image to a defined rectangle
+ASCAPI void Image_AlphaCrop(Image *image, float threshold);
+// Crop image depending on alpha value
+ASCAPI void Image_AlphaClear(Image *image, Color color, float threshold);
+// Clear alpha channel to desired color
+ASCAPI void Image_AlphaMask(Image *image, Image alphaMask);
+// Apply alpha mask to image
+ASCAPI void Image_AlphaPremultiply(Image *image);
+// Premultiply alpha channel
+ASCAPI void Image_Resize(Image *image, int newWidth, int newHeight);
+// Resize image (Bicubic scaling algorithm)
+ASCAPI void Image_ResizeNN(Image *image, int newWidth,int newHeight);
+// Resize image (Nearest-Neighbor scaling algorithm)
+ASCAPI void Image_ResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill);
+// Resize canvas and fill with color
+ASCAPI void Image_GenMipmaps(Image *image);
+// Compute all mipmap levels for a provided image
+ASCAPI void Image_Dither(Image *image, int rBpp, int gBpp, int bBpp, int aBpp);
+// Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
+ASCAPI void Image_FlipV(Image *image);
+// Vertically flip an image
+ASCAPI void Image_FlipH(Image *image);
+// Horizontally flip an image
+ASCAPI void Image_RotateCW(Image *image);
+// Rotate image clockwise 90deg
+ASCAPI void Image_RotateCCW(Image *image);
+// Rotate image counter-clockwise 90deg
+ASCAPI void Image_ColorTint(Image *image, Color color);
+// Modify image color: tint
+ASCAPI void Image_ColorInvert(Image *image);
+// Modify image color: invert
+ASCAPI void Image_ColorGrayscale(Image *image);
+// Modify image color: grayscale
+ASCAPI void Image_ColorContrast(Image *image, float contrast);
+// Modify image color: contrast (-100 to 100)
+ASCAPI void Image_ColorBrightness(Image *image, int brightness);
+// Modify image color: brightness (-255 to 255)
+ASCAPI void Image_ColorReplace(Image *image, Color color, Color replace);
+// Modify image color: replace color
+```
+
+###### Image Drawing
+
+```C
+ASCAPI void Image_Clear(Image *dst, Color color);
+// Clear image background
+ASCAPI void Image_DrawPixel(Image *dst, int posX, int posY, Color color);
+// Draw pixel within an image
+ASCAPI void Image_DrawPixelV(Image *dst, Vector2 position, Color color);
+// Draw pixel within an image (Vector version)
+ASCAPI void Image_DrawLine(Image *dst, int startPosX, int startPosY, int endPosX, int endPosY, Color color);
+// Draw line within an image
+ASCAPI void Image_DrawLineV(Image *dst, Vector2 start, Vector2 end, Color color);
+// Draw line within an image (Vector version)
+ASCAPI void Image_DrawCircle(Image *dst, int centerX, int centerY, int radius, Color color);
+// Draw circle within an image
+ASCAPI void Image_DrawCircleV(Image *dst, Vector2 center, int radius, Color color);
+// Draw circle within an image (Vector version)
+ASCAPI void Image_DrawRectangle(Image *dst, int posX, int posY, int width, int height, Color color);
+// Draw rectangle within an image
+ASCAPI void Image_DrawRectangleV(Image *dst, Vector2 position, Vector2 size, Color color);
+// Draw rectangle within an image (Vector version)
+ASCAPI void Image_DrawRectangleRec(Image *dst, Rectangle rec, Color color);
+// Draw rectangle within an image
+ASCAPI void Image_DrawText(Image *dst, const char *text, int posX, int posY, int fontSize, Color color);
+// Draw text (using default font) within an image (destination)
+ASCAPI void Image_DrawTextEx(Image *dst, Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);
+// Draw text (custom sprite font) within an image (destination)
+ASCAPI void Image_Draw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec, Color tint);
+// Draw a source image within a destination image (tint applied to source)
+```
+
+###### Key
+
+```c
 ASCAPI bool Key_IsPressed(int key);
 // Check if a key has been pressed
 ASCAPI bool Key_IsReleased(int key);
@@ -235,7 +350,42 @@ ASCAPI int Key_Get(void);
 // Get the keycode for the next pressed key in the queue
 ASCAPI int Key_GetChar(void);
 // Get the next character (unicode) in the input queue
+```
 
+###### Miscellaneous
+
+```C
+ASCAPI void Callback_SetTraceLog(TraceLogCallback callback);
+// Set custom trace log
+ASCAPI void Callback_SetLoadFileData(LoadFileDataCallback callback);
+// Set custom file binary data loader
+ASCAPI void Callback_SetSaveFileData(SaveFileDataCallback callback);
+// Set custom file binary data saver
+ASCAPI void Callback_SetLoadFileText(LoadFileTextCallback callback);
+// Set custom file text data loader
+ASCAPI void Callback_SetSaveFileText(SaveFileTextCallback callback);
+// Set custom file text data saver
+ASCAPI void TraceLog(int logLevel, const char *text, ...);
+// Show trace log messages (LOG_DEBUG, LOG_INFO, LOG_WARNING, LOG_ERROR...)
+ASCAPI void TraceLog_SetLevel(int logLevel);
+// Set the current threshold (minimum) log level
+void ASC_ERROR();
+// Error callback of memory management module, closes the program
+void *ASC_MALLOC(size_t bytes);
+// Allocate uninitialized memory trunk
+void *ASC_CALLOC(size_t num, size_t bytes);
+// Allocate memory
+void *ASC_REALLOC(void *pointer,size_t bytes);
+// Reallocate memory
+void ASC_FREE(void *pointer);
+// Free allocated memory
+void ASC_FREEALL();
+// Free all allocated memory
+```
+
+###### Monitor
+
+```c
 ASCAPI void Monitor_Set(int monitor);
 // Set monitor for current window (fullscreened)
 ASCAPI int Monitor_Count(void);
@@ -254,7 +404,11 @@ ASCAPI int Monitor_GetRefreshRate(int monitor);
 // Get monitor refresh rate
 ASCAPI const char* Monitor_GetName(int monitor);
 // Gt human-readable, UTF-8 encoded name
+```
 
+###### Mouse
+
+```c
 ASCAPI bool Mouse_IsPressed(int button);
 // Check if a mouse button is pressed
 ASCAPI bool Mouse_IsDown(int button);
@@ -281,7 +435,11 @@ ASCAPI float Mouse_GetWheelDelta(void);
 // Get wheel movement since last frame
 ASCAPI void Mouse_SetCursor(void);
 // Set mouse cursor
+```
 
+###### RenderTexture
+
+```c
 ASCAPI RenderTexture2D RenderTexture_Load(int width, int height);
 // Create a render texture (framebuffer)
 ASCAPI void RenderTexture_Free(RenderTexture2D target);
@@ -290,7 +448,11 @@ ASCAPI void RenderTexture_Begin(RenterTexture2D target);
 // Begin drawing to render texture
 ASCAPI void RenderTexture_Update(void);
 // End drawing current render texture
+```
 
+###### RNG
+
+```c
 ASCAPI double RNG_GenD(void);
 // Get a random double in range [0,1]
 ASCAPI int RNG_Gen(int min, int max);
@@ -301,7 +463,11 @@ ASCAPI void RNG_SetState(int state);
 // Set the current state of the RNG
 ASCAPI void RNG_GetState(void);
 // Get the current state of the RNG
+```
 
+###### Shader
+
+```c
 ASCAPI Shader Shader_Load(const char *vsFileName, const char *fsFileName);
 // Load shader from files and bind default locations
 ASCAPI Shader Shader_LoadData(const char *vsCode, const char *fsCode);
@@ -315,16 +481,38 @@ ASCAPI void Shader_Update(void)
 ASCAPI int Shader_GetLoc(Shader shader, const char *uniformName);
 // Get shader uniform location
 ASCAPI int Shader_GetLocAttrib(Shader shader, const char *attribName);
+```
 
+###### Shape
+
+```c
 ASCAPI void Shape_SetTexture(Texture2D texture, Rectangle source);
 // Set texture and rectangle to be used on shapes drawing
+ASCAPI void Shape_DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color);
+// Draw a line
+ASCAPI void Shape_DrawLineV(Vector2 startPos, Vector2 endPos, Color color);
+// Draw a line with vectorized parameters
+ASCAPI void Shape_DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color);
+// Draw a line with extended parameters
 ASCAPI void Shape_DrawRec(int posX, int posY, int width, int height, Color color);
 // Draw a color-filled rectangle
 ASCAPI void Shape_DrawRecV(Vector2 position, Vector2 size, Color color);
 // Draw a color-filled rectangle with vectorized parameters
 ASCAPI void Shape_DrawRecRec(Rectangle rec, Color color);
 // Draw a color-filld rectangle
+ASCAPI void Shape_DrawRecPro(Rectangle rec, Vector2 origin, float rotation, Color color);
+// Draw a color-filled rectangle with pro parameters
+ASCAPI void Shape_DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
+// Draw a color-filled triangle, vertex in counter-clockwise order
+ASCAPI void Shape_DrawTriangleStrip(Vector2 *points, int pointCount, Color color);
+// Draw a triangl strip defined by a point array
+ASCAPI void Shape_DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);
+// Draw a polygon
+```
 
+###### Text
+
+```c
 ASCAPI void Text_Draw(const char *text, int posX, int posY, int fontSize, Color color);
 // Draw text with default font
 ASCAPI void Text_DrawEx(Font font, const char *text, Vector2 position, float fontsize, float spacing, Color tint);
@@ -333,7 +521,24 @@ ASCAPI void Text_DrawPro(Font font, const char *text, Vector2 position, Vector2 
 // Draw text with even more parameters
 ASCAPI void Text_DrawCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint);
 // Draw one character (codepoint)
+ASCAPI bool Text_IsEqual(const char *text1, const char *text2);
+// Check if two text string are equal
+ASCAPI unsigned int Text_Length(const char *text);
+// Get text length, checks for '\0' ending
+ASCAPI const char *Text_Format(const char *text, ...);
+// Text formatting with variables (sprintf() style)
+ASCAPI const char *Text_ToLower(const char *text); 
+// Get lower case version of provided string
+ASCAPI int Text_GetCodepoint(const char *text, int *bytesProcessed);
+// Get codepoint of a UTF-8 character
+ASCAPI int Text_GetWidth(const char *text, int fontSize); 
+// Measure string width for font
+ASCAPI Vector2 Text_GetWidthEx(Font font, const char *text, float fontSize, float spacing);
+```
 
+###### Texture
+
+```c
 ASCAPI Texture2D Texture_Load(const char *fileName);
 // Load a texture from file
 ASCAPI Texture2D Texture_LoadFromImage(Image image);
@@ -358,7 +563,11 @@ ASCAPI void Texture_DrawEx(Texture2D texture, Vector2 position, float rotation, 
 // Draw a Texture2D with extended parameters
 ASCAPI void Texture_DrawPro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);
 // Draw a part of a texture (defined by a rectangle) with 'pro' parameters
+```
 
+###### Time
+
+```c
 ASCAPI float Time_GetFPS(void);
 // Get current FPS
 ASCAPI float Time_GetFrame(void);
@@ -373,7 +582,11 @@ ASCAPI void Time_Sleep(float ms);
 // Halt the program for several milliseconds
 ASCAPI void Time_Wait(float targetFPS);
 // Call this at the end of a loop
+```
 
+###### Touch
+
+```c
 ASCAPI void Touch_GetX(void);
 // Get touch position for touch point 0 or mouse position on desktop, relative to screen size
 ASCAPI void Touch_GetY(void);
@@ -384,8 +597,11 @@ ASCAPI int Touch_GetID(int index);
 // Gt touch point indentifier
 ASCAPI int Touch_Count(void);
 // Get number of touch points
+```
 
+###### Window
 
+```c
 ASCAPI void Window_Init(size_t width, size_t height, const char *title);
 // Initialize window and OpenGL context
 ASCAPI bool Window_ShouldClose(void);
@@ -457,7 +673,7 @@ int main(){
         Buffer_Begin();                  // ready to start drawing
         Buffer_Clear(WHITE);            // clear background with the color white
         Buffer_Update();                // end drawing
-        // <ain loop ends
+        // Main loop ends
         Time_Wait(60);                  // the target fps is 60
         Events_EndLoop();               // do the cleanups
     }
@@ -495,7 +711,9 @@ Texture_Draw(rtx.texture, 0, 0, WHITE); // Draw this render texture on screen
 ```
 
 ```C
-// If you want to scale or rotate your texture, consider setting its filters to TEXTURE_FILTER_BILINEAR or TEXTURE_FILTER_TRILINEAR to avoid bleeding edges.
+// If you want to scale or rotate your texture, consider setting its 
+// filters to TEXTURE_FILTER_BILINEAR or TEXTURE_FILTER_TRILINEAR to avoid 
+// bleeding edges.
 Image img = LoadImage("bunny.png");
 Texture2D texture = Texture_LoadFromImage(img);
 Texture_SetFilter(texture, TEXTURE_FILTER_BILINEAR);
@@ -504,7 +722,11 @@ Texture_SetFilter(texture, TEXTURE_FILTER_BILINEAR);
 ```C
 // Screenshots
 
-// Ascede uses double-buffering, so if the framebuffer is only updated once, this function would produce a blank image of the current, unupdated framebuffer. To avoid that, either at least update the framebuffer twice before using this function or use this function before Buffer_Update().
+// Ascede uses double-buffering, so if the framebuffer is only updated 
+// once, this function would produce a blank image of the current, 
+// unupdated framebuffer. To avoid that, either at least update the 
+// framebuffer twice before using this function or use this function 
+// before Buffer_Update().
 Image_Screenshot()
 ```
 
@@ -513,14 +735,16 @@ Image_Screenshot()
 ```C
 // FPS controls
 
-// The Events_Poll() or Events_Wait() functions should always be used first in a loop, and the Events_Endloop() is required to end a loop.
+// The Events_Poll() or Events_Wait() functions should always be used 
+// first in a loop, and the Events_Endloop() is required to end a loop.
 while(!Window_ShouldClose()){
     Events_Wait();
     // the main loop here...
     Events_EndLoop();
 }
 
-// With Events_Wait(), it's not very necessary to use Time_*() functions. But with Events_Poll(), Time_Wait() is required to lower CPU usage.
+// With Events_Wait(), it's not very necessary to use Time_*() functions. 
+// But with Events_Poll(), Time_Wait() is required to lower CPU usage.
 while(!Window_ShouldClose()){
     Events_Poll();
     // the main loop here...
@@ -532,12 +756,16 @@ while(!Window_ShouldClose()){
 ```C
 // FPS statistics
 
-// These are not actual FPS and frame time, but indicators of wheter the game is working properly. They are calculated ONLY in Time_Wait().
+// These are not actual FPS and frame time, but indicators of wheter the 
+// game is working properly. They are calculated ONLY in Time_Wait().
 Time_GetFPS();
 Time_GetFrame();
-// If there isn't a Time_Wait() in your loop, please consider adding one. These functions would return the same values as their "real" alternatives when the loop is without Time_Wait() functions.
+// If there isn't a Time_Wait() in your loop, please consider adding one. 
+// These functions would return the same values as their "real" 
+// alternatives when the loop is without Time_Wait() functions.
 
-// These functions below return actual FPS statistics. They are calculated in Events_Endloop() and are totally accurate.
+// These functions below return actual FPS statistics. They are calculated 
+// in Events_Endloop() and are totally accurate.
 Time_GetRealFPS();
 Time_GetRealFrame();
 ```
