@@ -17,18 +17,27 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 ## Status
 
+#### Audio module unavailable yet
+
 #### Major goals
 
 - [x] 1. Removed 3D support
   - This includes every single function in `model` and `mesh` modules and several other functions like `BeginMode3D()` and `EndMode3D()`.
+  
 - [x] 2. Removed camera support
+
 - [x] 3. Killed snapshot and screen recording
+
 - [x] 4. Removed text manipulation
   -  These functions remain: `TextIsEqual()`, `TextLength()`, `TextFormat()` and `TextToLower()`.
   - Functions for UTF-8 and Unicode conversion are removed as well.
+  
 - [x] 5. Remake timing & frame control
+
 - [x] 6. Improved FPS controls
+
 - [x] 7. Further improve memory controls and prevent leakage
+
 - [x] 8. Rearrange API
   - [x] window, monitor, cursor
   - [x] mouse, touch, gamepad, keys
@@ -37,12 +46,17 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
   - [x] filesystem
   - [x] shape, color, image
   - [x] text, font
+  
+- [x] 9. Make minimal binary size on Windows less than 750kB
+  
+  - Current minimal size: 730.5kB (Codeblocks 20.03 / GCC 8.1)
+  - Configuration: `-static-libgcc -static-libstdc++ -m32 -flto -Os -s`
+  
 - [ ] Add instancing
-- [ ] Improve audio precision
+
 - [ ] Add audio channeling
-- [ ] Make minimal binary size on Windows less than 750kB
-  - Current minimal size: 756.0kB (Codeblocks 20.03 / GCC 8.1)
-  - -static-libgcc -static-libstdc++ -m32 -flto -Os -s
+
+- [ ] Improve audio precision
 
 #### Minor adjustments
 
@@ -56,7 +70,7 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 - [x] 6. Removed all functions drawing outlines of shapes
   - I find them just ugly.
 - [x] 7. Removed collision detection functions
-- [ ] Change the default font
+- [ ] Change the default font?
 
 #### Specific function changes
 
@@ -106,7 +120,7 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 ## API
 
-#### v0.8.7.19 Cheatsheet
+#### v0.9.7.19 Cheatsheet
 
 ###### Buffer
 
