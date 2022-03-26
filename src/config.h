@@ -34,27 +34,11 @@
 #define SUPPORT_MOUSE_GESTURES      1
 // Reconfigure standard input to receive key inputs, works with SSH connection.
 #define SUPPORT_SSH_KEYBOARD_RPI    1
-// Draw a mouse pointer on screen
-//#define SUPPORT_MOUSE_CURSOR_POINT   1
 // Setting a higher resolution can improve the accuracy of time-out intervals in wait functions.
 // However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
 //#define SUPPORT_WINMM_HIGHRES_TIMER 1
-// Use busy wait loop for timing sync, if not defined, a high-resolution timer is setup and used
-//#define SUPPORT_BUSY_WAIT_LOOP      1
-// Use a partial-busy wait loop, in this case frame sleeps for most of the time, but then runs a busy loop at the end for accuracy
-#define SUPPORT_PARTIALBUSY_WAIT_LOOP
-// Wait for events passively (sleeping while no events) instead of polling them actively every frame
-//#define SUPPORT_EVENTS_WAITING      1
-// Support CompressData() and DecompressData() functions
-#define SUPPORT_COMPRESSION_API     1
-// Support saving binary data automatically to a generated storage.data file. This file is managed internally.
-#define SUPPORT_DATA_STORAGE        1
 // Support automatic generated events, loading and recording of those events when required
 //#define SUPPORT_EVENTS_AUTOMATION     1
-// Support custom frame control, only for advance users
-// By default EndDrawing() does this job: draws everything + SwapScreenBuffer() + manage frame timming + PollInputEvents()
-// Enabling this flag allows manual control of the frame processes, use at your own risk
-//#define SUPPORT_CUSTOM_FRAME_CONTROL   1
 
 // core: Configuration values
 //------------------------------------------------------------------------------------
@@ -69,11 +53,6 @@
 #define MAX_GAMEPAD_BUTTONS           32        // Max bumber of buttons supported (per gamepad)
 #define MAX_TOUCH_POINTS               8        // Maximum number of touch points supported
 #define MAX_KEY_PRESSED_QUEUE         16        // Max number of characters in the key input queue
-
-#define STORAGE_DATA_FILE  "storage.dat"       // Automatic storage filename
-
-#define MAX_DECOMPRESSION_SIZE        64        // Max size allocated for decompression in MB
-
 
 //------------------------------------------------------------------------------------
 // Module: rlgl - Configuration values
@@ -146,8 +125,8 @@
 #define SUPPORT_IMAGE_EXPORT        1
 // Support multiple image editing functions to scale, adjust colors, flip, draw on images, crop...
 // If not defined, still some functions are supported: ImageFormat(), ImageCrop(), ImageToPOT()
-#define SUPPORT_IMAGE_MANIPULATION  1
-
+//#define SUPPORT_IMAGE_MANIPULATION  1
+//#define SUPPORT_IMAGE_DRAWING       1
 
 //------------------------------------------------------------------------------------
 // Module: text - Configuration Flags
@@ -188,7 +167,7 @@
 // Module: utils - Configuration Flags
 //------------------------------------------------------------------------------------
 // Standard file io library (stdio.h) included
-#define SUPPORT_STANDARD_FILEIO
+//#define SUPPORT_STANDARD_FILEIO
 // Show TRACELOG() output messages
 // NOTE: By default LOG_DEBUG traces not shown
 #define SUPPORT_TRACELOG            1

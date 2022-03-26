@@ -358,6 +358,7 @@ typedef struct rlRenderBatch {
     rlDrawCall *draws;          // Draw calls array, depends on textureId
     int drawCounter;            // Draw calls counter
     float currentDepth;         // Current depth value for next draw
+    int instances;
 } rlRenderBatch;
 
 #if defined(__STDC__) && __STDC_VERSION__ >= 199901L
@@ -990,7 +991,7 @@ static char *rlGetCompressedFormatName(int format); // Get compressed format off
 static int rlGenTextureMipmapsData(unsigned char *data, int baseWidth, int baseHeight);         // Generate mipmaps data on CPU side
 static unsigned char *rlGenNextMipmapData(unsigned char *srcData, int srcWidth, int srcHeight); // Generate next mipmap level on CPU side
 #endif
-static int rlGetPixelDataSize(int width, int height, int format);   // Get pixel data size in bytes (image or texture)
+static int rlColor_GetPixelDataSize(int width, int height, int format);   // Get pixel data size in bytes (image or texture)
 // Auxiliar matrix math functions
 static Matrix rlMatrixIdentity(void);                             // Get identity matrix
 static Matrix rlMatrixMultiply(Matrix left, Matrix right);    // Multiply two matrices
@@ -2567,19 +2568,35 @@ void rlDrawRenderBatch(rlRenderBatch *batch)
                 // Bind current draw call texture, activated as GL_TEXTURE0 and binded to sampler2D texture0 by default
                 glBindTexture(GL_TEXTURE_2D, batch->draws[i].textureId);
 
-                if ((batch->draws[i].mode == RL_LINES) || (batch->draws[i].mode == RL_TRIANGLES)) glDrawArrays(batch->draws[i].mode, vertexOffset, batch->draws[i].vertexCount);
+                if ((batch->draws[i].mode == RL_LINES) || (batch->draws[i].mode == RL_TRIANGLES))
+                {
+                    if (batch->instances == 0)
+                    {
+                        glDrawArrays(batch->draws[i].mode, vertexOffset, batch->draws[i].vertexCount);
+                    }
+                    else
+                    {
+                        glDrawArraysInstanced(batch->draws[i].mode, vertexOffset, batch->draws[i].vertexCount, batch->instances);
+                    }
+                }
                 else
                 {
+                    if (batch->instances == 0){
 #if defined(GRAPHICS_API_OPENGL_33)
-                    // We need to define the number of indices to be processed: elementCount*6
-                    // NOTE: The final parameter tells the GPU the offset in bytes from the
-                    // start of the index buffer to the location of the first index to process
-                    glDrawElements(GL_TRIANGLES, batch->draws[i].vertexCount/4*6, GL_UNSIGNED_INT, (GLvoid *)(vertexOffset/4*6*sizeof(GLuint)));
+                        // We need to define the number of indices to be processed: elementCount*6
+                        // NOTE: The final parameter tells the GPU the offset in bytes from the
+                        // start of the index buffer to the location of the first index to process
+                        glDrawElements(GL_TRIANGLES, batch->draws[i].vertexCount/4*6, GL_UNSIGNED_INT, (GLvoid *)(vertexOffset/4*6*sizeof(GLuint)));
 #endif
 #if defined(GRAPHICS_API_OPENGL_ES2)
-                    glDrawElements(GL_TRIANGLES, batch->draws[i].vertexCount/4*6, GL_UNSIGNED_SHORT, (GLvoid *)(vertexOffset/4*6*sizeof(GLushort)));
+                        glDrawElements(GL_TRIANGLES, batch->draws[i].vertexCount/4*6, GL_UNSIGNED_SHORT, (GLvoid *)(vertexOffset/4*6*sizeof(GLushort)));
 #endif
-                }
+                    }
+                    else
+                    {
+                        glDrawElementsInstanced(GL_TRIANGLES, batch->draws[i].vertexCount/4*6, GL_UNSIGNED_INT, (GLvoid *)(vertexOffset/4*6*sizeof(GLuint)), batch->instances);
+                    }
+                 }
 
                 vertexOffset += (batch->draws[i].vertexCount + batch->draws[i].vertexAlignment);
             }
@@ -2739,7 +2756,7 @@ unsigned int rlLoadTexture(void *data, int width, int height, int format, int mi
     // Load the different mipmap levels
     for (int i = 0; i < mipmapCount; i++)
     {
-        unsigned int mipSize = rlGetPixelDataSize(mipWidth, mipHeight, format);
+        unsigned int mipSize = rlColor_GetPixelDataSize(mipWidth, mipHeight, format);
 
         int glInternalFormat, glFormat, glType;
         rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
@@ -2886,7 +2903,7 @@ unsigned int rlLoadTextureCubemap(void *data, int size, int format)
     unsigned int id = 0;
 
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
-    unsigned int dataSize = rlGetPixelDataSize(size, size, format);
+    unsigned int dataSize = rlColor_GetPixelDataSize(size, size, format);
 
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, id);
@@ -3126,7 +3143,7 @@ void *rlReadTexturePixels(unsigned int id, int width, int height, int format)
 
     int glInternalFormat, glFormat, glType;
     rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
-    unsigned int size = rlGetPixelDataSize(width, height, format);
+    unsigned int size = rlColor_GetPixelDataSize(width, height, format);
 
     if ((glInternalFormat != -1) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
     {
@@ -3155,7 +3172,7 @@ void *rlReadTexturePixels(unsigned int id, int width, int height, int format)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
 
     // We read data as RGBA because FBO texture is configured as RGBA, despite binding another texture format
-    pixels = (unsigned char *)RL_MALLOC(rlGetPixelDataSize(width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8));
+    pixels = (unsigned char *)RL_MALLOC(rlColor_GetPixelDataSize(width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -4591,7 +4608,7 @@ static unsigned char *rlGenNextMipmapData(unsigned char *srcData, int srcWidth, 
 
 // Get pixel data size in bytes (image or texture)
 // NOTE: Size depends on pixel format
-static int rlGetPixelDataSize(int width, int height, int format)
+static int rlColor_GetPixelDataSize(int width, int height, int format)
 {
     int dataSize = 0;       // Size in bytes
     int bpp = 0;            // Bits per pixel

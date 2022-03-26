@@ -853,31 +853,32 @@ ASCAPI void Cursor_Disable(void);                                   // Disables 
 ASCAPI bool Cursor_IsOnScreen(void);                                // Check if cursor is on the screen
 
 // Drawing-related functions
-ASCAPI void Buffer_Init(void);                                    // Setup canvas (framebuffer) to start drawing
+ASCAPI void Buffer_Begin(void);                                    // Setup canvas (framebuffer) to start drawing
 ASCAPI void Buffer_Clear(Color color);                          // Set background color (framebuffer clear color)
 ASCAPI void Buffer_Update(void);                                // Swap back buffer with front buffer (screen drawing)
-ASCAPI void RenderTexture_Init(RenderTexture2D target);              // Begin drawing to render texture
+ASCAPI void RenderTexture_Begin(RenderTexture2D target);              // Begin drawing to render texture
 ASCAPI void RenderTexture_Update(void);                                  // Ends drawing to render texture
-RLAPI void BeginShaderMode(Shader shader);                        // Begin custom shader drawing
-RLAPI void EndShaderMode(void);                                   // End custom shader drawing (use default shader)
-RLAPI void BeginBlendMode(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
-RLAPI void EndBlendMode(void);                                    // End blending mode (reset to default: alpha blending)
-RLAPI void BeginScissorMode(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
-RLAPI void EndScissorMode(void);                                  // End scissor mode
+ASCAPI void Shader_Begin(Shader shader);                        // Begin custom shader drawing
+ASCAPI void Shader_Update(void);                                   // End custom shader drawing (use default shader)
+ASCAPI void Buffer_BeginBlend(int mode);                              // Begin blending mode (alpha, additive, multiplied, subtract, custom)
+ASCAPI void Buffer_UpdateBlend(void);                                    // End blending mode (reset to default: alpha blending)
+ASCAPI void Buffer_BeginScissor(int x, int y, int width, int height); // Begin scissor mode (define screen area for following drawing)
+ASCAPI void Buffer_EndScissor(void);                                  // End scissor mode
 
 // Shader management functions
 // NOTE: Shader functionality is not available on OpenGL 1.1
-RLAPI Shader LoadShader(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
-RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
-RLAPI int GetShaderLocation(Shader shader, const char *uniformName);       // Get shader uniform location
-RLAPI int GetShaderLocationAttrib(Shader shader, const char *attribName);  // Get shader attribute location
+ASCAPI Shader Shader_Load(const char *vsFileName, const char *fsFileName);   // Load shader from files and bind default locations
+ASCAPI Shader Shader_LoadData(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
+ASCAPI int Shader_GetLoc(Shader shader, const char *uniformName);       // Get shader uniform location
+ASCAPI int Shader_GetLocAttrib(Shader shader, const char *attribName);  // Get shader attribute location
 RLAPI void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType);               // Set shader uniform value
 RLAPI void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count);   // Set shader uniform value vector
 RLAPI void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);         // Set shader uniform value (matrix 4x4)
 RLAPI void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
-RLAPI void UnloadShader(Shader shader);                                    // Unload shader from GPU memory (VRAM)
+ASCAPI void Shader_Free(Shader shader);                                    // Unload shader from GPU memory (VRAM)
 
 // Misc. functions
+ASCAPI double RNG_GenD();
 ASCAPI int RNG_Gen(int min, int max);                       // Get a random value between min and max (both included)
 ASCAPI void RNG_Init(unsigned int seed);                      // Set the seed for the random number generator defines format)
 ASCAPI void RNG_SetState(int state);
@@ -921,8 +922,6 @@ RLAPI bool IsFileDropped(void);                                   // Check if a 
 RLAPI char **GetDroppedFiles(int *count);                         // Get dropped files names (memory should be freed)
 RLAPI void ClearDroppedFiles(void);                               // Clear dropped files paths buffer (free memory)
 RLAPI long GetFileModTime(const char *fileName);                  // Get file modification time (last write time)
-
-RLAPI void OpenURL(const char *url);                              // Open URL with default system browser (if available)
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)
@@ -977,7 +976,7 @@ ASCAPI int Touch_Count(void);                           // Get number of touch p
 // Set texture and rectangle to be used on shapes drawing
 // NOTE: It can be useful when using basic shapes and one single font,
 // defining a font char white rectangle would allow drawing everything in a single draw call
-RLAPI void SetShapesTexture(Texture2D texture, Rectangle source);       // Set texture and rectangle to be used on shapes drawing
+ASCAPI void Shape_SetTexture(Texture2D texture, Rectangle source);       // Set texture and rectangle to be used on shapes drawing
 
 // Basic shapes drawing functions
 RLAPI void DrawPixel(int posX, int posY, Color color);                                                   // Draw a pixel
@@ -992,26 +991,11 @@ RLAPI void DrawLineStrip(Vector2 *points, int pointCount, Color color);         
 ASCAPI void Shape_DrawRec(int posX, int posY, int width, int height, Color color);                        // Draw a color-filled rectangle
 ASCAPI void Shape_DrawRecV(Vector2 position, Vector2 size, Color color);                                  // Draw a color-filled rectangle (Vector version)
 ASCAPI void Shape_DrawRecRec(Rectangle rec, Color color);                                                 // Draw a color-filled rectangle
-RLAPI void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color);                 // Draw a color-filled rectangle with pro parameters
-RLAPI void DrawRectangleGradientV(int posX, int posY, int width, int height, Color color1, Color color2);// Draw a vertical-gradient-filled rectangle
-RLAPI void DrawRectangleGradientH(int posX, int posY, int width, int height, Color color1, Color color2);// Draw a horizontal-gradient-filled rectangle
-RLAPI void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4);       // Draw a gradient-filled rectangle with custom vertex colors
-RLAPI void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color);              // Draw rectangle with rounded edges
+ASCAPI void Shape_DrawRecPro(Rectangle rec, Vector2 origin, float rotation, Color color);                 // Draw a color-filled rectangle with pro parameters
 RLAPI void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);                                // Draw a color-filled triangle (vertex in counter-clockwise order!)
 RLAPI void DrawTriangleFan(Vector2 *points, int pointCount, Color color);                                // Draw a triangle fan defined by points (first vertex is the center)
 RLAPI void DrawTriangleStrip(Vector2 *points, int pointCount, Color color);                              // Draw a triangle strip defined by points
 RLAPI void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);               // Draw a regular polygon (Vector version)
-
-// Basic shapes collision detection functions
-RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2);                                           // Check collision between two rectangles
-RLAPI bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2);        // Check collision between two circles
-RLAPI bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec);                         // Check collision between circle and rectangle
-RLAPI bool CheckCollisionPointRec(Vector2 point, Rectangle rec);                                         // Check if point is inside rectangle
-RLAPI bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius);                       // Check if point is inside circle
-RLAPI bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3);               // Check if point is inside a triangle
-RLAPI bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2 *collisionPoint); // Check the collision between two lines defined by two points each, returns collision point by reference
-RLAPI bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold);                // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
-RLAPI Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);                                         // Get collision rectangle for two rectangles collision
 
 //------------------------------------------------------------------------------------
 // Texture Loading and Drawing Functions (Module: textures)
@@ -1022,7 +1006,7 @@ RLAPI Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);                
 ASCAPI Image Image_Load(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
 ASCAPI Image Image_LoadRaw(const char *fileName, int width, int height, int format, int headerSize);       // Load image from RAW file data
 ASCAPI Image Image_LoadAnim(const char *fileName, int *frames);                                            // Load image sequence from file (frames appended to image.data)
-ASCAPI Image Image_LoadFromMemory(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
+ASCAPI Image Image_LoadMem(const char *fileType, const unsigned char *fileData, int dataSize);      // Load image from memory buffer, fileType refers to extension: i.e. '.png'
 ASCAPI Image Image_LoadFromTexture(Texture2D texture);                                                     // Load image from GPU texture data
 ASCAPI Image Image_Screenshot(void);                                                                   // Load image from screen buffer and (screenshot)
 ASCAPI void Image_Free(Image image);                                                                     // Unload image from CPU memory (RAM)
@@ -1096,27 +1080,17 @@ ASCAPI void Texture_SetWrap(Texture2D texture, int wrap);                       
 
 // Texture drawing functions
 ASCAPI void Texture_Draw(Texture2D texture, int posX, int posY, Color tint);                               // Draw a Texture2D
-RLAPI void DrawTextureV(Texture2D texture, Vector2 position, Color tint);                                // Draw a Texture2D with position defined as Vector2
-RLAPI void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);  // Draw a Texture2D with extended parameters
-RLAPI void DrawTextureRec(Texture2D texture, Rectangle source, Vector2 position, Color tint);            // Draw a part of a texture defined by a rectangle
-RLAPI void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle quad, Color tint);  // Draw texture quad with tiling and offset parameters
-RLAPI void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint);      // Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
-RLAPI void DrawTexturePro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);           // Draw a part of a texture defined by a rectangle with 'pro' parameters
-RLAPI void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle dest, Vector2 origin, float rotation, Color tint);   // Draws a texture (or part of it) that stretches or shrinks nicely
+ASCAPI void Texture_DrawV(Texture2D texture, Vector2 position, Color tint);                                // Draw a Texture2D with position defined as Vector2
+ASCAPI void Texture_DrawEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);  // Draw a Texture2D with extended parameters
+ASCAPI void Texture_DrawRec(Texture2D texture, Rectangle source, Vector2 position, Color tint);            // Draw a part of a texture defined by a rectangle
+ASCAPI void Texture_DrawPro(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Color tint);           // Draw a part of a texture defined by a rectangle with 'pro' parameters
 
 // Color/pixel related functions
-RLAPI Color Fade(Color color, float alpha);                                 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
-RLAPI int ColorToInt(Color color);                                          // Get hexadecimal value for a Color
-RLAPI Vector4 ColorNormalize(Color color);                                  // Get Color normalized as float [0..1]
-RLAPI Color ColorFromNormalized(Vector4 normalized);                        // Get Color from normalized values [0..1]
-RLAPI Vector3 ColorToHSV(Color color);                                      // Get HSV values for a Color, hue [0..360], saturation/value [0..1]
-RLAPI Color ColorFromHSV(float hue, float saturation, float value);         // Get a Color from HSV values, hue [0..360], saturation/value [0..1]
-RLAPI Color ColorAlpha(Color color, float alpha);                           // Get color with alpha applied, alpha goes from 0.0f to 1.0f
-RLAPI Color ColorAlphaBlend(Color dst, Color src, Color tint);              // Get src alpha-blended into dst color with tint
-RLAPI Color GetColor(unsigned int hexValue);                                // Get Color structure from hexadecimal value
-RLAPI Color GetPixelColor(void *srcPtr, int format);                        // Get Color from a source pixel pointer of certain format
-RLAPI void SetPixelColor(void *dstPtr, Color color, int format);            // Set color formatted into destination pixel pointer
-RLAPI int GetPixelDataSize(int width, int height, int format);              // Get pixel data size in bytes for certain format
+ASCAPI Color Color_Fade(Color color, float alpha);                                 // Get color with alpha applied, alpha goes from 0.0f to 1.0f
+ASCAPI Color Color_AlphaBlend(Color dst, Color src, Color tint);              // Get src alpha-blended into dst color with tint
+ASCAPI Color Color_GetPixel(void *srcPtr, int format);                        // Get Color from a source pixel pointer of certain format
+ASCAPI void Color_SetPixel(void *dstPtr, Color color, int format);            // Set color formatted into destination pixel pointer
+ASCAPI int Color_GetPixelDataSize(int width, int height, int format);              // Get pixel data size in bytes for certain format
 
 //------------------------------------------------------------------------------------
 // Font Loading and Text Drawing Functions (Module: text)

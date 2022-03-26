@@ -54,26 +54,6 @@
 *       WARNING: Reconfiguring standard input could lead to undesired effects, like breaking other running processes or
 *       blocking the device if not restored properly. Use with care.
 *
-*   #define SUPPORT_MOUSE_CURSOR_POINT
-*       Draw a mouse pointer on screen
-*
-*   #define SUPPORT_BUSY_WAIT_LOOP
-*       Use busy wait loop for timing sync, if not defined, a high-resolution timer is setup and used
-*
-*   #define SUPPORT_PARTIALBUSY_WAIT_LOOP
-*       Use a partial-busy wait loop, in this case frame sleeps for most of the time and runs a busy-wait-loop at the end
-*
-*   #define SUPPORT_EVENTS_WAITING
-*       Wait for events passively (sleeping while no events) instead of polling them actively every frame
-
-*   #define SUPPORT_COMPRESSION_API
-*       Support CompressData() and DecompressData() functions, those functions use zlib implementation
-*       provided by stb_image and stb_image_write libraries, so, those libraries must be enabled on textures module
-*       for linkage
-*
-*   #define SUPPORT_DATA_STORAGE
-*       Support saving binary data automatically to a generated storage.data file. This file is managed internally
-*
 *   #define SUPPORT_EVENTS_AUTOMATION
 *       Support automatic generated events, loading and recording of those events when required
 *
@@ -762,12 +742,12 @@ void Window_Init(size_t width, size_t height, const char *title)
     LoadFontDefault();
     Rectangle rec = GetFontDefault().recs[95];
     // NOTE: We setup a 1px padding on char rectangle to avoid pixel bleeding on MSAA filtering
-    SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
+    Shape_SetTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
 #else
     // Set default texture and rectangle to be used for shapes drawing
     // NOTE: rlgl default texture is a 1x1 pixel UNCOMPRESSED_R8G8B8A8
     Texture2D texture = { rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
-    SetShapesTexture(texture, (Rectangle){ 0.0f, 0.0f, 1.0f, 1.0f });
+    Shape_SetTexture(texture, (Rectangle){ 0.0f, 0.0f, 1.0f, 1.0f });
 #endif
 #if defined(PLATFORM_DESKTOP)
     if ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0)
@@ -1860,7 +1840,7 @@ void Buffer_Clear(Color color)
 }
 
 // Setup canvas (framebuffer) to start drawing
-void Buffer_Init(void)
+void Buffer_Begin(void)
 {
     // WARNING: Previously to BeginDrawing() other render textures drawing could happen,
     // consequently the measure for update vs draw is not accurate (only the total frame time is accurate)
@@ -1873,7 +1853,7 @@ void Buffer_Init(void)
 }
 
 // Initializes render texture for drawing
-void RenderTexture_Init(RenderTexture2D target)
+void RenderTexture_Begin(RenderTexture2D target)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1916,33 +1896,33 @@ void RenderTexture_Update(void)
 }
 
 // Begin custom shader mode
-void BeginShaderMode(Shader shader)
+void Shader_Begin(Shader shader)
 {
     rlSetShader(shader.id, shader.locs);
 }
 
 // End custom shader mode (returns to default shader)
-void EndShaderMode(void)
+void Shader_Update(void)
 {
     rlSetShader(rlGetShaderIdDefault(), rlGetShaderLocsDefault());
 }
 
 // Begin blending mode (alpha, additive, multiplied, subtract, custom)
 // NOTE: Blend modes supported are enumerated in BlendMode enum
-void BeginBlendMode(int mode)
+void Buffer_BeginBlend(int mode)
 {
     rlSetBlendMode(mode);
 }
 
 // End blending mode (reset to default: alpha blending)
-void EndBlendMode(void)
+void Buffer_UpdateBlend(void)
 {
     rlSetBlendMode(BLEND_ALPHA);
 }
 
 // Begin scissor mode (define screen area for following drawing)
 // NOTE: Scissor rec refers to bottom-left corner, we change it to upper-left
-void BeginScissorMode(int x, int y, int width, int height)
+void Buffer_BeginScissor(int x, int y, int width, int height)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -1961,7 +1941,7 @@ void BeginScissorMode(int x, int y, int width, int height)
 }
 
 // End scissor mode
-void EndScissorMode(void)
+void Buffer_EndScissor(void)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
     rlDisableScissorTest();
@@ -1969,7 +1949,7 @@ void EndScissorMode(void)
 
 // Load shader from files and bind default locations
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
-Shader LoadShader(const char *vsFileName, const char *fsFileName)
+Shader Shader_Load(const char *vsFileName, const char *fsFileName)
 {
     Shader shader = { 0 };
 
@@ -1979,7 +1959,7 @@ Shader LoadShader(const char *vsFileName, const char *fsFileName)
     if (vsFileName != NULL) vShaderStr = LoadFileText(vsFileName);
     if (fsFileName != NULL) fShaderStr = LoadFileText(fsFileName);
 
-    shader = LoadShaderFromMemory(vShaderStr, fShaderStr);
+    shader = Shader_LoadData(vShaderStr, fShaderStr);
 
     UnloadFileText(vShaderStr);
     UnloadFileText(fShaderStr);
@@ -1988,7 +1968,7 @@ Shader LoadShader(const char *vsFileName, const char *fsFileName)
 }
 
 // Load shader from code strings and bind default locations
-RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode)
+Shader Shader_LoadData(const char *vsCode, const char *fsCode)
 {
     Shader shader = { 0 };
     shader.locs = (int *)RL_CALLOC(RL_MAX_SHADER_LOCATIONS, sizeof(int));
@@ -2037,7 +2017,7 @@ RLAPI Shader LoadShaderFromMemory(const char *vsCode, const char *fsCode)
 }
 
 // Unload shader from GPU memory (VRAM)
-void UnloadShader(Shader shader)
+void Shader_Free(Shader shader)
 {
     if (shader.id != rlGetShaderIdDefault())
     {
@@ -2047,13 +2027,13 @@ void UnloadShader(Shader shader)
 }
 
 // Get shader uniform location
-int GetShaderLocation(Shader shader, const char *uniformName)
+int Shader_GetLoc(Shader shader, const char *uniformName)
 {
     return rlGetLocationUniform(shader.id, uniformName);
 }
 
 // Get shader attribute location
-int GetShaderLocationAttrib(Shader shader, const char *attribName)
+int Shader_GetLocAttrib(Shader shader, const char *attribName)
 {
     return rlGetLocationAttrib(shader.id, attribName);
 }
@@ -2217,6 +2197,11 @@ int RNG_Gen(int min, int max)
     }
 
     return (genRandLong(&CORE.mtrand)%(abs(max - min) + 1) + min);
+}
+
+double RNG_GenD()
+{
+    return genRand(&CORE.mtrand);
 }
 
 // Set the seed for the random number generator
@@ -2530,41 +2515,6 @@ long GetFileModTime(const char *fileName)
     }
 
     return 0;
-}
-
-// Open URL with default system browser (if available)
-// NOTE: This function is only safe to use if you control the URL given.
-// A user could craft a malicious string performing another action.
-// Only call this function yourself not with user input or make sure to check the string yourself.
-// Ref: https://github.com/raysan5/raylib/issues/686
-void OpenURL(const char *url)
-{
-    // Small security check trying to avoid (partially) malicious code...
-    // sorry for the inconvenience when you hit this point...
-    if (strchr(url, '\'') != NULL)
-    {
-        TRACELOG(LOG_WARNING, "SYSTEM: Provided URL is not valid");
-    }
-    else
-    {
-#if defined(PLATFORM_DESKTOP)
-        char *cmd = (char *)RL_CALLOC(strlen(url) + 10, sizeof(char));
-    #if defined(_WIN32)
-        sprintf(cmd, "explorer %s", url);
-    #endif
-    #if defined(__linux__) || defined(__FreeBSD__)
-        sprintf(cmd, "xdg-open '%s'", url); // Alternatives: firefox, x-www-browser
-    #endif
-    #if defined(__APPLE__)
-        sprintf(cmd, "open '%s'", url);
-    #endif
-        system(cmd);
-        RL_FREE(cmd);
-#endif
-#if defined(PLATFORM_WEB)
-        emscripten_run_script(TextFormat("window.open('%s', '_blank')", url));
-#endif
-    }
 }
 
 //----------------------------------------------------------------------------------
@@ -4846,7 +4796,7 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                     LoadFontDefault();
                     Rectangle rec = GetFontDefault().recs[95];
                     // NOTE: We setup a 1px padding on char rectangle to avoid pixel bleeding on MSAA filtering
-                    SetShapesTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
+                    Shape_SetTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
                 #endif
 
                     // TODO: GPU assets reload in case of lost focus (lost context)
