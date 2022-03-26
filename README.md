@@ -29,19 +29,19 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 - [x] 5. Remake timing & frame control
 - [x] 6. Improved FPS controls
 - [x] 7. Further improve memory controls and prevent leakage
-- [ ] **Rearrange API**
-  - [x] **window**, **monitor**, **cursor**
-  - [x] **mouse**, **touch**, **gamepad**, **keys**
-  - [x] **time**, **events**
-  - [x] **buffer**, **texture**, **rendertexture**, **shader**
-  - [ ] files, filesystems
-  - [x] **shape**, **color**, **image**
-  - [x] **text**, **font**
+- [x] 8. Rearrange API
+  - [x] window, monitor, cursor
+  - [x] mouse, touch, gamepad, keys
+  - [x] time, events
+  - [x] buffer, texture, rendertexture, shader
+  - [x] filesystem
+  - [x] shape, color, image
+  - [x] text, font
 - [ ] Add instancing
 - [ ] Improve audio precision
 - [ ] Add audio channeling
 - [ ] Make minimal binary size on Windows less than 750kB
-  - Current minimal size: 756.5kB (Codeblocks 20.03 / GCC 8.1)
+  - Current minimal size: 756.0kB (Codeblocks 20.03 / GCC 8.1)
   - -static-libgcc -static-libstdc++ -m32 -flto -Os -s
 
 #### Minor adjustments
@@ -90,6 +90,9 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 - [x] 16. Made `LoadImageColors()`, `LoadImagePalette()`, `UnloadImageColors()`, ``UnloadImagePalette()`, `GetImageAlphaBorder()` and `GetImageColor()` static.
 - [x] 17. Made Glyph-related functions static.
 
+- [x] 18. Removed `GetDirectoryPath()` and `GetPrevDirectoryPath()` because I'm pretty sure that they're not that useful.
+- [ ] 
+
 ...
 
 #### Problematic / worth noticing
@@ -103,7 +106,7 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 ## API
 
-#### v0.6.7.18 Cheatsheet
+#### v0.8.7.19 Cheatsheet
 
 ###### Buffer
 
@@ -174,6 +177,51 @@ ASCAPI void Events_Wait();
 // Wait for events
 ASCAPI void Events_EndLoop();
 // End the loop and do clean-ups
+```
+
+###### Filesystem
+
+```C
+ASCAPI unsigned char *File_Load(const char *fileName, unsigned int *bytesRead);
+// Load file data as byte array (read)
+ASCAPI void File_Free(unsigned char *data);
+// Unload file data allocated by File_Load()
+ASCAPI bool File_Save(const char *fileName, void *data, unsigned int bytesToWrite);
+// Save data to file from byte array (write), returns true on success
+ASCAPI char *File_LoadStr(const char *fileName);
+// Load text data from file (read), returns a '\0' terminated string
+ASCAPI void File_FreeStr(char *text);
+// Unload file text data allocated by File_LoadStr()
+ASCAPI bool File_SaveStr(const char *fileName, char *text);
+// Save text data to file (write), string must be '\0' terminated, returns true on success
+ASCAPI bool File_Exists(const char *fileName);
+// Check if file exists
+ASCAPI bool File_DirExists(const char *dirPath);
+// Check if directory exists
+ASCAPI bool File_IsExt(const char *fileName, const char *ext);
+// Check file extension (including the dot: '.png', '.wav')
+ASCAPI const char *File_GetExt(const char *fileName);
+// Get pointer to extension for a filename string (includes dot: '.png')
+ASCAPI const char *File_GetName(const char *filePath);
+// Get pointer to filename for a path string
+ASCAPI const char *File_GetNameNX(const char *filePath);
+// Get filename string without extension (uses static string)
+ASCAPI const char *File_GetWorkingDir(void);
+// Get current working directory (uses static string)
+ASCAPI bool File_SetWorkingDir(const char *dir);
+// Change working directory, return true on success
+ASCAPI char **File_LoadDirFileList(const char *dirPath, int *count);
+// Get filenames in a directory path (max 512 files)
+ASCAPI void File_FreeDirFileList(void);
+// Clear directory files paths buffers
+ASCAPI bool File_IsDropped(void);
+// Check if a file has been dropped into window
+ASCAPI char **File_GetDroppedList(int *count);
+// Get dropped files names (memory should be freed)
+ASCAPI void File_ClearDroppedList(void);
+// Clear dropped files paths buffer (free memory)
+ASCAPI long File_GetModTime(const char *fileName);
+// Get file modification time (last write time)
 ```
 
 ###### Font
@@ -479,6 +527,15 @@ ASCAPI void Shader_Update(void)
 ASCAPI int Shader_GetLoc(Shader shader, const char *uniformName);
 // Get shader uniform location
 ASCAPI int Shader_GetLocAttrib(Shader shader, const char *attribName);
+// Get shader attribute location
+ASCAPI void Shader_SetValue(Shader shader, int locIndex, const void *value, int uniformType);
+// Set shader uniform value
+ASCAPI void Shader_SetValueV(Shader shader, int locIndex, const void *value, int uniformType, int count);
+// Set shader uniform value vector
+ASCAPI void Shader_SetValueMatrix(Shader shader, int locIndex, Matrix mat);
+// Set shader uniform value (matrix 4x4)
+ASCAPI void Shader_SetValueTexture(Shader shader, int locIndex, Texture2D texture);
+// Set shader uniform value for texture (sampler2d)
 ```
 
 ###### Shape
