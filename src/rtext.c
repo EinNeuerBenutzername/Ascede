@@ -51,7 +51,7 @@
     #include "config.h"     // Defines module configuration flags
 #endif
 
-#include "utils.h"          // Required for: LoadFileText()
+#include "utils.h"          // Required for: File_LoadStr()
 #include "rlgl.h"           // OpenGL abstraction layer to OpenGL 1.1, 2.1, 3.3+ or ES2 -> Only Text_DrawPro()
 
 #include <stdlib.h>         // Required for: malloc(), free()
@@ -314,11 +314,11 @@ Font Font_Load(const char *fileName)
     Font font = { 0 };
 
 #if defined(SUPPORT_FILEFORMAT_TTF)
-    if (IsFileExtension(fileName, ".ttf;.otf")) font = Font_LoadEx(fileName, FONT_TTF_DEFAULT_SIZE, NULL, FONT_TTF_DEFAULT_NUMCHARS);
+    if (File_IsExt(fileName, ".ttf;.otf")) font = Font_LoadEx(fileName, FONT_TTF_DEFAULT_SIZE, NULL, FONT_TTF_DEFAULT_NUMCHARS);
     else
 #endif
 #if defined(SUPPORT_FILEFORMAT_FNT)
-    if (IsFileExtension(fileName, ".fnt")) font = LoadBMFont(fileName);
+    if (File_IsExt(fileName, ".fnt")) font = LoadBMFont(fileName);
     else
 #endif
     {
@@ -346,12 +346,12 @@ Font Font_LoadEx(const char *fileName, int fontSize, int *fontChars, int glyphCo
 
     // Loading file to memory
     unsigned int fileSize = 0;
-    unsigned char *fileData = LoadFileData(fileName, &fileSize);
+    unsigned char *fileData = File_Load(fileName, &fileSize);
 
     if (fileData != NULL)
     {
         // Loading font from memory data
-        font = Font_LoadMem(GetFileExtension(fileName), fileData, fileSize, fontSize, fontChars, glyphCount);
+        font = Font_LoadMem(File_GetExt(fileName), fileData, fileSize, fontSize, fontChars, glyphCount);
 
         ASC_FREE(fileData);
     }
@@ -1260,7 +1260,7 @@ static Font LoadBMFont(const char *fileName)
 
     int base = 0;   // Useless data
 
-    char *fileText = LoadFileText(fileName);
+    char *fileText = File_LoadStr(fileName);
 
     if (fileText == NULL) return font;
 
@@ -1369,7 +1369,7 @@ static Font LoadBMFont(const char *fileName)
     }
 
     Image_Free(imFont);
-    UnloadFileText(fileText);
+    File_FreeStr(fileText);
 
     if (font.texture.id == 0)
     {

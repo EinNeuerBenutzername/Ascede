@@ -66,7 +66,7 @@ static int logTypeLevel = LOG_INFO;                 // Minimum log type level
 
 static TraceLogCallback traceLog = NULL;            // TraceLog callback function pointer
 static LoadFileDataCallback loadFileData = NULL;    // LoadFileData callback funtion pointer
-static SaveFileDataCallback saveFileData = NULL;    // SaveFileText callback funtion pointer
+static SaveFileDataCallback saveFileData = NULL;    // SaveFileData callback funtion pointer
 static LoadFileTextCallback loadFileText = NULL;    // LoadFileText callback funtion pointer
 static SaveFileTextCallback saveFileText = NULL;    // SaveFileText callback funtion pointer
 
@@ -160,7 +160,7 @@ void TraceLog(int logType, const char *text, ...)
 }
 
 // Load data from file into a buffer
-unsigned char *LoadFileData(const char *fileName, unsigned int *bytesRead)
+unsigned char *File_Load(const char *fileName, unsigned int *bytesRead)
 {
     unsigned char *data = NULL;
     *bytesRead = 0;
@@ -208,14 +208,14 @@ unsigned char *LoadFileData(const char *fileName, unsigned int *bytesRead)
     return data;
 }
 
-// Unload file data allocated by LoadFileData()
-void UnloadFileData(unsigned char *data)
+// Unload file data allocated by File_Load()
+void File_Free(unsigned char *data)
 {
     ASC_FREE(data);
 }
 
 // Save data to file from buffer
-bool SaveFileData(const char *fileName, void *data, unsigned int bytesToWrite)
+bool File_Save(const char *fileName, void *data, unsigned int bytesToWrite)
 {
     bool success = false;
 
@@ -251,7 +251,7 @@ bool SaveFileData(const char *fileName, void *data, unsigned int bytesToWrite)
 
 // Load text data from file, returns a '\0' terminated string
 // NOTE: text chars array should be freed manually
-char *LoadFileText(const char *fileName)
+char *File_LoadStr(const char *fileName)
 {
     char *text = NULL;
 
@@ -302,14 +302,14 @@ char *LoadFileText(const char *fileName)
     return text;
 }
 
-// Unload file text data allocated by LoadFileText()
-void UnloadFileText(char *text)
+// Unload file text data allocated by File_LoadStr()
+void File_FreeStr(char *text)
 {
     ASC_FREE(text);
 }
 
 // Save text data to file (write), string must be '\0' terminated
-bool SaveFileText(const char *fileName, char *text)
+bool File_SaveStr(const char *fileName, char *text)
 {
     bool success = false;
 

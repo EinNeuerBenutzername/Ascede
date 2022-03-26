@@ -27,9 +27,9 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1648294726 g:\-guten\prog\c\proj\ascede\src\config.h
+1648299202 g:\-guten\prog\c\proj\ascede\src\config.h
 
-1647697204 g:\-guten\prog\c\proj\ascede\src\utils.h
+1648296910 g:\-guten\prog\c\proj\ascede\src\utils.h
 	<stdio.h>
 	<android/asset_manager.h>
 
@@ -208,7 +208,7 @@
 	<wchar.h>
 	<errno.h>
 
-1648295596 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
+1648299432 source:g:\-guten\prog\c\proj\ascede\src\rcore.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -255,7 +255,7 @@
 	<emscripten/emscripten.h>
 	<emscripten/html5.h>
 
-1648296354 g:\-guten\prog\c\proj\ascede\src\rlgl.h
+1648298965 g:\-guten\prog\c\proj\ascede\src\rlgl.h
 	"ascmem.h"
 	<stdbool.h>
 	<OpenGL/gl.h>
@@ -279,7 +279,7 @@
 	<stdlib.h>
 	<string.h>
 
-1647697204 g:\-guten\prog\c\proj\ascede\src\raymath.h
+1648296895 g:\-guten\prog\c\proj\ascede\src\raymath.h
 	<math.h>
 
 1644143215 g:\-guten\prog\c\proj\ascede\src\external\sinfl.h
@@ -299,7 +299,7 @@
 	<string.h>
 	<errno.h>
 
-1647697204 source:g:\-guten\prog\c\proj\ascede\src\rglfw.c
+1648296843 source:g:\-guten\prog\c\proj\ascede\src\rglfw.c
 	"external/glfw/src/context.c"
 	"external/glfw/src/init.c"
 	"external/glfw/src/input.c"
@@ -726,7 +726,7 @@
 	<math.h>
 	<float.h>
 
-1648295596 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
+1648298163 source:g:\-guten\prog\c\proj\ascede\src\rtext.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -757,7 +757,7 @@
 	<string.h>
 	<string.h>
 
-1648295596 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
+1648299313 source:g:\-guten\prog\c\proj\ascede\src\rtextures.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -804,7 +804,7 @@
 	<math.h>
 	<stdlib.h>
 
-1648295596 source:g:\-guten\prog\c\proj\ascede\src\utils.c
+1648297888 source:g:\-guten\prog\c\proj\ascede\src\utils.c
 	"ascede.h"
 	"config.h"
 	"utils.h"
@@ -1682,7 +1682,7 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1648296327 g:\-guten\prog\c\proj\ascede\src\ascede.h
+1648298949 g:\-guten\prog\c\proj\ascede\src\ascede.h
 	<stdarg.h>
 	<stddef.h>
 	"ascmem.h"
@@ -2987,8 +2987,12 @@
 	<math.h>
 	<stdlib.h>
 
-1648276114 source:g:\-guten\prog\c\proj\ascede\minimal.c
+1648296803 source:g:\-guten\prog\c\proj\ascede\minimal.c
 	"src/ascede.h"
 
 1648296566 g:\-guten\prog\c\proj\ascede\src\ascmem.h
+
+1648296623 source:g:\-guten\prog\c\proj\ascede\src\ascmem.c
+	<stdlib.h>
+	"ascmem.h"
 

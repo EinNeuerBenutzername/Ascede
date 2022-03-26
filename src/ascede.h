@@ -854,10 +854,10 @@ ASCAPI Shader Shader_Load(const char *vsFileName, const char *fsFileName);   // 
 ASCAPI Shader Shader_LoadData(const char *vsCode, const char *fsCode); // Load shader from code strings and bind default locations
 ASCAPI int Shader_GetLoc(Shader shader, const char *uniformName);       // Get shader uniform location
 ASCAPI int Shader_GetLocAttrib(Shader shader, const char *attribName);  // Get shader attribute location
-RLAPI void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType);               // Set shader uniform value
-RLAPI void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count);   // Set shader uniform value vector
-RLAPI void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat);         // Set shader uniform value (matrix 4x4)
-RLAPI void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
+ASCAPI void Shader_SetValue(Shader shader, int locIndex, const void *value, int uniformType);               // Set shader uniform value
+ASCAPI void Shader_SetValueV(Shader shader, int locIndex, const void *value, int uniformType, int count);   // Set shader uniform value vector
+ASCAPI void Shader_SetValueMatrix(Shader shader, int locIndex, Matrix mat);         // Set shader uniform value (matrix 4x4)
+ASCAPI void Shader_SetValueTexture(Shader shader, int locIndex, Texture2D texture); // Set shader uniform value for texture (sampler2d)
 ASCAPI void Shader_Free(Shader shader);                                    // Unload shader from GPU memory (VRAM)
 
 // Misc. functions
@@ -879,28 +879,26 @@ ASCAPI void Callback_SetLoadFileText(LoadFileTextCallback callback); // Set cust
 ASCAPI void Callback_SetSaveFileText(SaveFileTextCallback callback); // Set custom file text data saver
 
 // Files management functions
-RLAPI unsigned char *LoadFileData(const char *fileName, unsigned int *bytesRead);     // Load file data as byte array (read)
-RLAPI void UnloadFileData(unsigned char *data);                   // Unload file data allocated by LoadFileData()
-RLAPI bool SaveFileData(const char *fileName, void *data, unsigned int bytesToWrite); // Save data to file from byte array (write), returns true on success
-RLAPI char *LoadFileText(const char *fileName);                   // Load text data from file (read), returns a '\0' terminated string
-RLAPI void UnloadFileText(char *text);                            // Unload file text data allocated by LoadFileText()
-RLAPI bool SaveFileText(const char *fileName, char *text);        // Save text data to file (write), string must be '\0' terminated, returns true on success
-RLAPI bool FileExists(const char *fileName);                      // Check if file exists
-RLAPI bool DirectoryExists(const char *dirPath);                  // Check if a directory path exists
-RLAPI bool IsFileExtension(const char *fileName, const char *ext);// Check file extension (including point: .png, .wav)
-RLAPI const char *GetFileExtension(const char *fileName);         // Get pointer to extension for a filename string (includes dot: '.png')
-RLAPI const char *GetFileName(const char *filePath);              // Get pointer to filename for a path string
-RLAPI const char *GetFileNameWithoutExt(const char *filePath);    // Get filename string without extension (uses static string)
-RLAPI const char *GetDirectoryPath(const char *filePath);         // Get full path for a given fileName with path (uses static string)
-RLAPI const char *GetPrevDirectoryPath(const char *dirPath);      // Get previous directory path for a given path (uses static string)
-RLAPI const char *GetWorkingDirectory(void);                      // Get current working directory (uses static string)
-RLAPI char **GetDirectoryFiles(const char *dirPath, int *count);  // Get filenames in a directory path (memory should be freed)
-RLAPI void ClearDirectoryFiles(void);                             // Clear directory files paths buffers (free memory)
-RLAPI bool ChangeDirectory(const char *dir);                      // Change working directory, return true on success
-RLAPI bool IsFileDropped(void);                                   // Check if a file has been dropped into window
-RLAPI char **GetDroppedFiles(int *count);                         // Get dropped files names (memory should be freed)
-RLAPI void ClearDroppedFiles(void);                               // Clear dropped files paths buffer (free memory)
-RLAPI long GetFileModTime(const char *fileName);                  // Get file modification time (last write time)
+ASCAPI unsigned char *File_Load(const char *fileName, unsigned int *bytesRead);     // Load file data as byte array (read)
+ASCAPI void File_Free(unsigned char *data);                   // Unload file data allocated by File_Load()
+ASCAPI bool File_Save(const char *fileName, void *data, unsigned int bytesToWrite); // Save data to file from byte array (write), returns true on success
+ASCAPI char *File_LoadStr(const char *fileName);                   // Load text data from file (read), returns a '\0' terminated string
+ASCAPI void File_FreeStr(char *text);                            // Unload file text data allocated by File_LoadStr()
+ASCAPI bool File_SaveStr(const char *fileName, char *text);        // Save text data to file (write), string must be '\0' terminated, returns true on success
+ASCAPI bool File_Exists(const char *fileName);                      // Check if file exists
+ASCAPI bool File_DirExists(const char *dirPath);                  // Check if a directory path exists
+ASCAPI bool File_IsExt(const char *fileName, const char *ext);// Check file extension (including point: .png, .wav)
+ASCAPI const char *File_GetExt(const char *fileName);         // Get pointer to extension for a filename string (includes dot: '.png')
+ASCAPI const char *File_GetName(const char *filePath);              // Get pointer to filename for a path string
+ASCAPI const char *File_GetNameNX(const char *filePath);    // Get filename string without extension (uses static string)
+ASCAPI const char *File_GetWorkingDir(void);                      // Get current working directory (uses static string)
+ASCAPI char **File_LoadDirFileList(const char *dirPath, int *count);  // Get filenames in a directory path (memory should be freed)
+ASCAPI void File_FreeDirFileList(void);                             // Clear directory files paths buffers (free memory)
+ASCAPI bool File_SetWorkingDir(const char *dir);                      // Change working directory, return true on success
+ASCAPI bool File_IsDropped(void);                                   // Check if a file has been dropped into window
+ASCAPI char **File_GetDroppedList(int *count);                         // Get dropped files names (memory should be freed)
+ASCAPI void File_ClearDroppedList(void);                               // Clear dropped files paths buffer (free memory)
+ASCAPI long File_GetModTime(const char *fileName);                  // Get file modification time (last write time)
 
 //------------------------------------------------------------------------------------
 // Input Handling Functions (Module: core)

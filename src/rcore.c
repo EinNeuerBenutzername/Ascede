@@ -122,16 +122,16 @@
     #define DIRENT_MALLOC ASC_MALLOC
     #define DIRENT_FREE ASC_FREE
 
-    #include "external/dirent.h"    // Required for: DIR, opendir(), closedir() [Used in GetDirectoryFiles()]
+    #include "external/dirent.h"    // Required for: DIR, opendir(), closedir() [Used in File_LoadDirFileList()]
 #else
-    #include <dirent.h>             // Required for: DIR, opendir(), closedir() [Used in GetDirectoryFiles()]
+    #include <dirent.h>             // Required for: DIR, opendir(), closedir() [Used in File_LoadDirFileList()]
 #endif
 
 #if defined(_WIN32)
     #include <direct.h>             // Required for: _getch(), _chdir()
     #define GETCWD _getcwd          // NOTE: MSDN recommends not to use getcwd(), chdir()
     #define CHDIR _chdir
-    #include <io.h>                 // Required for: _access() [Used in FileExists()]
+    #include <io.h>                 // Required for: _access() [Used in File_Exists()]
 #else
     #include <unistd.h>             // Required for: getch(), chdir() (POSIX), access()
     #define GETCWD getcwd
@@ -258,12 +258,6 @@
     #define MAX_CHAR_PRESSED_QUEUE        16        // Maximum number of characters in the char input queue
 #endif
 
-// Flags operation macros
-#define FLAG_SET(n, f) ((n) |= (f))
-#define FLAG_CLEAR(n, f) ((n) &= ~(f))
-#define FLAG_TOGGLE(n, f) ((n) ^= (f))
-#define FLAG_CHECK(n, f) ((n) & (f))
-
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
@@ -337,9 +331,6 @@ typedef struct CoreData {
         bool contextRebindRequired;         // Used to know context rebind required
     } Android;
 #endif
-    struct {
-        const char *basePath;               // Base path for data storage
-    } Storage;
     struct {
 #if defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
         InputEventWorker eventWorker[10];   // List of worker threads for every monitored "/dev/input/event<N>"
@@ -415,7 +406,6 @@ typedef struct CoreData {
         float fps;
         float realfps;
         bool unreal;
-//        double target;                      // Desired time for one frame, if 0 not applied
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_RPI) || defined(PLATFORM_DRM)
         unsigned long long base;            // Base time measure for hi-res timer
 #endif
@@ -722,9 +712,6 @@ void Window_Init(size_t width, size_t height, const char *title)
 
     // Initialize random seed
     srand((unsigned int)time(NULL));
-
-    // Initialize base path for storage
-    CORE.Storage.basePath = GetWorkingDirectory();
 
 #if defined(SUPPORT_DEFAULT_FONT)
     // Load default font
@@ -1950,13 +1937,13 @@ Shader Shader_Load(const char *vsFileName, const char *fsFileName)
     char *vShaderStr = NULL;
     char *fShaderStr = NULL;
 
-    if (vsFileName != NULL) vShaderStr = LoadFileText(vsFileName);
-    if (fsFileName != NULL) fShaderStr = LoadFileText(fsFileName);
+    if (vsFileName != NULL) vShaderStr = File_LoadStr(vsFileName);
+    if (fsFileName != NULL) fShaderStr = File_LoadStr(fsFileName);
 
     shader = Shader_LoadData(vShaderStr, fShaderStr);
 
-    UnloadFileText(vShaderStr);
-    UnloadFileText(fShaderStr);
+    File_FreeStr(vShaderStr);
+    File_FreeStr(fShaderStr);
 
     return shader;
 }
@@ -2033,13 +2020,13 @@ int Shader_GetLocAttrib(Shader shader, const char *attribName)
 }
 
 // Set shader uniform value
-void SetShaderValue(Shader shader, int locIndex, const void *value, int uniformType)
+void Shader_SetValue(Shader shader, int locIndex, const void *value, int uniformType)
 {
-    SetShaderValueV(shader, locIndex, value, uniformType, 1);
+    Shader_SetValueV(shader, locIndex, value, uniformType, 1);
 }
 
 // Set shader uniform value vector
-void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniformType, int count)
+void Shader_SetValueV(Shader shader, int locIndex, const void *value, int uniformType, int count)
 {
     rlEnableShader(shader.id);
     rlSetUniform(locIndex, value, uniformType, count);
@@ -2047,7 +2034,7 @@ void SetShaderValueV(Shader shader, int locIndex, const void *value, int uniform
 }
 
 // Set shader uniform value (matrix 4x4)
-void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat)
+void Shader_SetValueMatrix(Shader shader, int locIndex, Matrix mat)
 {
     rlEnableShader(shader.id);
     rlSetUniformMatrix(locIndex, mat);
@@ -2055,7 +2042,7 @@ void SetShaderValueMatrix(Shader shader, int locIndex, Matrix mat)
 }
 
 // Set shader uniform value for texture
-void SetShaderValueTexture(Shader shader, int locIndex, Texture2D texture)
+void Shader_SetValueTexture(Shader shader, int locIndex, Texture2D texture)
 {
     rlEnableShader(shader.id);
     rlSetUniformSampler(locIndex, texture.id);
@@ -2213,7 +2200,7 @@ int RNG_GetState(){
 }
 
 // Check if the file exists
-bool FileExists(const char *fileName)
+bool File_Exists(const char *fileName)
 {
     bool result = false;
 
@@ -2228,10 +2215,10 @@ bool FileExists(const char *fileName)
 
 // Check file extension
 // NOTE: Extensions checking is not case-sensitive
-bool IsFileExtension(const char *fileName, const char *ext)
+bool File_IsExt(const char *fileName, const char *ext)
 {
     bool result = false;
-    const char *fileExt = GetFileExtension(fileName);
+    const char *fileExt = File_GetExt(fileName);
 
     if (fileExt != NULL)
     {
@@ -2242,7 +2229,7 @@ bool IsFileExtension(const char *fileName, const char *ext)
 }
 
 // Check if a directory path exists
-bool DirectoryExists(const char *dirPath)
+bool File_DirExists(const char *dirPath)
 {
     bool result = false;
     DIR *dir = opendir(dirPath);
@@ -2257,7 +2244,7 @@ bool DirectoryExists(const char *dirPath)
 }
 
 // Get pointer to extension for a filename string (includes the dot: .png)
-const char *GetFileExtension(const char *fileName)
+const char *File_GetExt(const char *fileName)
 {
     const char *dot = strrchr(fileName, '.');
 
@@ -2275,7 +2262,7 @@ static const char *strprbrk(const char *s, const char *charset)
 }
 
 // Get pointer to filename for a path string
-const char *GetFileName(const char *filePath)
+const char *File_GetName(const char *filePath)
 {
     const char *fileName = NULL;
     if (filePath != NULL) fileName = strprbrk(filePath, "\\/");
@@ -2286,14 +2273,14 @@ const char *GetFileName(const char *filePath)
 }
 
 // Get filename string without extension (uses static string)
-const char *GetFileNameWithoutExt(const char *filePath)
+const char *File_GetNameNX(const char *filePath)
 {
     #define MAX_FILENAMEWITHOUTEXT_LENGTH   128
 
     static char fileName[MAX_FILENAMEWITHOUTEXT_LENGTH] = { 0 };
     memset(fileName, 0, MAX_FILENAMEWITHOUTEXT_LENGTH);
 
-    if (filePath != NULL) strcpy(fileName, GetFileName(filePath));   // Get filename with extension
+    if (filePath != NULL) strcpy(fileName, File_GetName(filePath));   // Get filename with extension
 
     int size = (int)strlen(fileName);   // Get size in bytes
 
@@ -2310,78 +2297,8 @@ const char *GetFileNameWithoutExt(const char *filePath)
     return fileName;
 }
 
-// Get directory for a given filePath
-const char *GetDirectoryPath(const char *filePath)
-{
-/*
-    // NOTE: Directory separator is different in Windows and other platforms,
-    // fortunately, Windows also support the '/' separator, that's the one should be used
-    #if defined(_WIN32)
-        char separator = '\\';
-    #else
-        char separator = '/';
-    #endif
-*/
-    const char *lastSlash = NULL;
-    static char dirPath[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(dirPath, 0, MAX_FILEPATH_LENGTH);
-
-    // In case provided path does not contain a root drive letter (C:\, D:\) nor leading path separator (\, /),
-    // we add the current directory path to dirPath
-    if (filePath[1] != ':' && filePath[0] != '\\' && filePath[0] != '/')
-    {
-        // For security, we set starting path to current directory,
-        // obtained path will be concated to this
-        dirPath[0] = '.';
-        dirPath[1] = '/';
-    }
-
-    lastSlash = strprbrk(filePath, "\\/");
-    if (lastSlash)
-    {
-        if (lastSlash == filePath)
-        {
-            // The last and only slash is the leading one: path is in a root directory
-            dirPath[0] = filePath[0];
-            dirPath[1] = '\0';
-        }
-        else
-        {
-            // NOTE: Be careful, strncpy() is not safe, it does not care about '\0'
-            memcpy(dirPath + (filePath[1] != ':' && filePath[0] != '\\' && filePath[0] != '/' ? 2 : 0), filePath, strlen(filePath) - (strlen(lastSlash) - 1));
-            dirPath[strlen(filePath) - strlen(lastSlash) + (filePath[1] != ':' && filePath[0] != '\\' && filePath[0] != '/' ? 2 : 0)] = '\0';  // Add '\0' manually
-        }
-    }
-
-    return dirPath;
-}
-
-// Get previous directory path for a given path
-const char *GetPrevDirectoryPath(const char *dirPath)
-{
-    static char prevDirPath[MAX_FILEPATH_LENGTH] = { 0 };
-    memset(prevDirPath, 0, MAX_FILEPATH_LENGTH);
-    int pathLen = (int)strlen(dirPath);
-
-    if (pathLen <= 3) strcpy(prevDirPath, dirPath);
-
-    for (int i = (pathLen - 1); (i >= 0) && (pathLen > 3); i--)
-    {
-        if ((dirPath[i] == '\\') || (dirPath[i] == '/'))
-        {
-            // Check for root: "C:\" or "/"
-            if (((i == 2) && (dirPath[1] ==':')) || (i == 0)) i++;
-
-            strncpy(prevDirPath, dirPath, i);
-            break;
-        }
-    }
-
-    return prevDirPath;
-}
-
 // Get current working directory
-const char *GetWorkingDirectory(void)
+const char *File_GetWorkingDir(void)
 {
     static char currentDir[MAX_FILEPATH_LENGTH] = { 0 };
     memset(currentDir, 0, MAX_FILEPATH_LENGTH);
@@ -2393,11 +2310,11 @@ const char *GetWorkingDirectory(void)
 
 // Get filenames in a directory path (max 512 files)
 // NOTE: Files count is returned by parameters pointer
-char **GetDirectoryFiles(const char *dirPath, int *fileCount)
+char **File_LoadDirFileList(const char *dirPath, int *fileCount)
 {
     #define MAX_DIRECTORY_FILES     512
 
-    ClearDirectoryFiles();
+    File_FreeDirFileList();
 
     // Memory allocation for MAX_DIRECTORY_FILES
     dirFilesPath = (char **)ASC_MALLOC(MAX_DIRECTORY_FILES*sizeof(char *));
@@ -2430,7 +2347,7 @@ char **GetDirectoryFiles(const char *dirPath, int *fileCount)
 }
 
 // Clear directory files paths buffers
-void ClearDirectoryFiles(void)
+void File_FreeDirFileList(void)
 {
     if (dirFileCount > 0)
     {
@@ -2443,7 +2360,7 @@ void ClearDirectoryFiles(void)
 }
 
 // Change working directory, returns true on success
-bool ChangeDirectory(const char *dir)
+bool File_SetWorkingDir(const char *dir)
 {
     bool result = CHDIR(dir);
 
@@ -2453,21 +2370,21 @@ bool ChangeDirectory(const char *dir)
 }
 
 // Check if a file has been dropped into window
-bool IsFileDropped(void)
+bool File_IsDropped(void)
 {
     if (CORE.Window.dropFileCount > 0) return true;
     else return false;
 }
 
 // Get dropped files names
-char **GetDroppedFiles(int *count)
+char **File_GetDroppedList(int *count)
 {
     *count = CORE.Window.dropFileCount;
     return CORE.Window.dropFilesPath;
 }
 
 // Clear dropped files paths buffer
-void ClearDroppedFiles(void)
+void File_ClearDroppedList(void)
 {
     if (CORE.Window.dropFileCount > 0)
     {
@@ -2480,7 +2397,7 @@ void ClearDroppedFiles(void)
 }
 
 // Get file modification time (last write time)
-long GetFileModTime(const char *fileName)
+long File_GetModTime(const char *fileName)
 {
     struct stat result = { 0 };
 
@@ -4714,7 +4631,7 @@ static void CursorEnterCallback(GLFWwindow *window, int enter)
 // Everytime new files are dropped, old ones are discarded
 static void WindowDropCallback(GLFWwindow *window, int count, const char **paths)
 {
-    ClearDroppedFiles();
+    File_ClearDroppedList();
 
     CORE.Window.dropFilesPath = (char **)ASC_MALLOC(count*sizeof(char *));
 

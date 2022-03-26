@@ -194,6 +194,9 @@ static Color GetImageColor(Image image, int x, int y);                          
 
 static Vector4 *Image_LoadDataNormalized(Image image);       // Load pixel data from image as Vector4 array (float normalized)
 
+#ifdef SUPPORT_IMAGE_DRAWING
+static int Glyph_GetIndex(Font font, int codepoint);
+#endif // SUPPORT_IMAGE_DRAWING
 //----------------------------------------------------------------------------------
 // Module Functions Definition
 //----------------------------------------------------------------------------------
@@ -216,10 +219,10 @@ Image Image_Load(const char *fileName)
 
     // Loading file to memory
     unsigned int fileSize = 0;
-    unsigned char *fileData = LoadFileData(fileName, &fileSize);
+    unsigned char *fileData = File_Load(fileName, &fileSize);
 
     // Loading image from memory data
-    if (fileData != NULL) image = Image_LoadMem(GetFileExtension(fileName), fileData, fileSize);
+    if (fileData != NULL) image = Image_LoadMem(File_GetExt(fileName), fileData, fileSize);
 
     ASC_FREE(fileData);
 
@@ -232,7 +235,7 @@ Image Image_LoadRaw(const char *fileName, int width, int height, int format, int
     Image image = { 0 };
 
     unsigned int dataSize = 0;
-    unsigned char *fileData = LoadFileData(fileName, &dataSize);
+    unsigned char *fileData = File_Load(fileName, &dataSize);
 
     if (fileData != NULL)
     {
@@ -265,10 +268,10 @@ Image Image_LoadAnim(const char *fileName, int *frames)
     int frameCount = 1;
 
 #if defined(SUPPORT_FILEFORMAT_GIF)
-    if (IsFileExtension(fileName, ".gif"))
+    if (File_IsExt(fileName, ".gif"))
     {
         unsigned int dataSize = 0;
-        unsigned char *fileData = LoadFileData(fileName, &dataSize);
+        unsigned char *fileData = File_Load(fileName, &dataSize);
 
         if (fileData != NULL)
         {
@@ -469,33 +472,33 @@ bool Image_Export(Image image, const char *fileName)
     }
 
 #if defined(SUPPORT_FILEFORMAT_PNG)
-    if (IsFileExtension(fileName, ".png"))
+    if (File_IsExt(fileName, ".png"))
     {
         int dataSize = 0;
         unsigned char *fileData = stbi_write_png_to_mem((const unsigned char *)imgData, image.width*channels, image.width, image.height, channels, &dataSize);
-        success = SaveFileData(fileName, fileData, dataSize);
+        success = File_Save(fileName, fileData, dataSize);
         ASC_FREE(fileData);
     }
 #else
     if (false) { }
 #endif
 #if defined(SUPPORT_FILEFORMAT_BMP)
-    else if (IsFileExtension(fileName, ".bmp")) success = stbi_write_bmp(fileName, image.width, image.height, channels, imgData);
+    else if (File_IsExt(fileName, ".bmp")) success = stbi_write_bmp(fileName, image.width, image.height, channels, imgData);
 #endif
 #if defined(SUPPORT_FILEFORMAT_TGA)
-    else if (IsFileExtension(fileName, ".tga")) success = stbi_write_tga(fileName, image.width, image.height, channels, imgData);
+    else if (File_IsExt(fileName, ".tga")) success = stbi_write_tga(fileName, image.width, image.height, channels, imgData);
 #endif
 #if defined(SUPPORT_FILEFORMAT_JPG)
-    else if (IsFileExtension(fileName, ".jpg")) success = stbi_write_jpg(fileName, image.width, image.height, channels, imgData, 90);  // JPG quality: between 1 and 100
+    else if (File_IsExt(fileName, ".jpg")) success = stbi_write_jpg(fileName, image.width, image.height, channels, imgData, 90);  // JPG quality: between 1 and 100
 #endif
 #if defined(SUPPORT_FILEFORMAT_KTX)
-    else if (IsFileExtension(fileName, ".ktx")) success = SaveKTX(image, fileName);
+    else if (File_IsExt(fileName, ".ktx")) success = SaveKTX(image, fileName);
 #endif
-    else if (IsFileExtension(fileName, ".raw"))
+    else if (File_IsExt(fileName, ".raw"))
     {
         // Export raw pixel data (without header)
         // NOTE: It's up to the user to track image parameters
-        success = SaveFileData(fileName, image.data, Color_GetPixelDataSize(image.width, image.height, image.format));
+        success = File_Save(fileName, image.data, Color_GetPixelDataSize(image.width, image.height, image.format));
     }
 
     if (allocatedData) ASC_FREE(imgData);
@@ -538,7 +541,7 @@ bool Image_ExportCode(Image image, const char *fileName)
 
     // Get file name from path and convert variable name to uppercase
     char varFileName[256] = { 0 };
-    strcpy(varFileName, GetFileNameWithoutExt(fileName));
+    strcpy(varFileName, File_GetNameNX(fileName));
     for (int i = 0; varFileName[i] != '\0'; i++) if ((varFileName[i] >= 'a') && (varFileName[i] <= 'z')) { varFileName[i] = varFileName[i] - 32; }
 
     // Add image information
@@ -552,7 +555,7 @@ bool Image_ExportCode(Image image, const char *fileName)
     byteCount += sprintf(txtData + byteCount, "0x%x };\n", ((unsigned char *)image.data)[dataSize - 1]);
 
     // NOTE: Text data size exported is determined by '\0' (NULL) character
-    success = SaveFileText(fileName, txtData);
+    success = File_SaveStr(fileName, txtData);
 
     ASC_FREE(txtData);
 
@@ -3667,7 +3670,7 @@ static int SaveKTX(Image image, const char *fileName)
         }
     }
 
-    int success = SaveFileData(fileName, fileData, dataSize);
+    int success = File_Save(fileName, fileData, dataSize);
 
     ASC_FREE(fileData);    // Free file data buffer
 
@@ -3995,3 +3998,31 @@ static Vector4 *Image_LoadDataNormalized(Image image)
 
     return pixels;
 }
+
+#ifdef SUPPORT_IMAGE_DRAWING
+static int Glyph_GetIndex(Font font, int codepoint)
+{
+#ifndef GLYPH_NOTFOUND_CHAR_FALLBACK
+    #define GLYPH_NOTFOUND_CHAR_FALLBACK     63      // Character used if requested codepoint is not found: '?'
+#endif
+
+// Support charsets with any characters order
+#define SUPPORT_UNORDERED_CHARSET
+#if defined(SUPPORT_UNORDERED_CHARSET)
+    int index = GLYPH_NOTFOUND_CHAR_FALLBACK;
+
+    for (int i = 0; i < font.glyphCount; i++)
+    {
+        if (font.glyphs[i].value == codepoint)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    return index;
+#else
+    return (codepoint - 32);
+#endif
+}
+#endif // SUPPORT_IMAGE_DRAWING
