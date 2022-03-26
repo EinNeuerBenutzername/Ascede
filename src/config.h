@@ -2,9 +2,9 @@
 *
 *   ALTERED
 *
-*   raylib configuration flags
+*   ascede configuration flags
 *
-*   This file defines all the configuration flags for the different raylib modules
+*   This file defines all the configuration flags for the different ascede modules
 *
 *   LICENSE: zlib/libpng
 *
@@ -30,29 +30,26 @@
 //------------------------------------------------------------------------------------
 // Module: core - Configuration Flags
 //------------------------------------------------------------------------------------
-// Mouse gestures are directly mapped like touches and processed by gestures system
 #define SUPPORT_MOUSE_GESTURES      1
-// Reconfigure standard input to receive key inputs, works with SSH connection.
 #define SUPPORT_SSH_KEYBOARD_RPI    1
-// Setting a higher resolution can improve the accuracy of time-out intervals in wait functions.
-// However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
 //#define SUPPORT_WINMM_HIGHRES_TIMER 1
-// Support automatic generated events, loading and recording of those events when required
 //#define SUPPORT_EVENTS_AUTOMATION     1
+#define SUPPORT_MONITOR_CONTROLS    1
+#define SUPPORT_GAMEPAD_CONTROLS    1
 
 // core: Configuration values
 //------------------------------------------------------------------------------------
 #if defined(__linux__)
-    #define MAX_FILEPATH_LENGTH     4096        // Maximum length for filepaths (Linux PATH_MAX default value)
+    #define MAX_FILEPATH_LENGTH     4096
 #else
-    #define MAX_FILEPATH_LENGTH      512        // Maximum length supported for filepaths
+    #define MAX_FILEPATH_LENGTH      512
 #endif
 
-#define MAX_GAMEPADS                   4        // Max number of gamepads supported
-#define MAX_GAMEPAD_AXIS               8        // Max number of axis supported (per gamepad)
-#define MAX_GAMEPAD_BUTTONS           32        // Max bumber of buttons supported (per gamepad)
-#define MAX_TOUCH_POINTS               8        // Maximum number of touch points supported
-#define MAX_KEY_PRESSED_QUEUE         16        // Max number of characters in the key input queue
+#define MAX_GAMEPADS                   4
+#define MAX_GAMEPAD_AXIS               8
+#define MAX_GAMEPAD_BUTTONS           32
+#define MAX_TOUCH_POINTS               8
+#define MAX_KEY_PRESSED_QUEUE         16
 
 //------------------------------------------------------------------------------------
 // Module: rlgl - Configuration values
@@ -64,7 +61,7 @@
 // Show OpenGL extensions and capabilities detailed logs on init
 //#define RLGL_SHOW_GL_DETAILS_INFO              1
 
-#define RL_DEFAULT_BATCH_BUFFER_ELEMENTS    4096    // Default internal render batch elements limits
+#define RL_DEFAULT_BATCH_BUFFER_ELEMENTS    8192      // Default internal render batch elements limits
 #define RL_DEFAULT_BATCH_BUFFERS               1      // Default number of batch buffers (multi-buffering)
 #define RL_DEFAULT_BATCH_DRAWCALLS           256      // Default number of batch draw calls (by state changes: mode, texture)
 #define RL_DEFAULT_BATCH_MAX_TEXTURE_UNITS     4      // Maximum number of textures units that can be activated on batch drawing (SetShaderValueTexture())
@@ -112,7 +109,7 @@
 #define SUPPORT_FILEFORMAT_BMP      1
 #define SUPPORT_FILEFORMAT_TGA      1
 #define SUPPORT_FILEFORMAT_JPG      1
-#define SUPPORT_FILEFORMAT_GIF      1
+//#define SUPPORT_FILEFORMAT_GIF      1
 //#define SUPPORT_FILEFORMAT_PSD      1
 //#define SUPPORT_FILEFORMAT_DDS      1
 //#define SUPPORT_FILEFORMAT_HDR      1
@@ -121,10 +118,8 @@
 //#define SUPPORT_FILEFORMAT_PKM      1
 //#define SUPPORT_FILEFORMAT_PVR      1
 
-// Support image export functionality (.png, .bmp, .tga, .jpg)
 #define SUPPORT_IMAGE_EXPORT        1
-// Support multiple image editing functions to scale, adjust colors, flip, draw on images, crop...
-// If not defined, still some functions are supported: ImageFormat(), ImageCrop(), ImageToPOT()
+// If not defined, still some functions are supported: Image_SetFormat(), Image_Crop(), Image_ToPOT()
 //#define SUPPORT_IMAGE_MANIPULATION  1
 //#define SUPPORT_IMAGE_DRAWING       1
 
@@ -135,14 +130,12 @@
 // NOTE: If enabled, uses external module functions to load default raylib font
 #define SUPPORT_DEFAULT_FONT        1
 // Selected desired font fileformats to be supported for loading
-#define SUPPORT_FILEFORMAT_FNT      1
+//#define SUPPORT_FILEFORMAT_FNT      1
 #define SUPPORT_FILEFORMAT_TTF      1
 
 // text: Configuration values
 //------------------------------------------------------------------------------------
 #define MAX_TEXT_BUFFER_LENGTH      1024        // Size of internal static buffers used on some functions:
-                                                // TextFormat(), TextSubtext(), TextToUpper(), TextToLower(), TextToPascal(), TextSplit()
-#define MAX_TEXTSPLIT_COUNT          128        // Maximum number of substrings to split: TextSplit()
 
 //------------------------------------------------------------------------------------
 // Module: audio - Configuration Flags
@@ -167,10 +160,9 @@
 // Module: utils - Configuration Flags
 //------------------------------------------------------------------------------------
 // Standard file io library (stdio.h) included
-//#define SUPPORT_STANDARD_FILEIO
+#define SUPPORT_STANDARD_FILEIO
 // Show TRACELOG() output messages
-// NOTE: By default LOG_DEBUG traces not shown
-#define SUPPORT_TRACELOG            1
+//#define SUPPORT_TRACELOG            1
 //#define SUPPORT_TRACELOG_DEBUG      1
 
 // utils: Configuration values

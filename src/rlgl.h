@@ -109,6 +109,8 @@
 #ifndef RLGL_H
 #define RLGL_H
 
+#include "ascmem.h"
+
 #define RLGL_VERSION  "4.0"
 
 // Function specifiers in case library is build/used as a shared library (Windows)
@@ -133,17 +135,17 @@
 #endif
 
 // Allow custom memory allocators
-#ifndef RL_MALLOC
-    #define RL_MALLOC(sz)     malloc(sz)
+#ifndef ASC_MALLOC
+    #define ASC_MALLOC(sz)     malloc(sz)
 #endif
-#ifndef RL_CALLOC
-    #define RL_CALLOC(n,sz)   calloc(n,sz)
+#ifndef ASC_CALLOC
+    #define ASC_CALLOC(n,sz)   calloc(n,sz)
 #endif
-#ifndef RL_REALLOC
-    #define RL_REALLOC(n,sz)  realloc(n,sz)
+#ifndef ASC_REALLOC
+    #define ASC_REALLOC(n,sz)  realloc(n,sz)
 #endif
-#ifndef RL_FREE
-    #define RL_FREE(p)        free(p)
+#ifndef ASC_FREE
+    #define ASC_FREE(p)        free(p)
 #endif
 
 // Security check in case no GRAPHICS_API_OPENGL_* defined
@@ -737,8 +739,8 @@ RLAPI void rlLoadDrawQuad(void);     // Load and draw a quad
         #include <OpenGL/gl3.h>         // OpenGL 3 library for OSX
         #include <OpenGL/gl3ext.h>      // OpenGL 3 extensions library for OSX
     #else
-        #define GLAD_MALLOC RL_MALLOC
-        #define GLAD_FREE RL_FREE
+        #define GLAD_MALLOC ASC_MALLOC
+        #define GLAD_FREE ASC_FREE
 
         #define GLAD_GL_IMPLEMENTATION
         #include "external/glad.h"      // GLAD extensions loading library, includes OpenGL headers
@@ -2012,12 +2014,12 @@ void rlLoadExtensions(void *loader)
 #if defined(GRAPHICS_API_OPENGL_ES2)
     // Get supported extensions list
     GLint numExt = 0;
-    const char **extList = RL_MALLOC(512*sizeof(const char *)); // Allocate 512 strings pointers (2 KB)
+    const char **extList = ASC_MALLOC(512*sizeof(const char *)); // Allocate 512 strings pointers (2 KB)
     const char *extensions = (const char *)glGetString(GL_EXTENSIONS);  // One big const string
 
     // NOTE: We have to duplicate string because glGetString() returns a const string
     int size = strlen(extensions) + 1;      // Get extensions string size in bytes
-    char *extensionsDup = (char *)RL_CALLOC(size, sizeof(char));
+    char *extensionsDup = (char *)ASC_CALLOC(size, sizeof(char));
     strcpy(extensionsDup, extensions);
     extList[numExt] = extensionsDup;
 
@@ -2117,8 +2119,8 @@ void rlLoadExtensions(void *loader)
     }
 
     // Free extensions pointers
-    RL_FREE(extList);
-    RL_FREE(extensionsDup);    // Duplicated string must be deallocated
+    ASC_FREE(extList);
+    ASC_FREE(extensionsDup);    // Duplicated string must be deallocated
 #endif  // GRAPHICS_API_OPENGL_ES2
 
     // Check OpenGL information and capabilities
@@ -2158,10 +2160,10 @@ void rlLoadExtensions(void *loader)
     #endif
     glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &capability);
     TRACELOG(RL_LOG_INFO, "    GL_NUM_COMPRESSED_TEXTURE_FORMATS: %i", capability);
-    GLint *compFormats = (GLint *)RL_CALLOC(capability, sizeof(GLint));
+    GLint *compFormats = (GLint *)ASC_CALLOC(capability, sizeof(GLint));
     glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, compFormats);
     for (int i = 0; i < capability; i++) TRACELOG(RL_LOG_INFO, "        %s", rlGetCompressedFormatName(compFormats[i]));
-    RL_FREE(compFormats);
+    ASC_FREE(compFormats);
 
     /*
     // Following capabilities are only supported by OpenGL 4.3 or greater
@@ -2277,20 +2279,20 @@ rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
     // Initialize CPU (RAM) vertex buffers (position, texcoord, color data and indexes)
     //--------------------------------------------------------------------------------------------
-    batch.vertexBuffer = (rlVertexBuffer *)RL_MALLOC(numBuffers*sizeof(rlVertexBuffer));
+    batch.vertexBuffer = (rlVertexBuffer *)ASC_MALLOC(numBuffers*sizeof(rlVertexBuffer));
 
     for (int i = 0; i < numBuffers; i++)
     {
         batch.vertexBuffer[i].elementCount = bufferElements;
 
-        batch.vertexBuffer[i].vertices = (float *)RL_MALLOC(bufferElements*3*4*sizeof(float));        // 3 float by vertex, 4 vertex by quad
-        batch.vertexBuffer[i].texcoords = (float *)RL_MALLOC(bufferElements*2*4*sizeof(float));       // 2 float by texcoord, 4 texcoord by quad
-        batch.vertexBuffer[i].colors = (unsigned char *)RL_MALLOC(bufferElements*4*4*sizeof(unsigned char));   // 4 float by color, 4 colors by quad
+        batch.vertexBuffer[i].vertices = (float *)ASC_MALLOC(bufferElements*3*4*sizeof(float));        // 3 float by vertex, 4 vertex by quad
+        batch.vertexBuffer[i].texcoords = (float *)ASC_MALLOC(bufferElements*2*4*sizeof(float));       // 2 float by texcoord, 4 texcoord by quad
+        batch.vertexBuffer[i].colors = (unsigned char *)ASC_MALLOC(bufferElements*4*4*sizeof(unsigned char));   // 4 float by color, 4 colors by quad
 #if defined(GRAPHICS_API_OPENGL_33)
-        batch.vertexBuffer[i].indices = (unsigned int *)RL_MALLOC(bufferElements*6*sizeof(unsigned int));      // 6 int by quad (indices)
+        batch.vertexBuffer[i].indices = (unsigned int *)ASC_MALLOC(bufferElements*6*sizeof(unsigned int));      // 6 int by quad (indices)
 #endif
 #if defined(GRAPHICS_API_OPENGL_ES2)
-        batch.vertexBuffer[i].indices = (unsigned short *)RL_MALLOC(bufferElements*6*sizeof(unsigned short));  // 6 int by quad (indices)
+        batch.vertexBuffer[i].indices = (unsigned short *)ASC_MALLOC(bufferElements*6*sizeof(unsigned short));  // 6 int by quad (indices)
 #endif
 
         for (int j = 0; j < (3*4*bufferElements); j++) batch.vertexBuffer[i].vertices[j] = 0.0f;
@@ -2370,7 +2372,7 @@ rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
 
     // Init draw calls tracking system
     //--------------------------------------------------------------------------------------------
-    batch.draws = (rlDrawCall *)RL_MALLOC(RL_DEFAULT_BATCH_DRAWCALLS*sizeof(rlDrawCall));
+    batch.draws = (rlDrawCall *)ASC_MALLOC(RL_DEFAULT_BATCH_DRAWCALLS*sizeof(rlDrawCall));
 
     for (int i = 0; i < RL_DEFAULT_BATCH_DRAWCALLS; i++)
     {
@@ -2425,15 +2427,15 @@ void rlUnloadRenderBatch(rlRenderBatch batch)
         if (RLGL.ExtSupported.vao) glDeleteVertexArrays(1, &batch.vertexBuffer[i].vaoId);
 
         // Free vertex arrays memory from CPU (RAM)
-        RL_FREE(batch.vertexBuffer[i].vertices);
-        RL_FREE(batch.vertexBuffer[i].texcoords);
-        RL_FREE(batch.vertexBuffer[i].colors);
-        RL_FREE(batch.vertexBuffer[i].indices);
+        ASC_FREE(batch.vertexBuffer[i].vertices);
+        ASC_FREE(batch.vertexBuffer[i].texcoords);
+        ASC_FREE(batch.vertexBuffer[i].colors);
+        ASC_FREE(batch.vertexBuffer[i].indices);
     }
 
     // Unload arrays
-    RL_FREE(batch.vertexBuffer);
-    RL_FREE(batch.draws);
+    ASC_FREE(batch.vertexBuffer);
+    ASC_FREE(batch.draws);
 #endif
 }
 
@@ -3091,7 +3093,7 @@ void rlGenTextureMipmaps(unsigned int id, int width, int height, int format, int
             }
 
             *mipmaps = mipmapCount + 1;
-            RL_FREE(texData); // Once mipmaps have been generated and data has been uploaded to GPU VRAM, we can discard RAM data
+            ASC_FREE(texData); // Once mipmaps have been generated and data has been uploaded to GPU VRAM, we can discard RAM data
 
             TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Mipmaps generated manually on CPU side, total: %i", id, *mipmaps);
         }
@@ -3147,7 +3149,7 @@ void *rlReadTexturePixels(unsigned int id, int width, int height, int format)
 
     if ((glInternalFormat != -1) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
     {
-        pixels = RL_MALLOC(size);
+        pixels = ASC_MALLOC(size);
         glGetTexImage(GL_TEXTURE_2D, 0, glFormat, glType, pixels);
     }
     else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Data retrieval not suported for pixel format (%i)", id, format);
@@ -3172,7 +3174,7 @@ void *rlReadTexturePixels(unsigned int id, int width, int height, int format)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
 
     // We read data as RGBA because FBO texture is configured as RGBA, despite binding another texture format
-    pixels = (unsigned char *)RL_MALLOC(rlColor_GetPixelDataSize(width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8));
+    pixels = (unsigned char *)ASC_MALLOC(rlColor_GetPixelDataSize(width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -3188,14 +3190,14 @@ void *rlReadTexturePixels(unsigned int id, int width, int height, int format)
 // Read screen pixel data (color buffer)
 unsigned char *rlReadScreenPixels(int width, int height)
 {
-    unsigned char *screenData = (unsigned char *)RL_CALLOC(width*height*4, sizeof(unsigned char));
+    unsigned char *screenData = (unsigned char *)ASC_CALLOC(width*height*4, sizeof(unsigned char));
 
     // NOTE 1: glReadPixels returns image flipped vertically -> (0,0) is the bottom left corner of the framebuffer
     // NOTE 2: We are getting alpha channel! Be careful, it can be transparent if not cleared properly!
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, screenData);
 
     // Flip image vertically!
-    unsigned char *imgData = (unsigned char *)RL_MALLOC(width*height*4*sizeof(unsigned char));
+    unsigned char *imgData = (unsigned char *)ASC_MALLOC(width*height*4*sizeof(unsigned char));
 
     for (int y = height - 1; y >= 0; y--)
     {
@@ -3209,7 +3211,7 @@ unsigned char *rlReadScreenPixels(int width, int height)
         }
     }
 
-    RL_FREE(screenData);
+    ASC_FREE(screenData);
 
     return imgData;     // NOTE: image data should be freed
 }
@@ -3649,10 +3651,10 @@ unsigned int rlCompileShader(const char *shaderCode, int type)
         if (maxLength > 0)
         {
             int length = 0;
-            char *log = RL_CALLOC(maxLength, sizeof(char));
+            char *log = ASC_CALLOC(maxLength, sizeof(char));
             glGetShaderInfoLog(shader, maxLength, &length, log);
             TRACELOG(RL_LOG_WARNING, "SHADER: [ID %i] Compile error: %s", shader, log);
-            RL_FREE(log);
+            ASC_FREE(log);
         }
     }
     else
@@ -3711,10 +3713,10 @@ unsigned int rlLoadShaderProgram(unsigned int vShaderId, unsigned int fShaderId)
         if (maxLength > 0)
         {
             int length = 0;
-            char *log = RL_CALLOC(maxLength, sizeof(char));
+            char *log = ASC_CALLOC(maxLength, sizeof(char));
             glGetProgramInfoLog(program, maxLength, &length, log);
             TRACELOG(RL_LOG_WARNING, "SHADER: [ID %i] Link error: %s", program, log);
-            RL_FREE(log);
+            ASC_FREE(log);
         }
 
         glDeleteProgram(program);
@@ -3878,10 +3880,10 @@ unsigned int rlLoadComputeShaderProgram(unsigned int shaderId)
         if (maxLength > 0)
         {
             int length = 0;
-            char *log = RL_CALLOC(maxLength, sizeof(char));
+            char *log = ASC_CALLOC(maxLength, sizeof(char));
             glGetProgramInfoLog(program, maxLength, &length, log);
             TRACELOG(RL_LOG_WARNING, "SHADER: [ID %i] Link error: %s", program, log);
-            RL_FREE(log);
+            ASC_FREE(log);
         }
 
         glDeleteProgram(program);
@@ -4278,7 +4280,7 @@ const char *rlGetPixelFormatName(unsigned int format)
 // NOTE: Loaded: RLGL.State.defaultShaderId, RLGL.State.defaultShaderLocs
 static void rlLoadShaderDefault(void)
 {
-    RLGL.State.defaultShaderLocs = (int *)RL_CALLOC(RL_MAX_SHADER_LOCATIONS, sizeof(int));
+    RLGL.State.defaultShaderLocs = (int *)ASC_CALLOC(RL_MAX_SHADER_LOCATIONS, sizeof(int));
 
     // NOTE: All locations must be reseted to -1 (no location)
     for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++) RLGL.State.defaultShaderLocs[i] = -1;
@@ -4392,7 +4394,7 @@ static void rlUnloadShaderDefault(void)
 
     glDeleteProgram(RLGL.State.defaultShaderId);
 
-    RL_FREE(RLGL.State.defaultShaderLocs);
+    ASC_FREE(RLGL.State.defaultShaderLocs);
 
     TRACELOG(RL_LOG_INFO, "SHADER: [ID %i] Default shader unloaded successfully", RLGL.State.defaultShaderId);
 }
@@ -4506,7 +4508,7 @@ static int rlGenTextureMipmapsData(unsigned char *data, int baseWidth, int baseH
     TRACELOGD("TEXTURE: Total mipmaps required: %i", mipmapCount);
     TRACELOGD("TEXTURE: Total size of data required: %i", size);
 
-    unsigned char *temp = RL_REALLOC(data, size);
+    unsigned char *temp = ASC_REALLOC(data, size);
 
     if (temp != NULL) data = temp;
     else TRACELOG(RL_LOG_WARNING, "TEXTURE: Failed to re-allocate required mipmaps memory");
@@ -4517,7 +4519,7 @@ static int rlGenTextureMipmapsData(unsigned char *data, int baseWidth, int baseH
 
     // Generate mipmaps
     // NOTE: Every mipmap data is stored after data (RGBA - 4 bytes)
-    unsigned char *image = (unsigned char *)RL_MALLOC(width*height*4);
+    unsigned char *image = (unsigned char *)ASC_MALLOC(width*height*4);
     unsigned char *mipmap = NULL;
     int offset = 0;
 
@@ -4550,13 +4552,13 @@ static int rlGenTextureMipmapsData(unsigned char *data, int baseWidth, int baseH
             data[offset + i + 3] = mipmap[i + 3];
         }
 
-        RL_FREE(image);
+        ASC_FREE(image);
 
         image = mipmap;
         mipmap = NULL;
     }
 
-    RL_FREE(mipmap);       // free mipmap data
+    ASC_FREE(mipmap);       // free mipmap data
 
     return mipmapCount;
 }
@@ -4572,7 +4574,7 @@ static unsigned char *rlGenNextMipmapData(unsigned char *srcData, int srcWidth, 
     int width = srcWidth/2;
     int height = srcHeight/2;
 
-    unsigned char *mipmap = (unsigned char *)RL_MALLOC(width*height*4);
+    unsigned char *mipmap = (unsigned char *)ASC_MALLOC(width*height*4);
 
     // Scaling algorithm works perfectly (box-filter)
     for (int y = 0; y < height; y++)

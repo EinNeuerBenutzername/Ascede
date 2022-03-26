@@ -1,5 +1,7 @@
 /**********************************************************************************************
 *
+*   ALTERED
+*
 *   raylib.utils - Some common utility functions
 *
 *   CONFIGURATION:
@@ -71,11 +73,11 @@ static SaveFileTextCallback saveFileText = NULL;    // SaveFileText callback fun
 //----------------------------------------------------------------------------------
 // Functions to set internal callbacks
 //----------------------------------------------------------------------------------
-void SetTraceLogCallback(TraceLogCallback callback) { traceLog = callback; }              // Set custom trace log
-void SetLoadFileDataCallback(LoadFileDataCallback callback) { loadFileData = callback; }  // Set custom file data loader
-void SetSaveFileDataCallback(SaveFileDataCallback callback) { saveFileData = callback; }  // Set custom file data saver
-void SetLoadFileTextCallback(LoadFileTextCallback callback) { loadFileText = callback; }  // Set custom file text loader
-void SetSaveFileTextCallback(SaveFileTextCallback callback) { saveFileText = callback; }  // Set custom file text saver
+void Callback_SetTraceLog(TraceLogCallback callback) { traceLog = callback; }              // Set custom trace log
+void Callback_SetLoadFileData(LoadFileDataCallback callback) { loadFileData = callback; }  // Set custom file data loader
+void Callback_SetSaveFileData(SaveFileDataCallback callback) { saveFileData = callback; }  // Set custom file data saver
+void Callback_SetLoadFileText(LoadFileTextCallback callback) { loadFileText = callback; }  // Set custom file text loader
+void Callback_SetSaveFileText(SaveFileTextCallback callback) { saveFileText = callback; }  // Set custom file text saver
 
 
 #if defined(PLATFORM_ANDROID)
@@ -101,7 +103,7 @@ static int android_close(void *cookie);
 //----------------------------------------------------------------------------------
 
 // Set the current threshold (minimum) log level
-void SetTraceLogLevel(int logType) { logTypeLevel = logType; }
+void TraceLog_SetLevel(int logType) { logTypeLevel = logType; }
 
 // Show trace log messages (LOG_INFO, LOG_WARNING, LOG_ERROR, LOG_DEBUG)
 void TraceLog(int logType, const char *text, ...)
@@ -157,27 +159,6 @@ void TraceLog(int logType, const char *text, ...)
 #endif  // SUPPORT_TRACELOG
 }
 
-// Internal memory allocator
-// NOTE: Initializes to zero by default
-void *MemAlloc(int size)
-{
-    void *ptr = RL_CALLOC(size, 1);
-    return ptr;
-}
-
-// Internal memory reallocator
-void *MemRealloc(void *ptr, int size)
-{
-    void *ret = RL_REALLOC(ptr, size);
-    return ret;
-}
-
-// Internal memory free
-void MemFree(void *ptr)
-{
-    RL_FREE(ptr);
-}
-
 // Load data from file into a buffer
 unsigned char *LoadFileData(const char *fileName, unsigned int *bytesRead)
 {
@@ -204,7 +185,7 @@ unsigned char *LoadFileData(const char *fileName, unsigned int *bytesRead)
 
             if (size > 0)
             {
-                data = (unsigned char *)RL_MALLOC(size*sizeof(unsigned char));
+                data = (unsigned char *)ASC_MALLOC(size*sizeof(unsigned char));
 
                 // NOTE: fread() returns number of read elements instead of bytes, so we read [1 byte, size elements]
                 unsigned int count = (unsigned int)fread(data, sizeof(unsigned char), size, file);
@@ -230,7 +211,7 @@ unsigned char *LoadFileData(const char *fileName, unsigned int *bytesRead)
 // Unload file data allocated by LoadFileData()
 void UnloadFileData(unsigned char *data)
 {
-    RL_FREE(data);
+    ASC_FREE(data);
 }
 
 // Save data to file from buffer
@@ -295,12 +276,12 @@ char *LoadFileText(const char *fileName)
 
             if (size > 0)
             {
-                text = (char *)RL_MALLOC((size + 1)*sizeof(char));
+                text = (char *)ASC_MALLOC((size + 1)*sizeof(char));
                 unsigned int count = (unsigned int)fread(text, sizeof(char), size, file);
 
                 // WARNING: \r\n is converted to \n on reading, so,
                 // read bytes count gets reduced by the number of lines
-                if (count < size) text = RL_REALLOC(text, count + 1);
+                if (count < size) text = ASC_REALLOC(text, count + 1);
 
                 // Zero-terminate the string
                 text[count] = '\0';
@@ -324,7 +305,7 @@ char *LoadFileText(const char *fileName)
 // Unload file text data allocated by LoadFileText()
 void UnloadFileText(char *text)
 {
-    RL_FREE(text);
+    ASC_FREE(text);
 }
 
 // Save text data to file (write), string must be '\0' terminated

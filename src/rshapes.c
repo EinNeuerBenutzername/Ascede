@@ -82,28 +82,8 @@ void Shape_SetTexture(Texture2D texture, Rectangle source)
     texShapesRec = source;
 }
 
-// Draw a pixel
-void DrawPixel(int posX, int posY, Color color)
-{
-    rlBegin(RL_LINES);
-        rlColor4ub(color.r, color.g, color.b, color.a);
-        rlVertex2i(posX, posY);
-        rlVertex2i(posX + 1, posY + 1);
-    rlEnd();
-}
-
-// Draw a pixel (Vector version)
-void DrawPixelV(Vector2 position, Color color)
-{
-    rlBegin(RL_LINES);
-        rlColor4ub(color.r, color.g, color.b, color.a);
-        rlVertex2f(position.x, position.y);
-        rlVertex2f(position.x + 1.0f, position.y + 1.0f);
-    rlEnd();
-}
-
 // Draw a line
-void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
+void Shape_DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -113,7 +93,7 @@ void DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color colo
 }
 
 // Draw a line  (Vector version)
-void DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
+void Shape_DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
 {
     rlBegin(RL_LINES);
         rlColor4ub(color.r, color.g, color.b, color.a);
@@ -123,7 +103,7 @@ void DrawLineV(Vector2 startPos, Vector2 endPos, Color color)
 }
 
 // Draw a line defining thickness
-void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
+void Shape_DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
 {
     Vector2 delta = { endPos.x - startPos.x, endPos.y - startPos.y };
     float length = sqrtf(delta.x*delta.x + delta.y*delta.y);
@@ -139,101 +119,7 @@ void DrawLineEx(Vector2 startPos, Vector2 endPos, float thick, Color color)
             { endPos.x + radius.x, endPos.y + radius.y }
         };
 
-        DrawTriangleStrip(strip, 4, color);
-    }
-}
-
-// Draw line using cubic-bezier curves in-out
-void DrawLineBezier(Vector2 startPos, Vector2 endPos, float thick, Color color)
-{
-#ifndef BEZIER_LINE_DIVISIONS
-    #define BEZIER_LINE_DIVISIONS         24   // Bezier line divisions
-#endif
-
-    Vector2 previous = startPos;
-    Vector2 current = { 0 };
-
-    for (int i = 1; i <= BEZIER_LINE_DIVISIONS; i++)
-    {
-        // Cubic easing in-out
-        // NOTE: Easing is calculated only for y position value
-        current.y = EaseCubicInOut((float)i, startPos.y, endPos.y - startPos.y, (float)BEZIER_LINE_DIVISIONS);
-        current.x = previous.x + (endPos.x - startPos.x)/ (float)BEZIER_LINE_DIVISIONS;
-
-        DrawLineEx(previous, current, thick, color);
-
-        previous = current;
-    }
-}
-
-// Draw line using quadratic bezier curves with a control point
-void DrawLineBezierQuad(Vector2 startPos, Vector2 endPos, Vector2 controlPos, float thick, Color color)
-{
-    const float step = 1.0f/BEZIER_LINE_DIVISIONS;
-
-    Vector2 previous = startPos;
-    Vector2 current = { 0 };
-    float t = 0.0f;
-
-    for (int i = 0; i <= BEZIER_LINE_DIVISIONS; i++)
-    {
-        t = step*i;
-        float a = powf(1 - t, 2);
-        float b = 2*(1 - t)*t;
-        float c = powf(t, 2);
-
-        // NOTE: The easing functions aren't suitable here because they don't take a control point
-        current.y = a*startPos.y + b*controlPos.y + c*endPos.y;
-        current.x = a*startPos.x + b*controlPos.x + c*endPos.x;
-
-        DrawLineEx(previous, current, thick, color);
-
-        previous = current;
-    }
-}
-
-// Draw line using cubic bezier curves with 2 control points
-void DrawLineBezierCubic(Vector2 startPos, Vector2 endPos, Vector2 startControlPos, Vector2 endControlPos, float thick, Color color)
-{
-    const float step = 1.0f/BEZIER_LINE_DIVISIONS;
-
-    Vector2 previous = startPos;
-    Vector2 current = { 0 };
-    float t = 0.0f;
-
-    for (int i = 0; i <= BEZIER_LINE_DIVISIONS; i++)
-    {
-        t = step*i;
-        float a = powf(1 - t, 3);
-        float b = 3*powf(1 - t, 2)*t;
-        float c = 3*(1-t)*powf(t, 2);
-        float d = powf(t, 3);
-
-        current.y = a*startPos.y + b*startControlPos.y + c*endControlPos.y + d*endPos.y;
-        current.x = a*startPos.x + b*startControlPos.x + c*endControlPos.x + d*endPos.x;
-
-        DrawLineEx(previous, current, thick, color);
-
-        previous = current;
-    }
-}
-
-// Draw lines sequence
-void DrawLineStrip(Vector2 *points, int pointCount, Color color)
-{
-    if (pointCount >= 2)
-    {
-        rlCheckRenderBatchLimit(pointCount);
-
-        rlBegin(RL_LINES);
-            rlColor4ub(color.r, color.g, color.b, color.a);
-
-            for (int i = 0; i < pointCount - 1; i++)
-            {
-                rlVertex2f(points[i].x, points[i].y);
-                rlVertex2f(points[i + 1].x, points[i + 1].y);
-            }
-        rlEnd();
+        Shape_DrawTriangleStrip(strip, 4, color);
     }
 }
 
@@ -319,7 +205,7 @@ void Shape_DrawRecPro(Rectangle rec, Vector2 origin, float rotation, Color color
     rlEnd();
     rlSetTexture(0);
 }
-//
+
 //// Draw a vertical-gradient-filled rectangle
 //// NOTE: Gradient goes from bottom (color1) to top (color2)
 //void DrawRectangleGradientV(int posX, int posY, int width, int height, Color color1, Color color2)
@@ -590,7 +476,7 @@ void Shape_DrawRecPro(Rectangle rec, Vector2 origin, float rotation, Color color
 
 // Draw a triangle
 // NOTE: Vertex must be provided in counter-clockwise order
-void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
+void Shape_DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 {
     rlCheckRenderBatchLimit(4);
 
@@ -624,41 +510,9 @@ void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color)
 #endif
 }
 
-// Draw a triangle fan defined by points
-// NOTE: First vertex provided is the center, shared by all triangles
-// By default, following vertex should be provided in counter-clockwise order
-void DrawTriangleFan(Vector2 *points, int pointCount, Color color)
-{
-    if (pointCount >= 3)
-    {
-        rlCheckRenderBatchLimit((pointCount - 2)*4);
-
-        rlSetTexture(texShapes.id);
-        rlBegin(RL_QUADS);
-            rlColor4ub(color.r, color.g, color.b, color.a);
-
-            for (int i = 1; i < pointCount - 1; i++)
-            {
-                rlTexCoord2f(texShapesRec.x/texShapes.width, texShapesRec.y/texShapes.height);
-                rlVertex2f(points[0].x, points[0].y);
-
-                rlTexCoord2f(texShapesRec.x/texShapes.width, (texShapesRec.y + texShapesRec.height)/texShapes.height);
-                rlVertex2f(points[i].x, points[i].y);
-
-                rlTexCoord2f((texShapesRec.x + texShapesRec.width)/texShapes.width, (texShapesRec.y + texShapesRec.height)/texShapes.height);
-                rlVertex2f(points[i + 1].x, points[i + 1].y);
-
-                rlTexCoord2f((texShapesRec.x + texShapesRec.width)/texShapes.width, texShapesRec.y/texShapes.height);
-                rlVertex2f(points[i + 1].x, points[i + 1].y);
-            }
-        rlEnd();
-        rlSetTexture(0);
-    }
-}
-
 // Draw a triangle strip defined by points
 // NOTE: Every new vertex connects with previous two
-void DrawTriangleStrip(Vector2 *points, int pointCount, Color color)
+void Shape_DrawTriangleStrip(Vector2 *points, int pointCount, Color color)
 {
     if (pointCount >= 3)
     {
@@ -687,7 +541,7 @@ void DrawTriangleStrip(Vector2 *points, int pointCount, Color color)
 }
 
 // Draw a regular polygon of n sides (Vector version)
-void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
+void Shape_DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color)
 {
     if (sides < 3) sides = 3;
     float centralAngle = 0.0f;
@@ -740,19 +594,4 @@ void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color col
         rlEnd();
 #endif
     rlPopMatrix();
-}
-
-//----------------------------------------------------------------------------------
-// Module specific Functions Definition
-//----------------------------------------------------------------------------------
-
-// Cubic easing in-out
-// NOTE: Used by DrawLineBezier() only
-static float EaseCubicInOut(float t, float b, float c, float d)
-{
-    if ((t /= 0.5f*d) < 1) return 0.5f*c*t*t*t + b;
-
-    t -= 2;
-
-    return 0.5f*c*(t*t*t + 2.0f) + b;
 }

@@ -119,8 +119,8 @@
 #include "external/mtwister.h"
 
 #if defined(PLATFORM_DESKTOP) && defined(_WIN32) && (defined(_MSC_VER) || defined(__TINYC__))
-    #define DIRENT_MALLOC RL_MALLOC
-    #define DIRENT_FREE RL_FREE
+    #define DIRENT_MALLOC ASC_MALLOC
+    #define DIRENT_FREE ASC_FREE
 
     #include "external/dirent.h"    // Required for: DIR, opendir(), closedir() [Used in GetDirectoryFiles()]
 #else
@@ -256,16 +256,6 @@
 #endif
 #ifndef MAX_CHAR_PRESSED_QUEUE
     #define MAX_CHAR_PRESSED_QUEUE        16        // Maximum number of characters in the char input queue
-#endif
-
-#if defined(SUPPORT_DATA_STORAGE)
-    #ifndef STORAGE_DATA_FILE
-        #define STORAGE_DATA_FILE  "storage.data"   // Automatic storage filename
-    #endif
-#endif
-
-#ifndef MAX_DECOMPRESSION_SIZE
-    #define MAX_DECOMPRESSION_SIZE        64        // Maximum size allocated for decompression in MB
 #endif
 
 // Flags operation macros
@@ -740,9 +730,9 @@ void Window_Init(size_t width, size_t height, const char *title)
     // Load default font
     // NOTE: External functions (defined in module: text)
     LoadFontDefault();
-    Rectangle rec = GetFontDefault().recs[95];
+    Rectangle rec = Font_GetDefault().recs[95];
     // NOTE: We setup a 1px padding on char rectangle to avoid pixel bleeding on MSAA filtering
-    Shape_SetTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
+    Shape_SetTexture(Font_GetDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
 #else
     // Set default texture and rectangle to be used for shapes drawing
     // NOTE: rlgl default texture is a 1x1 pixel UNCOMPRESSED_R8G8B8A8
@@ -753,7 +743,7 @@ void Window_Init(size_t width, size_t height, const char *title)
     if ((CORE.Window.flags & FLAG_WINDOW_HIGHDPI) > 0)
     {
         // Set default font texture filter for HighDPI (blurry)
-        Texture_SetFilter(GetFontDefault().texture, TEXTURE_FILTER_BILINEAR);
+        Texture_SetFilter(Font_GetDefault().texture, TEXTURE_FILTER_BILINEAR);
     }
 #endif
 
@@ -1575,6 +1565,8 @@ int Monitor_Get(void)
 #endif
 }
 
+#ifdef SUPPORT_MONITOR_CONTROLS
+
 // Get selected monitor width
 Vector2 Monitor_GetPos(int monitor)
 {
@@ -1709,6 +1701,8 @@ const char *Monitor_GetName(int monitor)
 #endif
     return "";
 }
+
+#endif
 
 // Get window position XY on monitor
 Vector2 Window_GetPos(void)
@@ -1971,7 +1965,7 @@ Shader Shader_Load(const char *vsFileName, const char *fsFileName)
 Shader Shader_LoadData(const char *vsCode, const char *fsCode)
 {
     Shader shader = { 0 };
-    shader.locs = (int *)RL_CALLOC(RL_MAX_SHADER_LOCATIONS, sizeof(int));
+    shader.locs = (int *)ASC_CALLOC(RL_MAX_SHADER_LOCATIONS, sizeof(int));
 
     // NOTE: All locations must be reseted to -1 (no location)
     for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++) shader.locs[i] = -1;
@@ -2022,7 +2016,7 @@ void Shader_Free(Shader shader)
     if (shader.id != rlGetShaderIdDefault())
     {
         rlUnloadShaderProgram(shader.id);
-        RL_FREE(shader.locs);
+        ASC_FREE(shader.locs);
     }
 }
 
@@ -2241,24 +2235,7 @@ bool IsFileExtension(const char *fileName, const char *ext)
 
     if (fileExt != NULL)
     {
-#if defined(SUPPORT_TEXT_MANIPULATION)
-        int extCount = 0;
-        const char **checkExts = TextSplit(ext, ';', &extCount);
-
-        char fileExtLower[16] = { 0 };
-        strcpy(fileExtLower, TextToLower(fileExt));
-
-        for (int i = 0; i < extCount; i++)
-        {
-            if (TextIsEqual(fileExtLower, TextToLower(checkExts[i])))
-            {
-                result = true;
-                break;
-            }
-        }
-#else
         if (strcmp(fileExt, ext) == 0) result = true;
-#endif
     }
 
     return result;
@@ -2423,8 +2400,8 @@ char **GetDirectoryFiles(const char *dirPath, int *fileCount)
     ClearDirectoryFiles();
 
     // Memory allocation for MAX_DIRECTORY_FILES
-    dirFilesPath = (char **)RL_MALLOC(MAX_DIRECTORY_FILES*sizeof(char *));
-    for (int i = 0; i < MAX_DIRECTORY_FILES; i++) dirFilesPath[i] = (char *)RL_MALLOC(MAX_FILEPATH_LENGTH*sizeof(char));
+    dirFilesPath = (char **)ASC_MALLOC(MAX_DIRECTORY_FILES*sizeof(char *));
+    for (int i = 0; i < MAX_DIRECTORY_FILES; i++) dirFilesPath[i] = (char *)ASC_MALLOC(MAX_FILEPATH_LENGTH*sizeof(char));
 
     int counter = 0;
     struct dirent *entity;
@@ -2457,9 +2434,9 @@ void ClearDirectoryFiles(void)
 {
     if (dirFileCount > 0)
     {
-        for (int i = 0; i < MAX_DIRECTORY_FILES; i++) RL_FREE(dirFilesPath[i]);
+        for (int i = 0; i < MAX_DIRECTORY_FILES; i++) ASC_FREE(dirFilesPath[i]);
 
-        RL_FREE(dirFilesPath);
+        ASC_FREE(dirFilesPath);
     }
 
     dirFileCount = 0;
@@ -2494,9 +2471,9 @@ void ClearDroppedFiles(void)
 {
     if (CORE.Window.dropFileCount > 0)
     {
-        for (int i = 0; i < CORE.Window.dropFileCount; i++) RL_FREE(CORE.Window.dropFilesPath[i]);
+        for (int i = 0; i < CORE.Window.dropFileCount; i++) ASC_FREE(CORE.Window.dropFilesPath[i]);
 
-        RL_FREE(CORE.Window.dropFilesPath);
+        ASC_FREE(CORE.Window.dropFilesPath);
 
         CORE.Window.dropFileCount = 0;
     }
@@ -2608,6 +2585,7 @@ void Key_SetExitHotkey(int key)
 }
 
 // NOTE: Gamepad support not implemented in emscripten GLFW3 (PLATFORM_WEB)
+#ifdef SUPPORT_GAMEPAD_CONTROLS
 
 // Check if a gamepad is available
 bool Gamepad_IsAvailable(int gamepad)
@@ -2720,6 +2698,8 @@ int Gamepad_SetMappings(const char *mappings)
 
     return result;
 }
+
+#endif
 
 // Check if a mouse button has been pressed once
 bool Mouse_IsPressed(int button)
@@ -2957,9 +2937,9 @@ static bool InitGraphicsDevice(int width, int height)
 /*
     // TODO: Setup GLFW custom allocators to match raylib ones
     const GLFWallocator allocator = {
-        .allocate = MemAlloc,
-        .deallocate = MemFree,
-        .reallocate = MemRealloc,
+        .allocate = RL_ALLOC,
+        .deallocate = ASC_FREE,
+        .reallocate = ASC_REALLOC,
         .user = NULL
     };
 
@@ -3495,7 +3475,7 @@ static bool InitGraphicsDevice(int width, int height)
 
     TRACELOG(LOG_TRACE, "DISPLAY: EGL configs available: %d", numConfigs);
 
-    EGLConfig *configs = RL_CALLOC(numConfigs, sizeof(*configs));
+    EGLConfig *configs = ASC_CALLOC(numConfigs, sizeof(*configs));
     if (!configs)
     {
         TRACELOG(LOG_WARNING, "DISPLAY: Failed to get memory for EGL configs");
@@ -3532,7 +3512,7 @@ static bool InitGraphicsDevice(int width, int height)
         }
     }
 
-    RL_FREE(configs);
+    ASC_FREE(configs);
 
     if (!found)
     {
@@ -4736,11 +4716,11 @@ static void WindowDropCallback(GLFWwindow *window, int count, const char **paths
 {
     ClearDroppedFiles();
 
-    CORE.Window.dropFilesPath = (char **)RL_MALLOC(count*sizeof(char *));
+    CORE.Window.dropFilesPath = (char **)ASC_MALLOC(count*sizeof(char *));
 
     for (int i = 0; i < count; i++)
     {
-        CORE.Window.dropFilesPath[i] = (char *)RL_MALLOC(MAX_FILEPATH_LENGTH*sizeof(char));
+        CORE.Window.dropFilesPath[i] = (char *)ASC_MALLOC(MAX_FILEPATH_LENGTH*sizeof(char));
         strcpy(CORE.Window.dropFilesPath[i], paths[i]);
     }
 
@@ -4794,9 +4774,9 @@ static void AndroidCommandCallback(struct android_app *app, int32_t cmd)
                     // Load default font
                     // NOTE: External function (defined in module: text)
                     LoadFontDefault();
-                    Rectangle rec = GetFontDefault().recs[95];
+                    Rectangle rec = Font_GetDefault().recs[95];
                     // NOTE: We setup a 1px padding on char rectangle to avoid pixel bleeding on MSAA filtering
-                    Shape_SetTexture(GetFontDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
+                    Shape_SetTexture(Font_GetDefault().texture, (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 });
                 #endif
 
                     // TODO: GPU assets reload in case of lost focus (lost context)

@@ -1,5 +1,7 @@
 /**********************************************************************************************
 *
+*   ALTERED
+*
 *   rglfw - raylib GLFW single file compilation
 *
 *   This file includes latest GLFW sources (https://github.com/glfw/glfw) to be compiled together
