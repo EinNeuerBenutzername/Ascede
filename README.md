@@ -105,6 +105,8 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 - [x] 17. Made Glyph-related functions static.
 
 - [x] 18. Removed `GetDirectoryPath()` and `GetPrevDirectoryPath()` because I'm pretty sure that they're not that useful.
+
+- [x] 19. Added `DrawTextRec()` and `DrawTextRecEx()` from raylib 3.8 dev.
 - [ ] 
 
 ...
@@ -120,7 +122,7 @@ If you find these clauses acceptable, you may start using Ascede. Please remembe
 
 ## API
 
-#### v0.9.7.19 Cheatsheet
+#### v0.9.7.20 Cheatsheet
 
 ###### Buffer
 
@@ -588,6 +590,10 @@ ASCAPI void Text_DrawEx(Font font, const char *text, Vector2 position, float fon
 // Draw text with custom font and extended parameters
 ASCAPI void Text_DrawPro(Font font, const char *text, Vector2 position, Vector2 origin, float rotation, float fontSize, float spacing, Color tint);
 // Draw text with even more parameters
+ASCAPI void Text_DrawRec(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint);
+// Draw text using font inside rectangle limits
+ASCAPI void Text_DrawRecEx(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint);
+// Draw text using font inside rectangle limits with support for text selection
 ASCAPI void Text_DrawCodepoint(Font font, int codepoint, Vector2 position, float fontSize, Color tint);
 // Draw one character (codepoint)
 ASCAPI bool Text_IsEqual(const char *text1, const char *text2);
