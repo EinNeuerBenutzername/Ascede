@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1646996582 source:g:\-guten\prog\c\proj\ascede\src\raudio.c
+1648300337 source:g:\-guten\prog\c\proj\ascede\src\raudio.c
 	"raudio.h"
 	<stdarg.h>
-	"raylib.h"
+	"ascede.h"
 	"config.h"
 	"utils.h"
 	<windows.h>
@@ -21,7 +21,7 @@
 	"external/dr_mp3.h"
 	"external/dr_flac.h"
 
-1644155696 g:\-guten\prog\c\proj\ascede\src\raudio.h
+1648300311 g:\-guten\prog\c\proj\ascede\src\raudio.h
 
 1647670837 g:\-guten\prog\c\proj\ascede\src\raylib.h
 	<stdarg.h>
@@ -33,7 +33,7 @@
 	<stdio.h>
 	<android/asset_manager.h>
 
-1644143215 g:\-guten\prog\c\proj\ascede\src\external\miniaudio.h
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\miniaudio.h
 	"miniaudio.h"
 	"miniaudio.h"
 	"extras/stb_vorbis.c"
@@ -139,7 +139,7 @@
 	<wchar.h>
 	<errno.h>
 
-1644143215 g:\-guten\prog\c\proj\ascede\src\external\stb_vorbis.h
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\stb_vorbis.h
 	<stdio.h>
 	"utils.h"
 	<stdio.h>
@@ -152,7 +152,7 @@
 	<limits.h>
 	<crtdbg.h>
 
-1644156669 g:\-guten\prog\c\proj\ascede\src\external\jar_xm.h
+1644156670 g:\-guten\prog\c\proj\ascede\src\external\jar_xm.h
 	<stdint.h>
 	<math.h>
 	<stdio.h>
@@ -162,11 +162,11 @@
 	<stdio.h>
 	"raylib.h"
 
-1644143215 g:\-guten\prog\c\proj\ascede\src\external\jar_mod.h
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\jar_mod.h
 	<stdio.h>
 	<stdlib.h>
 
-1644143214 g:\-guten\prog\c\proj\ascede\src\external\dr_wav.h
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\dr_wav.h
 	"dr_wav.h"
 	<stddef.h>
 	<stdlib.h>
@@ -177,7 +177,7 @@
 	<assert.h>
 	<errno.h>
 
-1644143214 g:\-guten\prog\c\proj\ascede\src\external\dr_mp3.h
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\dr_mp3.h
 	"dr_mp3.h"
 	<stddef.h>
 	<stdlib.h>
@@ -192,7 +192,7 @@
 	<wchar.h>
 	<errno.h>
 
-1644143214 g:\-guten\prog\c\proj\ascede\src\external\dr_flac.h
+1644143216 g:\-guten\prog\c\proj\ascede\src\external\dr_flac.h
 	"dr_flac.h"
 	<stddef.h>
 	<endian.h>
@@ -1682,7 +1682,7 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1648298949 g:\-guten\prog\c\proj\ascede\src\ascede.h
+1648342010 g:\-guten\prog\c\proj\ascede\src\ascede.h
 	<stdarg.h>
 	<stddef.h>
 	"ascmem.h"
